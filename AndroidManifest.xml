@@ -38,24 +38,23 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.mail" />
-    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="23"></uses-sdk>
 
     <application android:name="CalendarApplication"
-            android:label="@string/app_label" android:icon="@mipmap/ic_launcher_calendar"
+            android:label="@string/app_label"
+            android:icon="@mipmap/ic_launcher_calendar"
             android:taskAffinity="android.task.calendar"
             android:hardwareAccelerated="true"
             android:backupAgent="com.android.calendar.CalendarBackupAgent"
             android:requiredAccountType="*"
-            android:usesCleartextTraffic="false" >
+            android:usesCleartextTraffic="false"
+            android:theme="@style/CalendarTheme.WithActionBar" >
 
         <meta-data android:name="com.google.android.backup.api_key"
                 android:value="AEdPqrEAAAAIM256oVOGnuSel5QKDpL8je_T65ZI8rFnDinssA" />
 
         <activity
             android:name="AllInOneActivity"
-            android:theme="@style/CalendarTheme.WithActionBar"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -79,7 +78,7 @@
 
         <activity android:name="EventInfoActivity"
             android:parentActivityName="com.android.calendar.AllInOneActivity"
-            android:theme="@style/CalendarTheme.WithActionBar">
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -94,7 +93,7 @@
         </activity>
 
         <activity android:name=".event.EditEventActivity"
-            android:theme="@style/CalendarTheme.WithActionBar">
+            android:windowSoftInputMode="adjustResize">
         </activity>
 
         <activity-alias android:name="EditEventActivity"
@@ -132,11 +131,11 @@
 
         <activity android:name=".selectcalendars.SelectVisibleCalendarsActivity"
             android:label="@string/select_visible_calendars_title"
-            android:theme="@style/Sync"/>
+            android:theme="@style/Settings"/>
 
         <activity android:name=".selectcalendars.SelectSyncedCalendarsMultiAccountActivity"
             android:label="@string/select_synced_calendars_title"
-            android:theme="@style/Sync"/>
+            android:theme="@style/Settings"/>
 
         <activity android:name="CalendarSettingsActivity" android:label="@string/preferences_title"
             android:theme="@style/Settings"/>
@@ -147,7 +146,7 @@
             android:value="com.android.calendar.SearchActivity"/>
 
         <activity android:name="SearchActivity" android:label="@string/search_title"
-            android:launchMode="singleTop" android:theme="@style/CalendarTheme.WithActionBar"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:exported="true">
             <intent-filter>
@@ -157,8 +156,7 @@
         </activity>
 
         <activity android:name="DeleteEventsActivity"
-            android:parentActivityName="com.android.calendar.AllInOneActivity"
-            android:theme="@style/CalendarTheme.WithActionBar" >
+            android:parentActivityName="com.android.calendar.AllInOneActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.android.calendar.AllInOneActivity" />

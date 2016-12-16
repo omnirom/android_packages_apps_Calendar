@@ -62,12 +62,6 @@ public class CalendarSettingsActivity extends PreferenceActivity {
             }
         }
         mAccounts = accounts;
-        if (Utils.getTardis() + DateUtils.MINUTE_IN_MILLIS > System.currentTimeMillis()) {
-            Header tardisHeader = new Header();
-            tardisHeader.title = getString(R.string.preferences_experimental_category);
-            tardisHeader.fragment = "com.android.calendar.OtherPreferences";
-            target.add(tardisHeader);
-        }
     }
 
     @Override
