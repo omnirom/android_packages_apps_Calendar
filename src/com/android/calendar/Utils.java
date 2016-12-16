@@ -2123,4 +2123,19 @@ public class Utils {
         return reminders;
     }
 
+    public static int shiftColor(int color, float by) {
+        if (by == 1f) return color;
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] *= by; // value component
+        return Color.HSVToColor(hsv);
+    }
+
+    public static int shiftColorDown(int color) {
+        return shiftColor(color, 0.9f);
+    }
+
+    public static int shiftColorUp(int color) {
+        return shiftColor(color, 1.1f);
+    }
 }

@@ -16,27 +16,24 @@
 <resources>
     <dimen name="day_label_text_size">11sp</dimen>
     <dimen name="all_day_bottom_margin">8dip</dimen>
-    <dimen name="one_day_header_height">0dip</dimen>
     <dimen name="day_header_bottom_margin">4dip</dimen>
-    <dimen name="date_header_text_size">12sp</dimen>
+    <dimen name="date_header_text_size">24sp</dimen>
+    <dimen name="day_header_text_size">12sp</dimen>
     <dimen name="hours_text_size">12sp</dimen>
     <dimen name="allday_text_size">12sp</dimen>
-    <dimen name="ampm_text_size">10sp</dimen>
     <dimen name="day_view_event_text_size">12sp</dimen>
     <dimen name="week_view_event_text_size">12sp</dimen>
     <dimen name="event_text_vertical_margin">2dp</dimen>
     <dimen name="event_text_horizontal_margin">4dp</dimen>
     <dimen name="event_min_height">24dip</dimen>
     <!-- minimum size of hours column in day/week view -->
-    <dimen name="min_hours_width">24dip</dimen>
-    <!-- margins size of hours column in day/week view -->
-    <dimen name="hours_left_margin">20dip</dimen>
-    <dimen name="hours_right_margin">4dip</dimen>
+    <dimen name="min_hours_width">32dip</dimen>
+    <dimen name="hours_margin">2dip</dimen>
+    
     <!-- size of day header in day and week views  -->
-    <dimen name="day_header_height">16dip</dimen>
+    <dimen name="day_header_height">40dip</dimen>
     <dimen name="widget_day_num_size">36sp</dimen>
     <dimen name="widget_day_num_top_padding">-4dip</dimen>
-    <dimen name="action_bar_date_text_size">22sp</dimen>
     <dimen name="new_event_hint_text_size">12sp</dimen>
     <dimen name="edit_event_view_width">800dip</dimen>
     <dimen name="edit_event_view_padding_left">80dip</dimen>
@@ -67,5 +64,6 @@
 
     <dimen name="event_info_dialog_width">300dip</dimen>
     <dimen name="event_info_dialog_height">400dip</dimen>
+    <dimen name="curent_time_line_width">2dip</dimen>
 
 </resources>
