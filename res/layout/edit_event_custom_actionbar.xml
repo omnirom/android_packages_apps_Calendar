@@ -18,39 +18,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:divider="?android:attr/dividerVertical"
-    android:dividerPadding="12dip"
-    android:showDividers="middle">
+    android:gravity="center_vertical" >
 
     <!-- id must match corresponding menu item id -->
-    <LinearLayout
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:id="@+id/action_cancel"
-        style="@style/EditEventCustomActionButton">
+        android:src="@drawable/ic_menu_cancel"
+        android:scaleType="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
 
-        <ImageView
-            android:src="@drawable/ic_menu_cancel_holo_light"
-            android:tint="@color/edit_event_icon_tint_color"
-            style="@style/EditEventCustomActionButtonImage" />
-        <TextView
-            android:text="@string/discard_label"
-            style="@style/EditEventCustomActionButtonText" />
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="match_parent" 
+        android:layout_weight="1" />
 
-    </LinearLayout>
-
-    <!-- id must match corresponding menu item id -->
-    <LinearLayout
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:id="@+id/action_done"
-        style="@style/EditEventCustomActionButton">
-
-        <ImageView
-            android:src="@drawable/ic_menu_done_holo_light"
-            android:tint="@color/edit_event_icon_tint_color"
-            style="@style/EditEventCustomActionButtonImage" />
-        <TextView
-            android:text="@string/save_label"
-            style="@style/EditEventCustomActionButtonText" />
-
-    </LinearLayout>
-
+        android:src="@drawable/ic_menu_done"
+        android:scaleType="center"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
 
 </LinearLayout>

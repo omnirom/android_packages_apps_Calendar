@@ -16,6 +16,7 @@
 
 package com.android.calendar;
 
+import android.Manifest;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
@@ -43,6 +44,7 @@ import android.content.Loader;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -95,10 +97,9 @@ import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
 public class AllInOneActivity extends AbstractCalendarActivity implements EventHandler,
         OnSharedPreferenceChangeListener, SearchView.OnQueryTextListener, ActionBar.TabListener,
-        LoaderManager.LoaderCallbacks<Cursor>,
         ActionBar.OnNavigationListener, OnSuggestionListener {
     private static final String TAG = "AllInOneActivity";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String EVENT_INFO_FRAGMENT_TAG = "EventInfoFragment";
     private static final String BUNDLE_KEY_RESTORE_TIME = "key_restore_time";
     private static final String BUNDLE_KEY_EVENT_ID = "key_event_id";
@@ -106,13 +107,16 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private static final String BUNDLE_KEY_CHECK_ACCOUNTS = "key_check_for_accounts";
     private static final int HANDLER_KEY = 0;
 
+    private static final int PERMISSIONS_REQUEST_CALENDAR = 0;
+
     // Indices of buttons for the drop down menu (tabs replacement)
     // Must match the strings in the array buttons_list in arrays.xml and the
     // OnNavigationListener
     private static final int BUTTON_DAY_INDEX = 0;
-    private static final int BUTTON_WEEK_INDEX = 1;
-    private static final int BUTTON_MONTH_INDEX = 2;
-    private static final int BUTTON_AGENDA_INDEX = 3;
+    private static final int BUTTON_THREE_INDEX = 1;
+    private static final int BUTTON_WEEK_INDEX = 2;
+    private static final int BUTTON_MONTH_INDEX = 3;
+    private static final int BUTTON_AGENDA_INDEX = 4;
 
     private CalendarController mController;
     private static boolean mIsMultipane;
@@ -138,8 +142,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private View mSecondaryPane;
     private String mTimeZone;
     private boolean mShowCalendarControls;
-    private boolean mShowEventInfoFullScreenAgenda;
-    private boolean mShowEventInfoFullScreen;
     private int mWeekNum;
     private int mCalendarControlsAnimationTime;
     private int mControlsAnimateWidth;
@@ -157,6 +159,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private ActionBar.Tab mWeekTab;
     private ActionBar.Tab mMonthTab;
     private ActionBar.Tab mAgendaTab;
+    private ActionBar.Tab mThreeTab;
+
     private SearchView mSearchView;
     private MenuItem mSearchMenu;
     private MenuItem mControlsMenu;
@@ -171,6 +175,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     DayOfMonthDrawable mDayOfMonthIcon;
 
     int mOrientation;
+    private Bundle mBundle;
+    private boolean mPermsDone;
 
     // Params for animating the controls on the right
     private LayoutParams mControlsParams;
@@ -314,11 +320,57 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     @Override
     protected void onCreate(Bundle icicle) {
-        if (Utils.getSharedPreference(this, OtherPreferences.KEY_OTHER_1, false)) {
-            setTheme(R.style.CalendarTheme_WithActionBarWallpaper);
-        }
         super.onCreate(icicle);
+        mBundle = icicle;
+        mPermsDone = false;
+        mTimeZone = Utils.getTimeZone(this, mHomeTimeUpdater);
 
+        Resources res = getResources();
+        mHideString = res.getString(R.string.hide_controls);
+        mShowString = res.getString(R.string.show_controls);
+        mOrientation = res.getConfiguration().orientation;
+        if (mOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mControlsAnimateWidth = (int)res.getDimension(R.dimen.calendar_controls_width);
+            if (mControlsParams == null) {
+                mControlsParams = new LayoutParams(mControlsAnimateWidth, 0);
+            }
+            mControlsParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        } else {
+            // Make sure width is in between allowed min and max width values
+            mControlsAnimateWidth = Math.max(res.getDisplayMetrics().widthPixels * 45 / 100,
+                    (int)res.getDimension(R.dimen.min_portrait_calendar_controls_width));
+            mControlsAnimateWidth = Math.min(mControlsAnimateWidth,
+                    (int)res.getDimension(R.dimen.max_portrait_calendar_controls_width));
+        }
+
+        mControlsAnimateHeight = (int)res.getDimension(R.dimen.calendar_controls_height);
+
+        mHideControls = !Utils.getSharedPreference(
+                this, GeneralPreferences.KEY_SHOW_CONTROLS, true);
+        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
+        mIsTabletConfig = Utils.getConfigBool(this, R.bool.tablet_config);
+        mShowAgendaWithMonth = Utils.getConfigBool(this, R.bool.show_agenda_with_month);
+        mShowCalendarControls =
+                Utils.getConfigBool(this, R.bool.show_calendar_controls);
+        mShowEventDetailsWithAgenda =
+            Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
+        mCalendarControlsAnimationTime = res.getInteger(R.integer.calendar_controls_animation_time);
+        Utils.setAllowWeekForDetailView(mIsMultipane);
+
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.WRITE_CALENDAR}, PERMISSIONS_REQUEST_CALENDAR);
+        } else {
+            mPermsDone = true;
+            doCreate(mBundle);
+        }
+    }
+
+    private void doCreate(Bundle icicle) {
         if (icicle != null && icicle.containsKey(BUNDLE_KEY_CHECK_ACCOUNTS)) {
             mCheckForAccounts = icicle.getBoolean(BUNDLE_KEY_CHECK_ACCOUNTS);
         }
@@ -359,7 +411,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (viewType == -1 || viewType > ViewType.MAX_VALUE) {
             viewType = Utils.getViewTypeFromIntentAndSharedPref(this);
         }
-        mTimeZone = Utils.getTimeZone(this, mHomeTimeUpdater);
         Time t = new Time(mTimeZone);
         t.set(timeMillis);
 
@@ -370,42 +421,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 Log.d(TAG, "not both, icicle:" + icicle + " intent:" + intent);
             }
         }
-
-        Resources res = getResources();
-        mHideString = res.getString(R.string.hide_controls);
-        mShowString = res.getString(R.string.show_controls);
-        mOrientation = res.getConfiguration().orientation;
-        if (mOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mControlsAnimateWidth = (int)res.getDimension(R.dimen.calendar_controls_width);
-            if (mControlsParams == null) {
-                mControlsParams = new LayoutParams(mControlsAnimateWidth, 0);
-            }
-            mControlsParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        } else {
-            // Make sure width is in between allowed min and max width values
-            mControlsAnimateWidth = Math.max(res.getDisplayMetrics().widthPixels * 45 / 100,
-                    (int)res.getDimension(R.dimen.min_portrait_calendar_controls_width));
-            mControlsAnimateWidth = Math.min(mControlsAnimateWidth,
-                    (int)res.getDimension(R.dimen.max_portrait_calendar_controls_width));
-        }
-
-        mControlsAnimateHeight = (int)res.getDimension(R.dimen.calendar_controls_height);
-
-        mHideControls = !Utils.getSharedPreference(
-                this, GeneralPreferences.KEY_SHOW_CONTROLS, true);
-        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
-        mIsTabletConfig = Utils.getConfigBool(this, R.bool.tablet_config);
-        mShowAgendaWithMonth = Utils.getConfigBool(this, R.bool.show_agenda_with_month);
-        mShowCalendarControls =
-                Utils.getConfigBool(this, R.bool.show_calendar_controls);
-        mShowEventDetailsWithAgenda =
-            Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
-        mShowEventInfoFullScreenAgenda =
-            Utils.getConfigBool(this, R.bool.agenda_show_event_info_full_screen);
-        mShowEventInfoFullScreen =
-            Utils.getConfigBool(this, R.bool.show_event_info_full_screen);
-        mCalendarControlsAnimationTime = res.getInteger(R.integer.calendar_controls_animation_time);
-        Utils.setAllowWeekForDetailView(mIsMultipane);
 
         // setContentView must be called before configureActionBar
         setContentView(R.layout.all_in_one);
@@ -444,9 +459,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         prefs.registerOnSharedPreferenceChangeListener(this);
 
         mContentResolver = getContentResolver();
-        if (getResources().getBoolean(R.bool.show_delete_events_menu)) {
-            getLoaderManager().initLoader(0, null, this);
-        }
 
         // clean up cached ics files - in case onDestroy() didn't run the last time
         cleanupCachedIcsFiles();
@@ -505,6 +517,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             case ViewType.MONTH:
                 mActionBar.setSelectedNavigationItem(BUTTON_MONTH_INDEX);
                 break;
+            case ViewType.THREE:
+                mActionBar.setSelectedNavigationItem(BUTTON_THREE_INDEX);
+                break;
             default:
                 mActionBar.setSelectedNavigationItem(BUTTON_DAY_INDEX);
                 break;
@@ -524,6 +539,10 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (!mPermsDone) {
+            return;
+        }
 
         // Check if the upgrade code has ever been run. If not, force a sync just this one time.
         Utils.trySyncAndDisableUpgradeReceiver(this);
@@ -574,14 +593,15 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         invalidateOptionsMenu();
 
         mCalIntentReceiver = Utils.setTimeChangesReceiver(this, mTimeChangesUpdater);
-        if (getResources().getBoolean(R.bool.show_delete_events_menu)) {
-            getLoaderManager().initLoader(0, null, this);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
+        if (!mPermsDone) {
+            return;
+        }
 
         mController.deregisterEventHandler(HANDLER_KEY);
         mPaused = true;
@@ -605,7 +625,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     @Override
     protected void onUserLeaveHint() {
-        mController.sendEvent(this, EventType.USER_HOME, null, null, -1, ViewType.CURRENT);
+        if (mController != null) {
+            mController.sendEvent(this, EventType.USER_HOME, null, null, -1, ViewType.CURRENT);
+        }
         super.onUserLeaveHint();
     }
 
@@ -630,6 +652,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (!mPermsDone) {
+            return;
+        }
 
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
@@ -792,13 +817,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mControlsMenu.setTitle(mHideControls ? mShowString : mHideString);
         }
 
-        MenuItem deleteEventsMenu = menu.findItem(R.id.action_delete_events);
-        if (!getResources().getBoolean(R.bool.show_delete_events_menu)) {
-            deleteEventsMenu.setVisible(false);
-        } else {
-            getLoaderManager().initLoader(0, null, this);
-        }
-
         MenuItem goToMenu = menu.findItem(R.id.action_goto);
         if (!getResources().getBoolean(R.bool.show_goto_menu)) {
             goToMenu.setVisible(false);
@@ -814,6 +832,23 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             menuItem.setIcon(R.drawable.ic_menu_today_no_date_holo_light);
         }
 
+        MenuItem filterItem = menu.findItem(R.id.action_filter);
+        if (filterItem != null) {
+            boolean filterEnabled = Utils.getSharedPreference(this, GeneralPreferences.KEY_HOURS_FILTER_ENABLED, false);
+            filterItem.setChecked(filterEnabled);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem filterItem = menu.findItem(R.id.action_filter);
+        if (filterItem != null) {
+            filterItem.setVisible(mController.getViewType() == ViewType.DAY ||
+                        mController.getViewType() == ViewType.THREE ||
+                        mController.getViewType() == ViewType.WEEK);
+        }
         return true;
     }
 
@@ -870,14 +905,15 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             return true;
         } else if (itemId == R.id.action_search) {
             return false;
-        } else if (itemId == R.id.action_delete_events) {
-            startActivity(new Intent(this, DeleteEventsActivity.class));
-            return true;
         } else if (itemId == R.id.action_goto) {
             // Get the current time to display in Dialog.
             String timeZone = mTimeZone;
             GoToDialogFragment goToFrg = GoToDialogFragment.newInstance(timeZone);
             goToFrg.show(getFragmentManager(), "goto");
+            return true;
+        } else if (itemId == R.id.action_filter) {
+            item.setChecked(!item.isChecked());
+            Utils.setSharedPreference(this, GeneralPreferences.KEY_HOURS_FILTER_ENABLED, item.isChecked());
             return true;
         } else {
             return mExtensions.handleItemSelected(item, this);
@@ -988,6 +1024,16 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     secFrag = new AgendaFragment(timeMillis, false);
                 }
                 ExtensionsFactory.getAnalyticsLogger(getBaseContext()).trackView("month");
+                break;
+            case ViewType.THREE:
+                if (mActionBar != null && (mActionBar.getSelectedTab() != mThreeTab)) {
+                    mActionBar.selectTab(mThreeTab);
+                }
+                if (mActionBarMenuSpinnerAdapter != null) {
+                    mActionBar.setSelectedNavigationItem(CalendarViewAdapter.THREE_BUTTON_INDEX);
+                }
+                frag = new DayFragment(timeMillis, 3);
+                ExtensionsFactory.getAnalyticsLogger(getBaseContext()).trackView("week");
                 break;
             case ViewType.WEEK:
             default:
@@ -1104,7 +1150,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mWeekNum = weekNum;
         }
 
-        if (mShowWeekNum && (mCurrentView == ViewType.WEEK) && mIsTabletConfig
+        if (mShowWeekNum && (mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE) && mIsTabletConfig
                 && mWeekTextView != null) {
             String weekString = getResources().getQuantityString(R.plurals.weekN, mWeekNum,
                     mWeekNum);
@@ -1126,7 +1172,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         }
 
         if (mHomeTime != null
-                && (mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK
+                && (mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE
                         || mCurrentView == ViewType.AGENDA)
                 && !TextUtils.equals(mTimeZone, Time.getCurrentTimezone())) {
             Time time = new Time(mTimeZone);
@@ -1251,38 +1297,18 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                             event.selectedTime, -1, ViewType.CURRENT);
                 }
                 int response = event.getResponse();
-                if ((mCurrentView == ViewType.AGENDA && mShowEventInfoFullScreenAgenda) ||
-                        ((mCurrentView == ViewType.DAY || (mCurrentView == ViewType.WEEK) ||
-                                mCurrentView == ViewType.MONTH) && mShowEventInfoFullScreen)){
-                    // start event info as activity
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
-                    intent.setData(eventUri);
-                    intent.setClass(this, EventInfoActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra(EXTRA_EVENT_BEGIN_TIME, event.startTime.toMillis(false));
-                    intent.putExtra(EXTRA_EVENT_END_TIME, event.endTime.toMillis(false));
-                    intent.putExtra(ATTENDEE_STATUS, response);
-                    startActivity(intent);
-                } else {
-                    // start event info as a dialog
-                    EventInfoFragment fragment = new EventInfoFragment(this,
-                            event.id, event.startTime.toMillis(false),
-                            event.endTime.toMillis(false), response, true,
-                            EventInfoFragment.DIALOG_WINDOW_STYLE,
-                            null /* No reminders to explicitly pass in. */);
-                    fragment.setDialogParams(event.x, event.y, mActionBar.getHeight());
-                    FragmentManager fm = getFragmentManager();
-                    FragmentTransaction ft = fm.beginTransaction();
-                    // if we have an old popup replace it
-                    Fragment fOld = fm.findFragmentByTag(EVENT_INFO_FRAGMENT_TAG);
-                    if (fOld != null && fOld.isAdded()) {
-                        ft.remove(fOld);
-                    }
-                    ft.add(fragment, EVENT_INFO_FRAGMENT_TAG);
-                    ft.commit();
-                }
+
+                // start event info as activity
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
+                intent.setData(eventUri);
+                intent.setClass(this, EventInfoActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(EXTRA_EVENT_BEGIN_TIME, event.startTime.toMillis(false));
+                intent.putExtra(EXTRA_EVENT_END_TIME, event.endTime.toMillis(false));
+                intent.putExtra(ATTENDEE_STATUS, response);
+                startActivity(intent);
             }
             displayTime = event.startTime.toMillis(true);
         } else if (event.eventType == EventType.UPDATE_TITLE) {
@@ -1331,11 +1357,13 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.MONTH);
         } else if (tab == mAgendaTab && mCurrentView != ViewType.AGENDA) {
             mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.AGENDA);
+        } else if (tab == mThreeTab && mCurrentView != ViewType.THREE) {
+            mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.THREE);
         } else {
             Log.w(TAG, "TabSelected event from unknown tab: "
                     + (tab == null ? "null" : tab.getText()));
             Log.w(TAG, "CurrentView:" + mCurrentView + " Tab:" + tab.toString() + " Day:" + mDayTab
-                    + " Week:" + mWeekTab + " Month:" + mMonthTab + " Agenda:" + mAgendaTab);
+                    + " Week:" + mWeekTab + " Month:" + mMonthTab + " Agenda:" + mAgendaTab + " 3Days:" + mThreeTab);
         }
     }
 
@@ -1371,11 +1399,16 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.AGENDA);
                 }
                 break;
+            case CalendarViewAdapter.THREE_BUTTON_INDEX:
+                if (mCurrentView != ViewType.THREE) {
+                    mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.THREE);
+                }
+                break;
             default:
                 Log.w(TAG, "ItemSelected event from unknown button: " + itemPosition);
                 Log.w(TAG, "CurrentView:" + mCurrentView + " Button:" + itemPosition +
                         " Day:" + mDayTab + " Week:" + mWeekTab + " Month:" + mMonthTab +
-                        " Agenda:" + mAgendaTab);
+                        " Agenda:" + mAgendaTab + " 3Days:" + mThreeTab);
                 break;
         }
         return false;
@@ -1398,42 +1431,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mSearchMenu.expandActionView();
         }
         return false;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        final String[] PROJECTION = new String[] {
-                CalendarContract.Events._ID,
-                CalendarContract.Events.TITLE,
-                CalendarContract.EventsEntity.DELETED
-        };
-        final String where = CalendarContract.EventsEntity.DELETED + "=0 AND "
-                + Calendars.CALENDAR_ACCESS_LEVEL + ">=" + Calendars.CAL_ACCESS_CONTRIBUTOR;
-        return new CursorLoader(this, CalendarContract.EventsEntity.CONTENT_URI,
-                PROJECTION, where, null, null);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> arg0, Cursor cursor) {
-        if (mOptionsMenu == null) {
-            Log.w(TAG, "mOptionsMenu is null");
-            return;
-        }
-
-        MenuItem delEventsMenu = mOptionsMenu.findItem(R.id.action_delete_events);
-        if (delEventsMenu != null) {
-            if (cursor.getCount() == 0) {
-                delEventsMenu.setEnabled(false);
-            } else {
-                delEventsMenu.setEnabled(true);
-            }
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> arg0) {
-        // Do nothing.
-        return;
     }
 
     public static class GoToDialogFragment extends DialogFragment implements
@@ -1486,6 +1483,24 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                         ViewType.CURRENT, CalendarController.EXTRA_GOTO_TIME,
                         null, null);
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CALENDAR: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length == 2
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    mPermsDone = true;
+                    doCreate(mBundle);
+                } else {
+                    finish();
+                }
+            }
+            return;
         }
     }
 }
