@@ -137,10 +137,11 @@ public class CalendarController {
         final int CURRENT = 0;
         final int AGENDA = 1;
         final int DAY = 2;
-        final int WEEK = 3;
-        final int MONTH = 4;
-        final int EDIT = 5;
-        final int MAX_VALUE = 5;
+        final int THREE = 3;
+        final int WEEK = 4;
+        final int MONTH = 5;
+        final int EDIT = 6;
+        final int MAX_VALUE = 7;
     }
 
     public static class EventInfo {
