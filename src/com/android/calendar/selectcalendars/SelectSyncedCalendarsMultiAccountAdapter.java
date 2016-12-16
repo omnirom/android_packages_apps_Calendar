@@ -66,7 +66,6 @@ public class SelectSyncedCalendarsMultiAccountAdapter extends CursorTreeAdapter 
     private final ContentResolver mResolver;
     private final SelectSyncedCalendarsMultiAccountActivity mActivity;
     private final FragmentManager mFragmentManager;
-    private final boolean mIsTablet;
     private CalendarColorPickerDialog mColorPickerDialog;
     private final View mView;
     private final static Runnable mStopRefreshing = new Runnable() {
@@ -229,7 +228,6 @@ public class SelectSyncedCalendarsMultiAccountAdapter extends CursorTreeAdapter 
         mFragmentManager = act.getFragmentManager();
         mColorPickerDialog = (CalendarColorPickerDialog)
                 mFragmentManager.findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
-        mIsTablet = Utils.getConfigBool(context, R.bool.tablet_config);
 
         if (mCalendarsUpdater == null) {
             mCalendarsUpdater = new AsyncCalendarsUpdater(mResolver);
@@ -348,7 +346,7 @@ public class SelectSyncedCalendarsMultiAccountAdapter extends CursorTreeAdapter 
                     return;
                 }
                 if (mColorPickerDialog == null) {
-                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(id, mIsTablet);
+                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(id);
                 } else {
                     mColorPickerDialog.setCalendarId(id);
                 }
