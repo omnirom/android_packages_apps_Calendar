@@ -38,10 +38,10 @@ public class EventColorPickerDialog extends ColorPickerDialog {
     }
 
     public static EventColorPickerDialog newInstance(int[] colors, int selectedColor,
-            int calendarColor, boolean isTablet) {
+            int calendarColor) {
         EventColorPickerDialog ret = new EventColorPickerDialog();
         ret.initialize(R.string.event_color_picker_dialog_title, colors, selectedColor, NUM_COLUMNS,
-                isTablet ? SIZE_LARGE : SIZE_SMALL);
+                SIZE_SMALL);
         ret.setCalendarColor(calendarColor);
         return ret;
     }

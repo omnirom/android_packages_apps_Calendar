@@ -95,7 +95,7 @@ public class CalendarAppWidgetService extends RemoteViewsService {
             EVENT_PROJECTION[INDEX_COLOR] = Instances.CALENDAR_COLOR;
         }
     }
-    static final int MAX_DAYS = 7;
+    static final int MAX_DAYS = 14;
 
     private static final long SEARCH_DURATION = MAX_DAYS * DateUtils.DAY_IN_MILLIS;
 
@@ -250,10 +250,10 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                 final long now = System.currentTimeMillis();
                 if (!eventInfo.allDay && eventInfo.start <= now && now <= eventInfo.end) {
                     views.setInt(R.id.widget_row, "setBackgroundResource",
-                            R.drawable.agenda_item_bg_secondary);
+                            R.color.day_past_background_color);
                 } else {
                     views.setInt(R.id.widget_row, "setBackgroundResource",
-                            R.drawable.agenda_item_bg_primary);
+                            R.color.calendar_future_bg_color);
                 }
 
                 if (!eventInfo.allDay) {

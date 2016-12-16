@@ -39,8 +39,6 @@
         android:textSize="12sp"
         android:textAllCaps="true"
         android:paddingLeft="4dip"
-        android:shadowColor="@color/text_shadow_color"
-        android:shadowRadius="1"
         android:textColor="@color/appwidget_date"/>
 
 </LinearLayout>

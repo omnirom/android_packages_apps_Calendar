@@ -18,49 +18,41 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_today"
-        android:alphabeticShortcut="t"
         android:title="@string/goto_today"
         android:icon="@drawable/today_icon"
-        android:showAsAction="ifRoom"
-        android:orderInCategory="1" />
-    <item
-        android:id="@+id/action_refresh"
-        android:alphabeticShortcut="r"
-        android:title="@string/calendar_refresh"
-        android:icon="@drawable/ic_menu_refresh_holo_light"
-        android:showAsAction="never"
-        android:orderInCategory="3" />
+        android:showAsAction="always" />
     <item
         android:id="@+id/action_search"
-        android:alphabeticShortcut="f"
         android:title="@string/search"
-        android:icon="@drawable/ic_menu_search_holo_light"
+        android:icon="@drawable/ic_menu_search"
         android:showAsAction="never|collapseActionView"
         android:actionViewClass="android.widget.SearchView"
-        android:imeOptions="actionSearch"
-        android:orderInCategory="4" />
+        android:imeOptions="actionSearch" />
     <item
-        android:id="@+id/action_delete_events"
-        android:alphabeticShortcut="d"
-        android:title="@string/events_delete"
-        android:showAsAction="never"
-        android:orderInCategory="5" />
+        android:id="@+id/action_refresh"
+        android:title="@string/calendar_refresh"
+        android:showAsAction="never" />
     <item
         android:id="@+id/action_goto"
         android:title="@string/go_to"
-        android:showAsAction="never"
-        android:orderInCategory="6" />
+        android:showAsAction="never"/>
     <item
         android:id="@+id/action_select_visible_calendars"
         android:title="@string/menu_select_visible_calendars"
-        android:icon="@drawable/ic_menu_select_visible_calendars_holo_light"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_filter"
+        android:title="@string/calendar_filter"
         android:showAsAction="never"
-        android:orderInCategory="7" />
+        android:checkable="true" />
     <item
         android:id="@+id/action_settings"
-        android:alphabeticShortcut="s"
         android:title="@string/menu_preferences"
-        android:icon="@drawable/ic_menu_settings_holo_light"
+        android:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_hide_controls"
+        android:alphabeticShortcut="h"
         android:showAsAction="never"
-        android:orderInCategory="8" />
+        android:title="@string/hide_controls" />
 </menu>
