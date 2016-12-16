@@ -426,8 +426,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
                     fOld.getEndMillis() != endMillis || fOld.getEventId() != event.id) {
                 mEventFragment = new EventInfoFragment(mActivity, event.id,
                         startMillis, endMillis,
-                        Attendees.ATTENDEE_STATUS_NONE, false,
-                        EventInfoFragment.DIALOG_WINDOW_STYLE, null);
+                        Attendees.ATTENDEE_STATUS_NONE, null);
                 ft.replace(R.id.agenda_event_info, mEventFragment);
                 ft.commit();
             } else {

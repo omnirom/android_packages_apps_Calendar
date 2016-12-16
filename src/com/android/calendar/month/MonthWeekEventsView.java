@@ -135,9 +135,6 @@ public class MonthWeekEventsView extends SimpleWeekView {
     protected Paint mDNATimePaint;
     protected Paint mEventSquarePaint;
 
-
-    protected Drawable mTodayDrawable;
-
     protected int mMonthNumHeight;
     protected int mMonthNumAscentHeight;
     protected int mEventHeight;
@@ -335,7 +332,6 @@ public class MonthWeekEventsView extends SimpleWeekView {
         mDaySeparatorInnerColor = res.getColor(R.color.month_grid_lines);
         mTodayAnimateColor = res.getColor(R.color.today_highlight_color);
         mClickedDayColor = res.getColor(R.color.day_clicked_background_color);
-        mTodayDrawable = res.getDrawable(R.drawable.today_blue_week_holo_light);
     }
 
     /**

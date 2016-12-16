@@ -73,7 +73,6 @@ public class EventInfoActivity extends Activity {
         Intent intent = getIntent();
         int attendeeResponse = 0;
         mEventId = -1;
-        boolean isDialog = false;
         ArrayList<ReminderEntry> reminders = null;
 
         if (icicle != null) {
@@ -81,7 +80,6 @@ public class EventInfoActivity extends Activity {
             mStartMillis = icicle.getLong(EventInfoFragment.BUNDLE_KEY_START_MILLIS);
             mEndMillis = icicle.getLong(EventInfoFragment.BUNDLE_KEY_END_MILLIS);
             attendeeResponse = icicle.getInt(EventInfoFragment.BUNDLE_KEY_ATTENDEE_RESPONSE);
-            isDialog = icicle.getBoolean(EventInfoFragment.BUNDLE_KEY_IS_DIALOG);
 
             reminders = Utils.readRemindersFromBundle(icicle);
         } else if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
@@ -124,17 +122,6 @@ public class EventInfoActivity extends Activity {
             finish();
         }
 
-        // If we do not support showing full screen event info in this configuration,
-        // close the activity and show the event in AllInOne.
-        Resources res = getResources();
-        if (!res.getBoolean(R.bool.agenda_show_event_info_full_screen)
-                && !res.getBoolean(R.bool.show_event_info_full_screen)) {
-            CalendarController.getInstance(this)
-                    .launchViewEvent(mEventId, mStartMillis, mEndMillis, attendeeResponse);
-            finish();
-            return;
-        }
-
         setContentView(R.layout.simple_frame_layout);
 
         // Get the fragment if exists
@@ -145,7 +132,8 @@ public class EventInfoActivity extends Activity {
         // Remove the application title
         ActionBar bar = getActionBar();
         if (bar != null) {
-            bar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
+            bar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
+            bar.setElevation(0);
         }
 
         // Create a new fragment if none exists
@@ -153,10 +141,7 @@ public class EventInfoActivity extends Activity {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();
             mInfoFragment = new EventInfoFragment(this, mEventId, mStartMillis, mEndMillis,
-                    attendeeResponse, isDialog, (isDialog ?
-                            EventInfoFragment.DIALOG_WINDOW_STYLE :
-                                EventInfoFragment.FULL_WINDOW_STYLE),
-                    reminders);
+                    attendeeResponse, reminders);
             ft.replace(R.id.main_frame, mInfoFragment);
             ft.commit();
         }
@@ -195,5 +180,10 @@ public class EventInfoActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        mInfoFragment.doSave();
     }
 }
