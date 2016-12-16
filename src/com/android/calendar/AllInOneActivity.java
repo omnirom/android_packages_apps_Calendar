@@ -110,9 +110,10 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     // Must match the strings in the array buttons_list in arrays.xml and the
     // OnNavigationListener
     private static final int BUTTON_DAY_INDEX = 0;
-    private static final int BUTTON_WEEK_INDEX = 1;
-    private static final int BUTTON_MONTH_INDEX = 2;
-    private static final int BUTTON_AGENDA_INDEX = 3;
+    private static final int BUTTON_THREE_INDEX = 1;
+    private static final int BUTTON_WEEK_INDEX = 2;
+    private static final int BUTTON_MONTH_INDEX = 3;
+    private static final int BUTTON_AGENDA_INDEX = 4;
 
     private CalendarController mController;
     private static boolean mIsMultipane;
@@ -157,6 +158,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private ActionBar.Tab mWeekTab;
     private ActionBar.Tab mMonthTab;
     private ActionBar.Tab mAgendaTab;
+    private ActionBar.Tab mThreeTab;
+
     private SearchView mSearchView;
     private MenuItem mSearchMenu;
     private MenuItem mControlsMenu;
@@ -504,6 +507,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 break;
             case ViewType.MONTH:
                 mActionBar.setSelectedNavigationItem(BUTTON_MONTH_INDEX);
+                break;
+            case ViewType.THREE:
+                mActionBar.setSelectedNavigationItem(BUTTON_THREE_INDEX);
                 break;
             default:
                 mActionBar.setSelectedNavigationItem(BUTTON_DAY_INDEX);
@@ -989,6 +995,16 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 }
                 ExtensionsFactory.getAnalyticsLogger(getBaseContext()).trackView("month");
                 break;
+            case ViewType.THREE:
+                if (mActionBar != null && (mActionBar.getSelectedTab() != mThreeTab)) {
+                    mActionBar.selectTab(mThreeTab);
+                }
+                if (mActionBarMenuSpinnerAdapter != null) {
+                    mActionBar.setSelectedNavigationItem(CalendarViewAdapter.THREE_BUTTON_INDEX);
+                }
+                frag = new DayFragment(timeMillis, 3);
+                ExtensionsFactory.getAnalyticsLogger(getBaseContext()).trackView("week");
+                break;
             case ViewType.WEEK:
             default:
                 if (mActionBar != null && (mActionBar.getSelectedTab() != mWeekTab)) {
@@ -1104,7 +1120,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mWeekNum = weekNum;
         }
 
-        if (mShowWeekNum && (mCurrentView == ViewType.WEEK) && mIsTabletConfig
+        if (mShowWeekNum && (mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE) && mIsTabletConfig
                 && mWeekTextView != null) {
             String weekString = getResources().getQuantityString(R.plurals.weekN, mWeekNum,
                     mWeekNum);
@@ -1126,7 +1142,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         }
 
         if (mHomeTime != null
-                && (mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK
+                && (mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE
                         || mCurrentView == ViewType.AGENDA)
                 && !TextUtils.equals(mTimeZone, Time.getCurrentTimezone())) {
             Time time = new Time(mTimeZone);
@@ -1252,8 +1268,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 }
                 int response = event.getResponse();
                 if ((mCurrentView == ViewType.AGENDA && mShowEventInfoFullScreenAgenda) ||
-                        ((mCurrentView == ViewType.DAY || (mCurrentView == ViewType.WEEK) ||
-                                mCurrentView == ViewType.MONTH) && mShowEventInfoFullScreen)){
+                        ((mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK ||
+                                mCurrentView == ViewType.THREE || mCurrentView == ViewType.MONTH) &&
+                                mShowEventInfoFullScreen)){
                     // start event info as activity
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
@@ -1331,11 +1348,13 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.MONTH);
         } else if (tab == mAgendaTab && mCurrentView != ViewType.AGENDA) {
             mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.AGENDA);
+        } else if (tab == mThreeTab && mCurrentView != ViewType.THREE) {
+            mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.THREE);
         } else {
             Log.w(TAG, "TabSelected event from unknown tab: "
                     + (tab == null ? "null" : tab.getText()));
             Log.w(TAG, "CurrentView:" + mCurrentView + " Tab:" + tab.toString() + " Day:" + mDayTab
-                    + " Week:" + mWeekTab + " Month:" + mMonthTab + " Agenda:" + mAgendaTab);
+                    + " Week:" + mWeekTab + " Month:" + mMonthTab + " Agenda:" + mAgendaTab + " 3Days:" + mThreeTab);
         }
     }
 
@@ -1371,11 +1390,16 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.AGENDA);
                 }
                 break;
+            case CalendarViewAdapter.THREE_BUTTON_INDEX:
+                if (mCurrentView != ViewType.THREE) {
+                    mController.sendEvent(this, EventType.GO_TO, null, null, -1, ViewType.THREE);
+                }
+                break;
             default:
                 Log.w(TAG, "ItemSelected event from unknown button: " + itemPosition);
                 Log.w(TAG, "CurrentView:" + mCurrentView + " Button:" + itemPosition +
                         " Day:" + mDayTab + " Week:" + mWeekTab + " Month:" + mMonthTab +
-                        " Agenda:" + mAgendaTab);
+                        " Agenda:" + mAgendaTab + " 3Days:" + mThreeTab);
                 break;
         }
         return false;
