@@ -45,7 +45,7 @@ public class EventGeometry {
 
     // Computes the rectangle coordinates of the given event on the screen.
     // Returns true if the rectangle is visible on the screen.
-    public boolean computeEventRect(int date, int left, int top, int cellWidth, Event event) {
+    public boolean computeEventRect(int date, int left, int top, int cellWidth, int filterStartTime, Event event) {
         if (event.drawAsAllday()) {
             return false;
         }
@@ -85,12 +85,12 @@ public class EventGeometry {
             endHour -= 1;
 
         event.top = top;
-        event.top += (int) (startTime * cellMinuteHeight);
-        event.top += startHour * mHourGap;
+        event.top += (int) ((startTime - (filterStartTime * 60)) * cellMinuteHeight);
+        event.top += (startHour - filterStartTime) * mHourGap;
 
         event.bottom = top;
-        event.bottom += (int) (endTime * cellMinuteHeight);
-        event.bottom += endHour * mHourGap - 1;
+        event.bottom += (int) ((endTime - (filterStartTime * 60))* cellMinuteHeight);
+        event.bottom += (endHour - filterStartTime) * mHourGap - 1;
 
         // Make the rectangle be at least mMinEventHeight pixels high
         if (event.bottom < event.top + mMinEventHeight) {

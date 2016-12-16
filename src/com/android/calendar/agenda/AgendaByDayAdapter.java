@@ -24,11 +24,15 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.android.calendar.R;
+import com.android.calendar.CalendarController;
+import com.android.calendar.CalendarController.EventType;
+import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.Utils;
 import com.android.calendar.agenda.AgendaWindowAdapter.DayAdapterInfo;
 
@@ -53,6 +57,9 @@ public class AgendaByDayAdapter extends BaseAdapter {
     // Note: Formatter is not thread safe. Fine for now as it is only used by the main thread.
     private final Formatter mFormatter;
     private final StringBuilder mStringBuilder;
+    private int mTodayTextColor;
+    private int mTextColor;
+    private int mPastTextColor;
 
     static class ViewHolder {
         TextView dayView;
@@ -78,6 +85,9 @@ public class AgendaByDayAdapter extends BaseAdapter {
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
         mTimeZone = Utils.getTimeZone(context, mTZUpdater);
         mTmpTime = new Time(mTimeZone);
+        mTextColor = mContext.getResources().getColor(R.color.agenda_text_color);
+        mTodayTextColor = mContext.getResources().getColor(R.color.agenda_today_text_color);
+        mPastTextColor = mContext.getResources().getColor(R.color.calendar_past_text_color);
     }
 
     public long getInstanceId(int position) {
@@ -220,8 +230,8 @@ public class AgendaByDayAdapter extends BaseAdapter {
             // Build the text for the day of the week.
             // Should be yesterday/today/tomorrow (if applicable) + day of the week
 
-            Time date = mTmpTime;
-            long millis = date.setJulianDay(row.mDay);
+            final Time date = mTmpTime;
+            final long millis = date.setJulianDay(row.mDay);
             int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
             mStringBuilder.setLength(0);
 
@@ -242,15 +252,42 @@ public class AgendaByDayAdapter extends BaseAdapter {
             }
             holder.dayView.setText(dayViewText);
             holder.dateView.setText(dateViewText);
+            agendaDayView.setBackgroundResource(R.color.agenda_day_bar_background_color);
 
             // Set the background of the view, it is grayed for day that are in the past and today
             if (row.mDay > mTodayJulianDay) {
-                agendaDayView.setBackgroundResource(R.drawable.agenda_item_bg_primary);
                 holder.grayed = false;
             } else {
-                agendaDayView.setBackgroundResource(R.drawable.agenda_item_bg_secondary);
                 holder.grayed = true;
             }
+            if (row.mDay == mTodayJulianDay) {
+                holder.dateView.setTextColor(mTodayTextColor);
+                holder.dayView.setTextColor(mTodayTextColor);
+                holder.dateView.setTypeface(Typeface.DEFAULT_BOLD);
+                holder.dayView.setTypeface(Typeface.DEFAULT_BOLD);
+            } else if (row.mDay < mTodayJulianDay) {
+                holder.dateView.setTextColor(mPastTextColor);
+                holder.dayView.setTextColor(mPastTextColor);
+                holder.dateView.setTypeface(Typeface.DEFAULT);
+                holder.dayView.setTypeface(Typeface.DEFAULT);
+            } else {
+                holder.dateView.setTextColor(mTextColor);
+                holder.dayView.setTextColor(mTextColor);
+                holder.dateView.setTypeface(Typeface.DEFAULT);
+                holder.dayView.setTypeface(Typeface.DEFAULT);
+            }
+            agendaDayView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Time selectedTime = new Time(date);
+                    selectedTime.setJulianDay(row.mDay);
+                    selectedTime.hour = 0;
+                    selectedTime.normalize(true /* ignore isDst */);
+                    CalendarController controller = CalendarController.getInstance(mContext);
+                    controller.sendEvent(this, EventType.GO_TO, null, null, selectedTime, -1,
+                            ViewType.DAY, CalendarController.EXTRA_GOTO_DATE, null, null);
+                }});
+
             return agendaDayView;
         } else if (row.mType == TYPE_MEETING) {
             View itemView = mAgendaAdapter.getView(row.mPosition, convertView, parent);
@@ -270,11 +307,11 @@ public class AgendaByDayAdapter extends BaseAdapter {
             // if event in the past or started already, un-bold the title and set the background
             if ((!allDay && row.mEventStartTimeMilli <= System.currentTimeMillis()) ||
                     (allDay && row.mDay <= mTodayJulianDay)) {
-                itemView.setBackgroundResource(R.drawable.agenda_item_bg_secondary);
+                itemView.setBackgroundResource(R.color.calendar_past_bg_color);
                 title.setTypeface(Typeface.DEFAULT);
                 holder.grayed = true;
             } else {
-                itemView.setBackgroundResource(R.drawable.agenda_item_bg_primary);
+                itemView.setBackgroundResource(R.color.calendar_future_bg_color);
                 title.setTypeface(Typeface.DEFAULT_BOLD);
                 holder.grayed = false;
             }

@@ -137,10 +137,11 @@ public class CalendarController {
         final int CURRENT = 0;
         final int AGENDA = 1;
         final int DAY = 2;
-        final int WEEK = 3;
-        final int MONTH = 4;
-        final int EDIT = 5;
-        final int MAX_VALUE = 5;
+        final int THREE = 3;
+        final int WEEK = 4;
+        final int MONTH = 5;
+        final int EDIT = 6;
+        final int MAX_VALUE = 7;
     }
 
     public static class EventInfo {
@@ -475,20 +476,26 @@ public class CalendarController {
             startMillis = event.startTime.toMillis(false);
         }
 
-        // Set mTime if selectedTime is set
-        if (event.selectedTime != null && event.selectedTime.toMillis(false) != 0) {
-            mTime.set(event.selectedTime);
-        } else {
-            if (startMillis != 0) {
-                // selectedTime is not set so set mTime to startTime iff it is not
-                // within start and end times
-                long mtimeMillis = mTime.toMillis(false);
-                if (mtimeMillis < startMillis
-                        || (event.endTime != null && mtimeMillis > event.endTime.toMillis(false))) {
-                    mTime.set(event.startTime);
+        // UPDATE_TITLE should never change internal time
+        if (event.eventType != EventType.UPDATE_TITLE) {
+            // Set mTime if selectedTime is set
+            if (event.selectedTime != null && event.selectedTime.toMillis(false) != 0) {
+                mTime.set(event.selectedTime);
+                if (DEBUG) {
+                    Log.d(TAG, "setTime from selectedTime:  " + mTime.toString());
                 }
+            } else {
+                if (startMillis != 0) {
+                    // selectedTime is not set so set mTime to startTime iff it is not
+                    // within start and end times
+                    long mtimeMillis = mTime.toMillis(false);
+                    if (mtimeMillis < startMillis
+                            || (event.endTime != null && mtimeMillis > event.endTime.toMillis(false))) {
+                        mTime.set(event.startTime);
+                    }
+                }
+                event.selectedTime = mTime;
             }
-            event.selectedTime = mTime;
         }
         // Store the formatting flags if this is an update to the title
         if (event.eventType == EventType.UPDATE_TITLE) {
@@ -702,6 +709,9 @@ public class CalendarController {
      */
     public void setTime(long millisTime) {
         mTime.set(millisTime);
+        if (DEBUG) {
+            Log.d(TAG, "setTime:  " + mTime.toString());
+        }
     }
 
     /**

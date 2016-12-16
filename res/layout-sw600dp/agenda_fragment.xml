@@ -16,7 +16,6 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/agenda_general_background_color"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <view
@@ -36,6 +35,5 @@
         android:id="@+id/agenda_event_info"
         android:layout_height="match_parent"
         android:layout_width="0px"
-        android:background="@color/agenda_general_background_color"
         android:layout_marginTop="0dip"/>
 </LinearLayout>
