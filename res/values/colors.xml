@@ -18,9 +18,6 @@
 */
 -->
 <resources>
-
-    <color name="pressed">#330066ff</color>
-
     <color name="selection">@android:color/holo_blue_light</color>
 
     <color name="today_highlight_color">#0033b5e5</color>
@@ -35,8 +32,11 @@
     <color name="calendar_date_range_color">#80000000</color>
 
 
-    <color name="week_saturday">#80333333</color>
-    <color name="week_sunday">#80333333</color>
+    <color name="week_saturday">#FF000000</color>
+    <color name="week_sunday">#FF000000</color>
+    <color name="week_today">@color/primary_color</color>
+    <color name="week_past">#60000000</color>
+    
     <color name="calendar_future_bg_color">#ffffffff</color>
     <color name="calendar_hour_label">#ff666666</color>
     <color name="calendar_ampm_label">#ff999999</color>
@@ -61,7 +61,7 @@
     <color name="month_day_number_other">#FF999999</color>
     <color name="month_week_num_color">#FF999999</color>
     <color name="month_day_names_color">#FF999999</color>
-    <color name="month_today_number">#FF333333</color>
+    <color name="month_today_number">@color/primary_color</color>
     <color name="month_event_color">#FF333333</color>
     <color name="month_event_extra_color">#FF666666</color>
     <color name="month_event_other_color">#FF666666</color>
@@ -121,10 +121,6 @@
     <!-- Text color of the "new event" hint in day and week views -->
     <color name="new_event_hint_text_color">#FFFFFFFF</color>
 
-    <!-- Text color of a clicked event in the day/week view -->
-    <color name="day_event_clicked_background_color">#8033B5E5</color>
-    <!-- background color for for clicked days in month view-->
-    <color name="day_clicked_background_color">#FF33B5E5</color>
     <!-- background color for the past -->
     <color name="day_past_background_color">#FFDDDDDD</color>
 
@@ -170,7 +166,7 @@
     <color name="recurrence_picker_background">#fff2f2f2</color>
     <color name="recurrence_bubble_text_normal">#ff737373</color>
 
-    <color name="accent">#4285f4</color>
+    <color name="accent">#F44336</color>
     <color name="primary_color">#3F51B5</color>
     <color name="primary_dark_color">#303F9F</color>
     <color name="month_focus_month_bgcolor">#FFFFFFFF</color>
@@ -179,4 +175,7 @@
     <color name="edit_event_action_text_color">#FFFFFFFF</color>
     <color name="edit_event_icon_tint_color">#FFFFFFFF</color>
 
+    <color name="pressed">#33999999</color>
+    <color name="day_event_clicked_background_color">#33999999</color>
+    <color name="day_clicked_background_color">#33999999</color>
 </resources>

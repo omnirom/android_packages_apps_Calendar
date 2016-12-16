@@ -133,10 +133,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     private boolean mIsReadOnly = false;
     public boolean mShowModifyDialogOnLaunch = false;
     private boolean mShowColorPalette = false;
-
-    private boolean mTimeSelectedWasStartTime;
-    private boolean mDateSelectedWasStartDate;
-
     private InputMethodManager mInputMethodManager;
 
     private final Intent mIntent;
@@ -566,8 +562,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         } else {
             view = inflater.inflate(R.layout.edit_event, null);
         }
-        mView = new EditEventView(mActivity, view, mOnDone, mTimeSelectedWasStartTime,
-                mDateSelectedWasStartDate);
+        mView = new EditEventView(mActivity, view, mOnDone);
         startQuery();
 
         if (mUseCustomActionBar) {
@@ -613,14 +608,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             }
             if (savedInstanceState.containsKey(BUNDLE_KEY_READ_ONLY)) {
                 mIsReadOnly = savedInstanceState.getBoolean(BUNDLE_KEY_READ_ONLY);
-            }
-            if (savedInstanceState.containsKey("EditEventView_timebuttonclicked")) {
-                mTimeSelectedWasStartTime = savedInstanceState.getBoolean(
-                        "EditEventView_timebuttonclicked");
-            }
-            if (savedInstanceState.containsKey(BUNDLE_KEY_DATE_BUTTON_CLICKED)) {
-                mDateSelectedWasStartDate = savedInstanceState.getBoolean(
-                        BUNDLE_KEY_DATE_BUTTON_CLICKED);
             }
             if (savedInstanceState.containsKey(BUNDLE_KEY_SHOW_COLOR_PALETTE)) {
                 mShowColorPalette = savedInstanceState.getBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE);
@@ -949,9 +936,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         outState.putSerializable(BUNDLE_KEY_EVENT, mEventBundle);
         outState.putBoolean(BUNDLE_KEY_READ_ONLY, mIsReadOnly);
         outState.putBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE, mView.isColorPaletteVisible());
-
-        outState.putBoolean("EditEventView_timebuttonclicked", mView.mTimeSelectedWasStartTime);
-        outState.putBoolean(BUNDLE_KEY_DATE_BUTTON_CLICKED, mView.mDateSelectedWasStartDate);
     }
 
     @Override

@@ -35,7 +35,5 @@
     <!--  A global var used to set the main layout theme (one pane vs multiple panes) -->
     <bool name="multiple_pane_config">false</bool>
     <!--  A golbal var used to show goto menu -->
-    <bool name="show_goto_menu">false</bool>
-    <!--  A golbal var used to show delete events menu -->
-    <bool name="show_delete_events_menu">false</bool>
+    <bool name="show_goto_menu">true</bool>
 </resources>

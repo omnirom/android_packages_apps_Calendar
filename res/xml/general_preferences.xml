@@ -31,6 +31,12 @@
             android:entries="@array/preferences_week_start_day_labels"
             android:entryValues="@array/preferences_week_start_day_values"
             android:dialogTitle="@string/preferences_week_start_day_dialog" />
+        <Preference
+            android:key="preferences_hours_filter_start"
+            android:title="@string/preferences_hours_filter_start_title" />
+        <Preference
+            android:key="preferences_hours_filter_end"
+            android:title="@string/preferences_hours_filter_end_title" />
         <CheckBoxPreference
             android:key="preferences_home_tz_enabled"
             android:defaultValue="false"
