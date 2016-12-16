@@ -24,6 +24,7 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -75,6 +76,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
     protected int mSaturdayColor = 0;
     protected int mSundayColor = 0;
     protected int mDayNameColor = 0;
+    protected int mTodayColor = 0;
 
     // You can override these numbers to get a different appearance
     protected int mNumWeeks = 6;
@@ -179,6 +181,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         mSaturdayColor = res.getColor(R.color.month_saturday);
         mSundayColor = res.getColor(R.color.month_sunday);
         mDayNameColor = res.getColor(R.color.month_day_names_color);
+        mTodayColor = res.getColor(R.color.month_today_number);
 
         // Adjust sizes for screen density
         if (mScale == 0) {
@@ -322,13 +325,20 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
             label.setVisibility(View.GONE);
         }
         int offset = mFirstDayOfWeek - 1;
+        String tz = Utils.getTimeZone(mContext, null);
+        Time time = new Time(tz);
+        time.setToNow();
+        int todayIndex = time.weekDay;
         for (int i = 1; i < 8; i++) {
             label = (TextView) mDayNamesHeader.getChildAt(i);
             if (i < mDaysPerWeek + 1) {
                 int position = (offset + i) % 7;
                 label.setText(mDayLabels[position]);
                 label.setVisibility(View.VISIBLE);
-                if (position == Time.SATURDAY) {
+                if (position == todayIndex) {
+                    label.setTextColor(mTodayColor);
+                    label.setTypeface(Typeface.DEFAULT_BOLD);
+                } else if (position == Time.SATURDAY) {
                     label.setTextColor(mSaturdayColor);
                 } else if (position == Time.SUNDAY) {
                     label.setTextColor(mSundayColor);

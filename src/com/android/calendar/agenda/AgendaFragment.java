@@ -65,7 +65,6 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     private EventInfoFragment mEventFragment;
     private String mQuery;
     private boolean mUsedForSearch = false;
-    private boolean mIsTabletConfig;
     private EventInfo mOnAttachedInfo = null;
     private boolean mOnAttachAllDay = false;
     private AgendaWindowAdapter mAdapter = null;
@@ -125,8 +124,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
         mController = CalendarController.getInstance(mActivity);
         mShowEventDetailsWithAgenda =
             Utils.getConfigBool(mActivity, R.bool.show_event_details_with_agenda);
-        mIsTabletConfig =
-            Utils.getConfigBool(mActivity, R.bool.tablet_config);
+
         if (icicle != null) {
             long prevTime = icicle.getLong(BUNDLE_KEY_RESTORE_TIME, -1);
             if (prevTime != -1) {
@@ -183,7 +181,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             // Set scroll listener so that the date on the ActionBar can be set while
             // the user scrolls the view
             lv.setOnScrollListener(this);
-            lv.setHeaderSeparator(getResources().getColor(R.color.agenda_list_separator_color), 1);
+            lv.setHeaderSeparator(getResources().getColor(R.color.calendar_grid_line_color), 1);
             topListView = lv;
         } else {
             topListView = mAgendaListView;
@@ -426,8 +424,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
                     fOld.getEndMillis() != endMillis || fOld.getEventId() != event.id) {
                 mEventFragment = new EventInfoFragment(mActivity, event.id,
                         startMillis, endMillis,
-                        Attendees.ATTENDEE_STATUS_NONE, false,
-                        EventInfoFragment.DIALOG_WINDOW_STYLE, null);
+                        Attendees.ATTENDEE_STATUS_NONE, null);
                 ft.replace(R.id.agenda_event_info, mEventFragment);
                 ft.commit();
             } else {
@@ -464,19 +461,6 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             Time t = new Time(mTimeZone);
             t.setJulianDay(mJulianDayOnTop);
             mController.setTime(t.toMillis(true));
-            // Cannot sent a message that eventually may change the layout of the views
-            // so instead post a runnable that will run when the layout is done
-            if (!mIsTabletConfig) {
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Time t = new Time(mTimeZone);
-                        t.setJulianDay(mJulianDayOnTop);
-                        mController.sendEvent(this, EventType.UPDATE_TITLE, t, t, null, -1,
-                                ViewType.CURRENT, 0, null, null);
-                    }
-                });
-            }
         }
     }
 }

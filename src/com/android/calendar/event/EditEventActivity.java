@@ -50,8 +50,6 @@ public class EditEventActivity extends AbstractCalendarActivity {
 
     public static final String EXTRA_EVENT_REMINDERS = "reminders";
 
-    private static boolean mIsMultipane;
-
     private EditEventFragment mEditFragment;
 
     private ArrayList<ReminderEntry> mReminders;
@@ -72,24 +70,11 @@ public class EditEventActivity extends AbstractCalendarActivity {
         mEventColorInitialized = getIntent().hasExtra(EXTRA_EVENT_COLOR);
         mEventColor = getIntent().getIntExtra(EXTRA_EVENT_COLOR, -1);
 
-
         mEditFragment = (EditEventFragment) getFragmentManager().findFragmentById(R.id.main_frame);
 
-        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
-
-        if (mIsMultipane) {
-            getActionBar().setDisplayOptions(
-                    ActionBar.DISPLAY_SHOW_TITLE,
-                    ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME
-                            | ActionBar.DISPLAY_SHOW_TITLE);
-            getActionBar().setTitle(
-                    mEventInfo.id == -1 ? R.string.event_create : R.string.event_edit);
-        }
-        else {
-            getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
-                    ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME|
-                    ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
-        }
+        getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
+        getActionBar().setElevation(0);
+        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel);
 
         if (mEditFragment == null) {
             Intent intent = null;
@@ -163,12 +148,12 @@ public class EditEventActivity extends AbstractCalendarActivity {
         return info;
     }
 
+    public void colorActivity(int color) {
+        mEditFragment.colorActivity(color);
+    }
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            Utils.returnToCalendarHome(this);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public void onBackPressed() {
+        mEditFragment.doRevert();
     }
 }

@@ -14,43 +14,28 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:paddingBottom="8dp"
-    android:paddingLeft="8dp"
-    android:paddingTop="8dp">
+    android:padding="10dp" >
 
     <View android:id="@+id/color"
         android:layout_width="16dip"
         android:layout_height="16dip"
-        android:layout_marginRight="4dip"
-        android:layout_marginTop="5dip"
-    />
+        android:layout_marginRight="10dip"
+        android:gravity="center_vertical" />
 
     <TextView
         android:id="@+id/calendar_name"
-        style="@style/TextAppearance.SelectCalendar_Name"
         android:singleLine="true"
-        android:layout_width="match_parent"
-        android:ellipsize="marquee"
-        android:layout_toRightOf="@id/color"
-        android:layout_alignParentTop="true"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-    />
+        android:gravity="center_vertical"
+        android:textColor="?android:attr/textColorPrimary" />
 
-    <TextView
-        android:id="@+id/account_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/calendar_name"
-        android:layout_alignLeft="@id/calendar_name"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-    />
-
-</RelativeLayout>
+</LinearLayout>
