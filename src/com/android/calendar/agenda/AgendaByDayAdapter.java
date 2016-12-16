@@ -24,11 +24,15 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.android.calendar.R;
+import com.android.calendar.CalendarController;
+import com.android.calendar.CalendarController.EventType;
+import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.Utils;
 import com.android.calendar.agenda.AgendaWindowAdapter.DayAdapterInfo;
 
@@ -220,8 +224,8 @@ public class AgendaByDayAdapter extends BaseAdapter {
             // Build the text for the day of the week.
             // Should be yesterday/today/tomorrow (if applicable) + day of the week
 
-            Time date = mTmpTime;
-            long millis = date.setJulianDay(row.mDay);
+            final Time date = mTmpTime;
+            final long millis = date.setJulianDay(row.mDay);
             int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
             mStringBuilder.setLength(0);
 
@@ -242,15 +246,32 @@ public class AgendaByDayAdapter extends BaseAdapter {
             }
             holder.dayView.setText(dayViewText);
             holder.dateView.setText(dateViewText);
-
+            View pastPresentDivider = agendaDayView.findViewById(R.id.top_divider_past_present);
+            if (isFirstDayAfterYesterday(position)) {
+                pastPresentDivider.setVisibility(View.VISIBLE);
+            } else {
+                pastPresentDivider.setVisibility(View.GONE);
+            }
             // Set the background of the view, it is grayed for day that are in the past and today
             if (row.mDay > mTodayJulianDay) {
-                agendaDayView.setBackgroundResource(R.drawable.agenda_item_bg_primary);
+                agendaDayView.setBackgroundResource(R.color.calendar_future_bg_color);
                 holder.grayed = false;
             } else {
-                agendaDayView.setBackgroundResource(R.drawable.agenda_item_bg_secondary);
+                agendaDayView.setBackgroundResource(R.color.day_past_background_color);
                 holder.grayed = true;
             }
+            agendaDayView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Time selectedTime = new Time(date);
+                    selectedTime.setJulianDay(row.mDay);
+                    selectedTime.hour = 0;
+                    selectedTime.normalize(true /* ignore isDst */);
+                    CalendarController controller = CalendarController.getInstance(mContext);
+                    controller.sendEvent(this, EventType.GO_TO, null, null, selectedTime, -1,
+                            ViewType.DAY, CalendarController.EXTRA_GOTO_DATE, null, null);
+                }});
+
             return agendaDayView;
         } else if (row.mType == TYPE_MEETING) {
             View itemView = mAgendaAdapter.getView(row.mPosition, convertView, parent);
@@ -266,17 +287,20 @@ public class AgendaByDayAdapter extends BaseAdapter {
             } else {
                 title.setText(title.getText());
             }
+            View pastPresentDivider = itemView.findViewById(R.id.top_divider_past_present);
+            pastPresentDivider.setVisibility(View.GONE);
 
             // if event in the past or started already, un-bold the title and set the background
             if ((!allDay && row.mEventStartTimeMilli <= System.currentTimeMillis()) ||
                     (allDay && row.mDay <= mTodayJulianDay)) {
-                itemView.setBackgroundResource(R.drawable.agenda_item_bg_secondary);
+                itemView.setBackgroundResource(R.color.day_past_background_color);
                 title.setTypeface(Typeface.DEFAULT);
                 holder.grayed = true;
             } else {
-                itemView.setBackgroundResource(R.drawable.agenda_item_bg_primary);
+                itemView.setBackgroundResource(R.color.calendar_future_bg_color);
                 title.setTypeface(Typeface.DEFAULT_BOLD);
                 holder.grayed = false;
+                //pastPresentDivider.setVisibility(View.VISIBLE);
             }
             holder.julianDay = row.mDay;
             return itemView;

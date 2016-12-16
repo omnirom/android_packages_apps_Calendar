@@ -66,7 +66,6 @@ public class SelectCalendarsSyncAdapter extends BaseAdapter
     private int mAccountNameColumn;
     private int mAccountTypeColumn;
 
-    private boolean mIsTablet;
     private FragmentManager mFragmentManager;
     private int mColorViewTouchAreaIncrease;
 
@@ -93,7 +92,6 @@ public class SelectCalendarsSyncAdapter extends BaseAdapter
                 manager.findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
         mColorViewTouchAreaIncrease = context.getResources()
                 .getDimensionPixelSize(R.dimen.color_view_touch_area_increase);
-        mIsTablet = Utils.getConfigBool(context, R.bool.tablet_config);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         COLOR_CHIP_SIZE *= context.getResources().getDisplayMetrics().density;
         r.resize(COLOR_CHIP_SIZE, COLOR_CHIP_SIZE);
@@ -197,8 +195,7 @@ public class SelectCalendarsSyncAdapter extends BaseAdapter
                 }
 
                 if (mColorPickerDialog == null) {
-                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id,
-                            mIsTablet);
+                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id);
                 } else {
                     mColorPickerDialog.setCalendarId(mData[position].id);
                 }
