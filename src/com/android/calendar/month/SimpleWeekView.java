@@ -99,7 +99,6 @@ public class SimpleWeekView extends View {
     protected static int DAY_SEPARATOR_WIDTH = 1;
 
     protected static int MINI_DAY_NUMBER_TEXT_SIZE = 14;
-    protected static int MINI_WK_NUMBER_TEXT_SIZE = 12;
     protected static int MINI_TODAY_NUMBER_TEXT_SIZE = 18;
     protected static int MINI_TODAY_OUTLINE_WIDTH = 2;
     protected static int WEEK_NUM_MARGIN_BOTTOM = 4;
@@ -165,6 +164,7 @@ public class SimpleWeekView extends View {
     protected int mDaySeparatorColor;
     protected int mTodayOutlineColor;
     protected int mWeekNumColor;
+    protected int mWeekNumSize;
 
     public SimpleWeekView(Context context) {
         super(context);
@@ -175,10 +175,11 @@ public class SimpleWeekView extends View {
         mSelectedWeekBGColor = res.getColor(R.color.month_selected_week_bgcolor);
         mFocusMonthColor = res.getColor(R.color.month_mini_day_number);
         mOtherMonthColor = res.getColor(R.color.month_other_month_day_number);
-        mDaySeparatorColor = res.getColor(R.color.month_grid_lines);
+        mDaySeparatorColor = res.getColor(R.color.calendar_grid_line_color);
         mTodayOutlineColor = res.getColor(R.color.mini_month_today_outline_color);
-        mWeekNumColor = res.getColor(R.color.month_week_num_color);
+        mWeekNumColor = res.getColor(R.color.month_day_names_color);
         mSelectedDayLine = res.getDrawable(R.drawable.dayline_minical_holo_light);
+        mWeekNumSize = res.getDimensionPixelSize(R.dimen.day_label_text_size);
 
         if (mScale == 0) {
             mScale = context.getResources().getDisplayMetrics().density;
@@ -190,7 +191,6 @@ public class SimpleWeekView extends View {
                 MINI_TODAY_OUTLINE_WIDTH *= mScale;
                 WEEK_NUM_MARGIN_BOTTOM *= mScale;
                 DAY_SEPARATOR_WIDTH *= mScale;
-                MINI_WK_NUMBER_TEXT_SIZE *= mScale;
             }
         }
 
@@ -433,7 +433,7 @@ public class SimpleWeekView extends View {
         int i = 0;
         int divisor = 2 * nDays;
         if (mShowWeekNum) {
-            p.setTextSize(MINI_WK_NUMBER_TEXT_SIZE);
+            p.setTextSize(mWeekNumSize);
             p.setStyle(Style.FILL);
             p.setTextAlign(Align.CENTER);
             p.setAntiAlias(true);

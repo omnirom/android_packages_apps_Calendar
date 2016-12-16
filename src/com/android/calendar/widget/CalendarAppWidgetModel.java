@@ -35,7 +35,7 @@ import java.util.TimeZone;
 
 class CalendarAppWidgetModel {
     private static final String TAG = CalendarAppWidgetModel.class.getSimpleName();
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = true;
 
     private String mHomeTZName;
     private boolean mShowTZ;

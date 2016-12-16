@@ -66,7 +66,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:thumb="@drawable/switch_thumb"
                         android:layout_marginLeft="4dp" />
                 </LinearLayout>
 
@@ -229,22 +228,19 @@
 
                         <TextView
                             android:id="@+id/endDate"
-                            style="@style/TextAppearance.EditEvent_SpinnerButton"
                             android:textSize="15sp"
                             android:textColor="@color/recurrence_spinner_text_color"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
+                            android:layout_gravity="center_vertical"
                             android:singleLine="true"
                             android:minWidth="80dp"
                             android:contentDescription="@string/acessibility_recurrence_choose_end_date_description"
                             android:gravity="center_horizontal|bottom"
-                            android:layout_marginTop="3dp"
                             android:layout_marginLeft="0dp"
                             android:layout_marginRight="0dp"
                             android:paddingLeft="12dp"
                             android:paddingRight="16dp"
-                            android:paddingBottom="8dp"
                             android:visibility="gone" />
                     </LinearLayout>
                 </LinearLayout>
@@ -269,8 +265,7 @@
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/save_label"
-                android:textColor="@color/done_text_color" />
+                android:text="@string/save_label" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

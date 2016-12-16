@@ -65,7 +65,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private int mRowCount = 0;
 
     private FragmentManager mFragmentManager;
-    private boolean mIsTablet;
     private int mColorViewTouchAreaIncrease;
 
     private int mIdColumn;
@@ -116,7 +115,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         mFragmentManager = fm;
         mColorPickerDialog = (CalendarColorPickerDialog)
                 fm.findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
-        mIsTablet = Utils.getConfigBool(context, R.bool.tablet_config);
         mColorViewTouchAreaIncrease = context.getResources()
                 .getDimensionPixelSize(R.dimen.color_view_touch_area_increase);
     }
@@ -258,8 +256,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
                 }
 
                 if (mColorPickerDialog == null) {
-                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id,
-                            mIsTablet);
+                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id);
                 } else {
                     mColorPickerDialog.setCalendarId(mData[position].id);
                 }

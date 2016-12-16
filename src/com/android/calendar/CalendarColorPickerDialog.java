@@ -157,10 +157,9 @@ public class CalendarColorPickerDialog extends ColorPickerDialog {
         // Empty constructor required for dialog fragments.
     }
 
-    public static CalendarColorPickerDialog newInstance(long calendarId, boolean isTablet) {
+    public static CalendarColorPickerDialog newInstance(long calendarId) {
         CalendarColorPickerDialog ret = new CalendarColorPickerDialog();
-        ret.setArguments(R.string.calendar_color_picker_dialog_title, NUM_COLUMNS,
-                isTablet ? SIZE_LARGE : SIZE_SMALL);
+        ret.setArguments(R.string.calendar_color_picker_dialog_title, NUM_COLUMNS, SIZE_SMALL);
         ret.setCalendarId(calendarId);
         return ret;
     }

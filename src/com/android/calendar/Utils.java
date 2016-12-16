@@ -139,7 +139,6 @@ public class Utils {
 
     private static final TimeZoneUtils mTZUtils = new TimeZoneUtils(SHARED_PREFS_NAME);
     private static boolean mAllowWeekForDetailView = false;
-    private static long mTardis = 0;
     private static String sVersion = null;
 
     private static final Pattern mWildcardPattern = Pattern.compile("^.*$");
@@ -371,14 +370,6 @@ public class Utils {
             set.add(value);
         }
         prefs.edit().putStringSet(key, set).apply();
-    }
-
-    protected static void tardis() {
-        mTardis = System.currentTimeMillis();
-    }
-
-    protected static long getTardis() {
-        return mTardis;
     }
 
     public static void setSharedPreference(Context context, String key, boolean value) {
@@ -2123,4 +2114,19 @@ public class Utils {
         return reminders;
     }
 
+    public static int shiftColor(int color, float by) {
+        if (by == 1f) return color;
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] *= by; // value component
+        return Color.HSVToColor(hsv);
+    }
+
+    public static int shiftColorDown(int color) {
+        return shiftColor(color, 0.9f);
+    }
+
+    public static int shiftColorUp(int color) {
+        return shiftColor(color, 1.1f);
+    }
 }

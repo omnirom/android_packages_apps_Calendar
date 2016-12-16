@@ -469,22 +469,6 @@ public class AgendaWindowAdapter extends BaseAdapter
             int offset = position - info.offset;
             v = info.dayAdapter.getView(offset, convertView,
                     parent);
-
-            // Turn on the past/present separator if the view is a day header
-            // and it is the first day with events after yesterday.
-            if (info.dayAdapter.isDayHeaderView(offset)) {
-                View simpleDivider = v.findViewById(R.id.top_divider_simple);
-                View pastPresentDivider = v.findViewById(R.id.top_divider_past_present);
-                if (info.dayAdapter.isFirstDayAfterYesterday(offset)) {
-                    if (simpleDivider != null && pastPresentDivider != null) {
-                        simpleDivider.setVisibility(View.GONE);
-                        pastPresentDivider.setVisibility(View.VISIBLE);
-                    }
-                } else if (simpleDivider != null && pastPresentDivider != null) {
-                    simpleDivider.setVisibility(View.VISIBLE);
-                    pastPresentDivider.setVisibility(View.GONE);
-                }
-            }
         } else {
             // TODO
             Log.e(TAG, "BUG: getAdapterInfoByPosition returned null!!! " + position);

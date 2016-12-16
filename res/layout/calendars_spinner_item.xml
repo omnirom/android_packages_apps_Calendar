@@ -14,30 +14,12 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent">
-
-    <TextView android:id="@+id/calendar_name"
-        style="@style/TextAppearance.SelectCalendar_Name"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/calendar_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="end"
-        android:textColor="#FFFFFFFF"
+        android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/account_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/calendar_name"
-        android:layout_alignLeft="@id/calendar_name"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textColor="#FFFFFFFF"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-    />
-
-</LinearLayout>

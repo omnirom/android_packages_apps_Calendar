@@ -44,7 +44,7 @@ import com.android.calendar.Utils;
  */
 public class CalendarAppWidgetProvider extends AppWidgetProvider {
     static final String TAG = "CalendarAppWidgetProvider";
-    static final boolean LOGD = false;
+    static final boolean LOGD = true;
 
     // TODO Move these to Calendar.java
     static final String EXTRA_EVENT_IDS = "com.android.calendar.EXTRA_EVENT_IDS";
@@ -137,8 +137,7 @@ public class CalendarAppWidgetProvider extends AppWidgetProvider {
             final String dayOfWeek = DateUtils.getDayOfWeekString(time.weekDay + 1,
                     DateUtils.LENGTH_MEDIUM);
             final String date = Utils.formatDateRange(context, millis, millis,
-                    DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE
-                            | DateUtils.FORMAT_NO_YEAR);
+                    DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR);
             views.setTextViewText(R.id.day_of_week, dayOfWeek);
             views.setTextViewText(R.id.date, date);
             // Attach to list of events
