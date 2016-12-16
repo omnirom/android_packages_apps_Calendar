@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2006 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2006 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,74 +13,146 @@
      limitations under the License.
 -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/edit_event"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/EditEvent_Layout">
-    <TextView
-        android:id="@+id/loading_message"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/event_info_loading_msg"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_gravity="center"
+        android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/loading"
-        style="?android:attr/textAppearanceLarge"
-        android:background="#FFFFFFFF"/>
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:layout_width="100dip"
+            android:layout_height="100dip"
+            android:indeterminate="true" />
+
+        <TextView
+            style="@style/TextAppearance.EditEvent_Value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dip"
+            android:text="@string/loading" />
+    </LinearLayout>
+
+    <!-- CALENDARS SELECTOR for new events -->
+    <LinearLayout
+        android:id="@+id/calendar_selector_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/calendars_spinner"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="12dip"
+            android:layout_marginRight="12dip"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingBottom="10dip"
+            android:paddingTop="10dip"
+            android:prompt="@string/edit_event_calendar_label" />
+
+        <ImageButton
+            android:id="@+id/change_color_new_event"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="8dip"
+            android:contentDescription="@string/choose_event_color_label"
+            android:enabled="false"
+            android:padding="8dip"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_menu_colorpicker_white"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- CALENDAR DISPLAY for existing events -->
+    <LinearLayout
+        android:id="@+id/calendar_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:paddingBottom="5dip"
+        android:paddingTop="5dip"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/calendar_textview"
+                style="@style/TextAppearance.EditEvent_Value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dip"
+                android:layout_marginRight="24dip"
+                android:textColor="#FFFFFFFF" />
+
+            <TextView
+                android:id="@+id/calendar_textview_secondary"
+                style="@style/TextAppearance.EditEvent_Value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dip"
+                android:layout_marginRight="24dip"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/change_color_existing_event"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="48dip"
+            android:layout_height="48dip"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="8dip"
+            android:contentDescription="@string/choose_event_color_label"
+            android:enabled="false"
+            android:padding="8dip"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_menu_colorpicker_white"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:animateLayoutChanges="true"
-        android:fillViewport="true"
-        android:visibility="gone">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip"
+        android:scrollbars="none" >
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/two_pane"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <View android:id="@+id/event_bg"
+            <include
+                layout="@layout/edit_event_1"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="1dip"
-                android:layout_marginRight="1dip"
-                android:layout_marginTop="1dip"
-                android:layout_marginBottom="1dip"
-                android:layout_gravity="center_horizontal|top"
-                android:background="#FFFFFFFF"/>
+                android:layout_height="wrap_content" />
 
-            <LinearLayout
-                android:id="@+id/two_pane"
-                android:orientation="vertical"
+            <include
+                layout="@layout/edit_event_2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top">
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
-                <!-- TOP HALF -->
-                <include
-                    layout="@layout/edit_event_1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <!-- BOTTOM HALF GUESTS/ATTENDEES -->
-                <include
-                    layout="@layout/edit_event_2"
-                    android:id="@+id/attendees_group"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <View android:id="@+id/color_chip"
-                android:layout_width="25dip"
-                android:layout_height="25dip"
-                android:visibility="gone"
-                android:layout_marginLeft="0dip"
-                android:layout_marginTop="0dip"
-                android:layout_gravity="left|top"/>
-        </FrameLayout>
     </ScrollView>
 </LinearLayout>
+
