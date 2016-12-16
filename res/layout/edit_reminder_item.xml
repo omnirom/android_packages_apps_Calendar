@@ -17,7 +17,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:paddingTop="1dip"
     android:gravity="center_vertical"
     android:layout_height="wrap_content"
     android:minHeight="@dimen/edit_reminder_min_size">

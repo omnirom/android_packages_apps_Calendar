@@ -64,9 +64,10 @@ public class CalendarViewAdapter extends BaseAdapter {
     static final int VIEW_TYPE_NUM = 1;  // Increase this if you add more view types
 
     public static final int DAY_BUTTON_INDEX = 0;
-    public static final int WEEK_BUTTON_INDEX = 1;
-    public static final int MONTH_BUTTON_INDEX = 2;
-    public static final int AGENDA_BUTTON_INDEX = 3;
+    public static final int THREE_BUTTON_INDEX = 1;
+    public static final int WEEK_BUTTON_INDEX = 2;
+    public static final int MONTH_BUTTON_INDEX = 3;
+    public static final int AGENDA_BUTTON_INDEX = 4;
 
     // The current selected event's time, used to calculate the date and day of the week
     // for the buttons.
@@ -106,7 +107,7 @@ public class CalendarViewAdapter extends BaseAdapter {
         mShowDate = showDate;
 
         // Initialize
-        mButtonNames = context.getResources().getStringArray(R.array.buttons_list);
+        mButtonNames = context.getResources().getStringArray(R.array.buttons_list_new);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mStringBuilder = new StringBuilder(50);
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
@@ -245,6 +246,16 @@ public class CalendarViewAdapter extends BaseAdapter {
                     weekDay.setText(buildDayOfWeek());
                     date.setText(buildFullDate());
                     break;
+                case ViewType.THREE:
+                    lunarInfo.setVisibility(View.GONE);
+                    if (Utils.getShowWeekNumber(mContext)) {
+                        weekDay.setVisibility(View.VISIBLE);
+                        weekDay.setText(buildWeekNum());
+                    } else {
+                        weekDay.setVisibility(View.GONE);
+                    }
+                    date.setText(buildMonthYearDate());
+                    break;
                 default:
                     v = null;
                     break;
@@ -273,6 +284,9 @@ public class CalendarViewAdapter extends BaseAdapter {
                     break;
                 case ViewType.AGENDA:
                     title.setText(mButtonNames [AGENDA_BUTTON_INDEX]);
+                    break;
+                case ViewType.THREE:
+                    title.setText(mButtonNames [THREE_BUTTON_INDEX]);
                     break;
                 default:
                     v = null;
@@ -326,6 +340,12 @@ public class CalendarViewAdapter extends BaseAdapter {
                 viewType.setText(mButtonNames [AGENDA_BUTTON_INDEX]);
                 if (mShowDate) {
                     date.setText(buildMonthDayDate());
+                }
+                break;
+            case THREE_BUTTON_INDEX:
+                viewType.setText(mButtonNames [THREE_BUTTON_INDEX]);
+                if (mShowDate) {
+                    date.setText(buildThreeDate());
                 }
                 break;
             default:
@@ -491,5 +511,25 @@ public class CalendarViewAdapter extends BaseAdapter {
         }
     }
 
+    private String buildThreeDate() {
+        Time t = new Time(mTimeZone);
+        t.set(mMilliTime);
+
+        long weekStartTime = t.toMillis(true);
+        long weekEndTime = weekStartTime + 2 * DateUtils.DAY_IN_MILLIS;
+
+        // If week start and end is in 2 different months, use short months names
+        Time t1 = new Time(mTimeZone);
+        t1.set(weekEndTime);
+        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR;
+        if (t.month != t1.month) {
+            flags |= DateUtils.FORMAT_ABBREV_MONTH;
+        }
+
+        mStringBuilder.setLength(0);
+        String date = DateUtils.formatDateRange(mContext, mFormatter, weekStartTime,
+                weekEndTime, flags, mTimeZone).toString();
+         return date;
+    }
 }
 

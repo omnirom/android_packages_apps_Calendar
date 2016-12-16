@@ -164,8 +164,6 @@ public class AgendaWindowAdapter extends BaseAdapter
     private final TextView mFooterView;
     private boolean mDoneSettingUpHeaderFooter = false;
 
-    private final boolean mIsTabletConfig;
-
     boolean mCleanQueryInitiated = false;
     private int mStickyHeaderSize = 44; // Initial size big enough for it to work
 
@@ -223,10 +221,6 @@ public class AgendaWindowAdapter extends BaseAdapter
     private String mSearchQuery;
 
     private long mSelectedInstanceId = -1;
-
-    private final int mSelectedItemBackgroundColor;
-    private final int mSelectedItemTextColor;
-    private final float mItemRightMargin;
 
     // Types of Query
     private static final int QUERY_TYPE_OLDER = 0; // Query for older events
@@ -340,11 +334,6 @@ public class AgendaWindowAdapter extends BaseAdapter
             AgendaListView agendaListView, boolean showEventOnStart) {
         mContext = context;
         mResources = context.getResources();
-        mSelectedItemBackgroundColor = mResources
-                .getColor(R.color.agenda_selected_background_color);
-        mSelectedItemTextColor = mResources.getColor(R.color.agenda_selected_text_color);
-        mItemRightMargin = mResources.getDimension(R.dimen.agenda_item_right_margin);
-        mIsTabletConfig = Utils.getConfigBool(mContext, R.bool.tablet_config);
 
         mTimeZone = Utils.getTimeZone(context, mTZUpdater);
         mAgendaListView = agendaListView;
@@ -469,22 +458,6 @@ public class AgendaWindowAdapter extends BaseAdapter
             int offset = position - info.offset;
             v = info.dayAdapter.getView(offset, convertView,
                     parent);
-
-            // Turn on the past/present separator if the view is a day header
-            // and it is the first day with events after yesterday.
-            if (info.dayAdapter.isDayHeaderView(offset)) {
-                View simpleDivider = v.findViewById(R.id.top_divider_simple);
-                View pastPresentDivider = v.findViewById(R.id.top_divider_past_present);
-                if (info.dayAdapter.isFirstDayAfterYesterday(offset)) {
-                    if (simpleDivider != null && pastPresentDivider != null) {
-                        simpleDivider.setVisibility(View.GONE);
-                        pastPresentDivider.setVisibility(View.VISIBLE);
-                    }
-                } else if (simpleDivider != null && pastPresentDivider != null) {
-                    simpleDivider.setVisibility(View.VISIBLE);
-                    pastPresentDivider.setVisibility(View.GONE);
-                }
-            }
         } else {
             // TODO
             Log.e(TAG, "BUG: getAdapterInfoByPosition returned null!!! " + position);
@@ -493,39 +466,6 @@ public class AgendaWindowAdapter extends BaseAdapter
             v = tv;
         }
 
-        // If this is not a tablet config don't do selection highlighting
-        if (!mIsTabletConfig) {
-            return v;
-        }
-        // Show selected marker if this is item is selected
-        boolean selected = false;
-        Object yy = v.getTag();
-        if (yy instanceof AgendaAdapter.ViewHolder) {
-            AgendaAdapter.ViewHolder vh = (AgendaAdapter.ViewHolder) yy;
-            selected = mSelectedInstanceId == vh.instanceId;
-            vh.selectedMarker.setVisibility((selected && mShowEventOnStart) ?
-                    View.VISIBLE : View.GONE);
-            if (mShowEventOnStart) {
-                GridLayout.LayoutParams lp =
-                        (GridLayout.LayoutParams)vh.textContainer.getLayoutParams();
-                if (selected) {
-                    mSelectedVH = vh;
-                    v.setBackgroundColor(mSelectedItemBackgroundColor);
-                    vh.title.setTextColor(mSelectedItemTextColor);
-                    vh.when.setTextColor(mSelectedItemTextColor);
-                    vh.where.setTextColor(mSelectedItemTextColor);
-                    lp.setMargins(0, 0, 0, 0);
-                    vh.textContainer.setLayoutParams(lp);
-                } else {
-                    lp.setMargins(0, 0, (int)mItemRightMargin, 0);
-                    vh.textContainer.setLayoutParams(lp);
-                }
-            }
-        }
-
-        if (DEBUGLOG) {
-            Log.e(TAG, "getView " + position + " = " + getViewTitle(v));
-        }
         return v;
     }
 
@@ -1370,30 +1310,12 @@ public class AgendaWindowAdapter extends BaseAdapter
     // in the adapter
     @Override
     public int getHeaderPositionFromItemPosition(int position) {
-
-        // For phone configuration, return -1 so there will be no sticky header
-        if (!mIsTabletConfig) {
-            return -1;
-        }
-
-        DayAdapterInfo info = getAdapterInfoByPosition(position);
-        if (info != null) {
-            int pos = info.dayAdapter.getHeaderPosition(position - info.offset);
-            return (pos != -1)?(pos + info.offset):-1;
-        }
         return -1;
     }
 
     // Returns the number of events for a specific day header
     @Override
     public int getHeaderItemsNumber(int headerPosition) {
-        if (headerPosition < 0 || !mIsTabletConfig) {
-            return -1;
-        }
-        DayAdapterInfo info = getAdapterInfoByPosition(headerPosition);
-        if (info != null) {
-            return info.dayAdapter.getHeaderItemsCount(headerPosition - info.offset);
-        }
         return -1;
     }
 

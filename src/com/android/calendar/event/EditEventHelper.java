@@ -49,6 +49,7 @@ import com.android.calendarcommon2.RecurrenceSet;
 import com.android.common.Rfc822Validator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -809,6 +810,24 @@ public class EditEventHelper {
         return true;
     }
 
+    public static void normalizeReminders(ArrayList<ReminderEntry> reminders) {
+        if (reminders.size() <= 1) {
+            return;
+        }
+        // sort
+        Collections.sort(reminders);
+        // remove duplicates
+        ReminderEntry prev = reminders.get(reminders.size()-1);
+        for (int i = reminders.size()-2; i >= 0; --i) {
+            ReminderEntry cur = reminders.get(i);
+            if (prev.equals(cur)) {
+                // match, remove later entry
+                reminders.remove(i+1);
+            }
+            prev = cur;
+        }
+    }
+
     /**
      * Saves the reminders, if they changed. Returns true if operations to
      * update the database were added.
@@ -823,6 +842,7 @@ public class EditEventHelper {
     public static boolean saveReminders(ArrayList<ContentProviderOperation> ops, long eventId,
             ArrayList<ReminderEntry> reminders, ArrayList<ReminderEntry> originalReminders,
             boolean forceSave) {
+        normalizeReminders(reminders);
         // If the reminders have not changed, then don't update the database
         if (reminders.equals(originalReminders) && !forceSave) {
             return false;

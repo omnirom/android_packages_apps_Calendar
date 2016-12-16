@@ -95,7 +95,7 @@ public class CalendarAppWidgetService extends RemoteViewsService {
             EVENT_PROJECTION[INDEX_COLOR] = Instances.CALENDAR_COLOR;
         }
     }
-    static final int MAX_DAYS = 7;
+    static final int MAX_DAYS = 14;
 
     private static final long SEARCH_DURATION = MAX_DAYS * DateUtils.DAY_IN_MILLIS;
 
@@ -133,7 +133,6 @@ public class CalendarAppWidgetService extends RemoteViewsService {
         private int mAppWidgetId;
         private int mDeclinedColor;
         private int mStandardColor;
-        private int mAllDayColor;
 
         private final Runnable mTimezoneChanged = new Runnable() {
             @Override
@@ -172,7 +171,6 @@ public class CalendarAppWidgetService extends RemoteViewsService {
 
             mDeclinedColor = mResources.getColor(R.color.appwidget_item_declined_color);
             mStandardColor = mResources.getColor(R.color.appwidget_item_standard_color);
-            mAllDayColor = mResources.getColor(R.color.appwidget_item_allday_color);
         }
 
         public CalendarFactory() {
@@ -235,37 +233,41 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                         R.layout.appwidget_day);
                 DayInfo dayInfo = mModel.mDayInfos.get(rowInfo.mIndex);
                 updateTextView(views, R.id.date, View.VISIBLE, dayInfo.mDayLabel);
+                views.setInt(R.id.date, "setTextColor", mStandardColor);
+
+                long start = dayInfo.mMillis;
+                long end = start;
+                final Intent fillInIntent = CalendarAppWidgetProvider.getLaunchFillInIntent(
+                        mContext, 0, start, end, false);
+                views.setOnClickFillInIntent(R.id.appwidget_date, fillInIntent);
                 return views;
             } else {
-                RemoteViews views;
                 final EventInfo eventInfo = mModel.mEventInfos.get(rowInfo.mIndex);
-                if (eventInfo.allDay) {
-                    views = new RemoteViews(mContext.getPackageName(),
-                            R.layout.widget_all_day_item);
-                } else {
-                    views = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
-                }
+                RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
                 int displayColor = Utils.getDisplayColorFromColor(eventInfo.color);
 
                 final long now = System.currentTimeMillis();
-                if (!eventInfo.allDay && eventInfo.start <= now && now <= eventInfo.end) {
+                if ((!eventInfo.allDay && eventInfo.start <= now && now <= eventInfo.end) ||
+                        (eventInfo.allDay && eventInfo.day == mModel.mTodayJulianDay) ) {
                     views.setInt(R.id.widget_row, "setBackgroundResource",
-                            R.drawable.agenda_item_bg_secondary);
+                            R.color.calendar_past_bg_color);
                 } else {
                     views.setInt(R.id.widget_row, "setBackgroundResource",
-                            R.drawable.agenda_item_bg_primary);
+                            R.color.calendar_future_bg_color);
                 }
 
                 if (!eventInfo.allDay) {
                     updateTextView(views, R.id.when, eventInfo.visibWhen, eventInfo.when);
-                    updateTextView(views, R.id.where, eventInfo.visibWhere, eventInfo.where);
+                } else {
+                    updateTextView(views, R.id.when, View.GONE, eventInfo.when);
                 }
+                updateTextView(views, R.id.where, eventInfo.visibWhere, eventInfo.where);
                 updateTextView(views, R.id.title, eventInfo.visibTitle, eventInfo.title);
 
                 views.setViewVisibility(R.id.agenda_item_color, View.VISIBLE);
 
                 int selfAttendeeStatus = eventInfo.selfAttendeeStatus;
-                if (eventInfo.allDay) {
+                /*if (eventInfo.allDay) {
                     if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_INVITED) {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
                                 R.drawable.widget_chip_not_responded_bg);
@@ -273,7 +275,7 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                     } else {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
                                 R.drawable.widget_chip_responded_bg);
-                        views.setInt(R.id.title, "setTextColor", mAllDayColor);
+                        views.setInt(R.id.title, "setTextColor", mStandardColor);
                     }
                     if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
                         // 40% opacity
@@ -282,27 +284,28 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                     } else {
                         views.setInt(R.id.agenda_item_color, "setColorFilter", displayColor);
                     }
-                } else if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
-                    views.setInt(R.id.title, "setTextColor", mDeclinedColor);
-                    views.setInt(R.id.when, "setTextColor", mDeclinedColor);
-                    views.setInt(R.id.where, "setTextColor", mDeclinedColor);
-                    // views.setInt(R.id.agenda_item_color, "setDrawStyle",
-                    // ColorChipView.DRAW_CROSS_HATCHED);
+                } else*/ if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
                     views.setInt(R.id.agenda_item_color, "setImageResource",
                             R.drawable.widget_chip_responded_bg);
                     // 40% opacity
-                    views.setInt(R.id.agenda_item_color, "setColorFilter",
-                            Utils.getDeclinedColorFromColor(displayColor));
-                } else {
+                    int declinedColor = Utils.getDeclinedColorFromColor(displayColor);
+                    views.setInt(R.id.agenda_item_color, "setColorFilter", declinedColor);
                     views.setInt(R.id.title, "setTextColor", mStandardColor);
                     views.setInt(R.id.when, "setTextColor", mStandardColor);
                     views.setInt(R.id.where, "setTextColor", mStandardColor);
+                } else {
                     if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_INVITED) {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
                                 R.drawable.widget_chip_not_responded_bg);
+                        views.setInt(R.id.title, "setTextColor", displayColor);
+                        views.setInt(R.id.when, "setTextColor", displayColor);
+                        views.setInt(R.id.where, "setTextColor", displayColor);
                     } else {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
                                 R.drawable.widget_chip_responded_bg);
+                        views.setInt(R.id.title, "setTextColor", mStandardColor);
+                        views.setInt(R.id.when, "setTextColor", mStandardColor);
+                        views.setInt(R.id.where, "setTextColor", mStandardColor);
                     }
                     views.setInt(R.id.agenda_item_color, "setColorFilter", displayColor);
                 }

@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.provider.CalendarContract.Calendars;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -45,6 +46,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     OnCalendarColorsLoadedListener {
     private static final String TAG = "SelectCalendarsAdapter";
     private static final String COLOR_PICKER_DIALOG_TAG = "ColorPickerDialog";
+    private static final String CONTACTS_CALENDAR_NAME = "#contacts@group.v.calendar.google.com";
 
     private static int BOTTOM_ITEM_HEIGHT = 64;
     private static int NORMAL_ITEM_HEIGHT = 48;
@@ -65,7 +67,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private int mRowCount = 0;
 
     private FragmentManager mFragmentManager;
-    private boolean mIsTablet;
     private int mColorViewTouchAreaIncrease;
 
     private int mIdColumn;
@@ -80,6 +81,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private int mColorCalendarHidden;
     private int mColorCalendarSecondaryVisible;
     private int mColorCalendarSecondaryHidden;
+    private int mAccessLevelColumn;
 
     private CalendarColorCache mCache;
 
@@ -91,6 +93,8 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         String accountType;
         int color;
         boolean selected;
+        int accessLevel;
+        boolean privateCalendar;
     }
 
     public SelectCalendarsSimpleAdapter(Context context, int layout, Cursor c, FragmentManager fm) {
@@ -116,7 +120,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         mFragmentManager = fm;
         mColorPickerDialog = (CalendarColorPickerDialog)
                 fm.findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
-        mIsTablet = Utils.getConfigBool(context, R.bool.tablet_config);
         mColorViewTouchAreaIncrease = context.getResources()
                 .getDimensionPixelSize(R.dimen.color_view_touch_area_increase);
     }
@@ -190,6 +193,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         mOwnerAccountColumn = c.getColumnIndexOrThrow(Calendars.OWNER_ACCOUNT);
         mAccountNameColumn = c.getColumnIndexOrThrow(Calendars.ACCOUNT_NAME);
         mAccountTypeColumn = c.getColumnIndexOrThrow(Calendars.ACCOUNT_TYPE);
+        mAccessLevelColumn = c.getColumnIndexOrThrow(Calendars.CALENDAR_ACCESS_LEVEL);
 
         mRowCount = c.getCount();
         mData = new CalendarRow[(c.getCount())];
@@ -204,6 +208,10 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
             mData[p].ownerAccount = c.getString(mOwnerAccountColumn);
             mData[p].accountName = c.getString(mAccountNameColumn);
             mData[p].accountType = c.getString(mAccountTypeColumn);
+            mData[p].accessLevel = c.getInt(mAccessLevelColumn);
+            mData[p].privateCalendar = mData[p].ownerAccount.equals(CONTACTS_CALENDAR_NAME) ||
+                    mData[p].accessLevel >= Calendars.CAL_ACCESS_OWNER;
+            //Log.d("maxwen", "" + mData[p].id  + " " + mData[p].displayName + " " +  mData[p].color + " " + mData[p].ownerAccount + " " + mData[p].accountName + " " + mData[p].accountType + " " + mData[p].accessLevel);
             p++;
         }
     }
@@ -258,8 +266,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
                 }
 
                 if (mColorPickerDialog == null) {
-                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id,
-                            mIsTablet);
+                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id);
                 } else {
                     mColorPickerDialog.setCalendarId(mData[position].id);
                 }
@@ -279,50 +286,34 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         calendarName.setTextColor(textColor);
 
         CheckBox syncCheckBox = (CheckBox) view.findViewById(R.id.sync);
-        if (syncCheckBox != null) {
+        syncCheckBox.setChecked(selected);
 
-            // Full screen layout
-            syncCheckBox.setChecked(selected);
+        colorView.setEnabled(hasMoreColors(position));
+        LayoutParams layoutParam = calendarName.getLayoutParams();
 
-            colorView.setEnabled(hasMoreColors(position));
-            LayoutParams layoutParam = calendarName.getLayoutParams();
-            TextView secondaryText = (TextView) view.findViewById(R.id.status);
-            if (!TextUtils.isEmpty(mData[position].ownerAccount)
-                    && !mData[position].ownerAccount.equals(name)
-                    && !mData[position].ownerAccount.endsWith("calendar.google.com")) {
-                int secondaryColor;
-                if (selected) {
-                    secondaryColor = mColorCalendarSecondaryVisible;
-                } else {
-                    secondaryColor = mColorCalendarSecondaryHidden;
-                }
-                secondaryText.setText(mData[position].ownerAccount);
-                secondaryText.setTextColor(secondaryColor);
-                secondaryText.setVisibility(View.VISIBLE);
-                layoutParam.height = LayoutParams.WRAP_CONTENT;
-            } else {
-                secondaryText.setVisibility(View.GONE);
-                layoutParam.height = LayoutParams.MATCH_PARENT;
-            }
-
-            calendarName.setLayoutParams(layoutParam);
-
+        TextView secondaryText = (TextView) view.findViewById(R.id.status);
+        int secondaryColor;
+        if (selected) {
+            secondaryColor = mColorCalendarSecondaryVisible;
         } else {
-            // Tablet layout
-            view.findViewById(R.id.color).setEnabled(selected && hasMoreColors(position));
-            view.setBackgroundDrawable(getBackground(position, selected));
-            ViewGroup.LayoutParams newParams = view.getLayoutParams();
-            if (position == mData.length - 1) {
-                newParams.height = BOTTOM_ITEM_HEIGHT;
-            } else {
-                newParams.height = NORMAL_ITEM_HEIGHT;
-            }
-            view.setLayoutParams(newParams);
-            CheckBox visibleCheckBox = (CheckBox) view.findViewById(R.id.visible_check_box);
-            if (visibleCheckBox != null) {
-                visibleCheckBox.setChecked(selected);
-            }
+            secondaryColor = mColorCalendarSecondaryHidden;
         }
+        secondaryText.setTextColor(secondaryColor);
+        secondaryText.setVisibility(View.VISIBLE);
+        layoutParam.height = LayoutParams.WRAP_CONTENT;
+
+        if (!TextUtils.isEmpty(mData[position].ownerAccount)
+                && !mData[position].ownerAccount.equals(name)
+                && !mData[position].ownerAccount.endsWith("calendar.google.com")) {
+            secondaryText.setText(mData[position].ownerAccount);
+        } else if (mData[position].privateCalendar) {
+            secondaryText.setText(R.string.calendar_type_mine);
+        } else {
+            secondaryText.setText(R.string.calendar_type_other);
+        }
+
+        calendarName.setLayoutParams(layoutParam);
+
         view.invalidate();
         return view;
     }

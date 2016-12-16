@@ -21,8 +21,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@drawable/minical_bg_shadow_holo_light">
+    android:fillViewport="true">
 
     <TextView android:id="@+id/month_name"
         android:layout_width="match_parent"
@@ -33,9 +32,9 @@
     <include android:id="@+id/day_names" layout="@layout/mini_month_header" />
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dip"
-        android:background="@color/month_grid_lines" />
+        android:background="@color/calendar_grid_scroll_line_color"
+        android:layout_height="3px"
+        android:layout_width="match_parent" />
 
     <com.android.calendar.month.MonthListView
         android:id="@android:id/list"

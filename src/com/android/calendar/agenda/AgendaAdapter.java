@@ -43,8 +43,6 @@ public class AgendaAdapter extends ResourceCursorAdapter {
     private final Resources mResources;
     private final int mDeclinedColor;
     private final int mStandardColor;
-    private final int mWhereColor;
-    private final int mWhereDeclinedColor;
     // Note: Formatter is not thread safe. Fine for now as it is only used by the main thread.
     private final Formatter mFormatter;
     private final StringBuilder mStringBuilder;
@@ -70,8 +68,7 @@ public class AgendaAdapter extends ResourceCursorAdapter {
         TextView title;
         TextView when;
         TextView where;
-        View selectedMarker;
-        LinearLayout textContainer;
+        View item;
         long instanceId;
         ColorChipView colorChip;
         long startTimeMilli;
@@ -87,21 +84,11 @@ public class AgendaAdapter extends ResourceCursorAdapter {
         mNoTitleLabel = mResources.getString(R.string.no_title_label);
         mDeclinedColor = mResources.getColor(R.color.agenda_item_declined_color);
         mStandardColor = mResources.getColor(R.color.agenda_item_standard_color);
-        mWhereDeclinedColor = mResources.getColor(R.color.agenda_item_where_declined_text_color);
-        mWhereColor = mResources.getColor(R.color.agenda_item_where_text_color);
         mStringBuilder = new StringBuilder(50);
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
 
-        COLOR_CHIP_ALL_DAY_HEIGHT = mResources.getInteger(R.integer.color_chip_all_day_height);
-        COLOR_CHIP_HEIGHT = mResources.getInteger(R.integer.color_chip_height);
-        if (mScale == 0) {
-            mScale = mResources.getDisplayMetrics().density;
-            if (mScale != 1) {
-                COLOR_CHIP_ALL_DAY_HEIGHT *= mScale;
-                COLOR_CHIP_HEIGHT *= mScale;
-            }
-        }
-
+        COLOR_CHIP_ALL_DAY_HEIGHT = (int) mResources.getDimensionPixelSize(R.dimen.color_chip_all_day_height);
+        COLOR_CHIP_HEIGHT = (int) mResources.getDimensionPixelSize(R.dimen.color_chip_height);
     }
 
     @Override
@@ -121,9 +108,7 @@ public class AgendaAdapter extends ResourceCursorAdapter {
             holder.title = (TextView) view.findViewById(R.id.title);
             holder.when = (TextView) view.findViewById(R.id.when);
             holder.where = (TextView) view.findViewById(R.id.where);
-            holder.textContainer = (LinearLayout)
-                    view.findViewById(R.id.agenda_item_text_container);
-            holder.selectedMarker = view.findViewById(R.id.selected_marker);
+            holder.item = view.findViewById(R.id.agenda_item);
             holder.colorChip = (ColorChipView)view.findViewById(R.id.agenda_item_color);
         }
 
@@ -134,29 +119,29 @@ public class AgendaAdapter extends ResourceCursorAdapter {
         int selfAttendeeStatus = cursor.getInt(AgendaWindowAdapter.INDEX_SELF_ATTENDEE_STATUS);
         if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
             holder.title.setTextColor(mDeclinedColor);
-            holder.when.setTextColor(mWhereDeclinedColor);
-            holder.where.setTextColor(mWhereDeclinedColor);
+            holder.when.setTextColor(mDeclinedColor);
+            holder.where.setTextColor(mDeclinedColor);
             holder.colorChip.setDrawStyle(ColorChipView.DRAW_FADED);
+            if (allDay) {
+                holder.when.setVisibility(View.GONE);
+            } else {
+                holder.when.setVisibility(View.VISIBLE);
+            }
         } else {
             holder.title.setTextColor(mStandardColor);
-            holder.when.setTextColor(mWhereColor);
-            holder.where.setTextColor(mWhereColor);
+            holder.when.setTextColor(mStandardColor);
+            holder.where.setTextColor(mStandardColor);
             if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_INVITED) {
                 holder.colorChip.setDrawStyle(ColorChipView.DRAW_BORDER);
             } else {
                 holder.colorChip.setDrawStyle(ColorChipView.DRAW_FULL);
             }
+            if (allDay) {
+                holder.when.setVisibility(View.GONE);
+            } else {
+                holder.when.setVisibility(View.VISIBLE);
+            }
         }
-
-        // Set the size of the color chip
-        ViewGroup.LayoutParams params = holder.colorChip.getLayoutParams();
-        if (allDay) {
-            params.height = COLOR_CHIP_ALL_DAY_HEIGHT;
-        } else {
-            params.height = COLOR_CHIP_HEIGHT;
-
-        }
-        holder.colorChip.setLayoutParams(params);
 
         // Deal with exchange events that the owner cannot respond to
         int canRespond = cursor.getInt(AgendaWindowAdapter.INDEX_CAN_ORGANIZER_RESPOND);

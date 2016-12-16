@@ -16,8 +16,11 @@
 
 package com.android.calendar.event;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.AsyncQueryHandler;
@@ -32,6 +35,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract.Attendees;
@@ -48,6 +52,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -133,22 +138,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     private boolean mIsReadOnly = false;
     public boolean mShowModifyDialogOnLaunch = false;
     private boolean mShowColorPalette = false;
-
-    private boolean mTimeSelectedWasStartTime;
-    private boolean mDateSelectedWasStartDate;
-
     private InputMethodManager mInputMethodManager;
 
     private final Intent mIntent;
-
-    private boolean mUseCustomActionBar;
-
-    private final View.OnClickListener mActionBarListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            onActionBarItemSelected(v.getId());
-        }
-    };
 
     // TODO turn this into a helper function in EditEventHelper for building the
     // model
@@ -395,7 +387,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             int[] colors = mModel.getCalendarEventColors();
             if (mColorPickerDialog == null) {
                 mColorPickerDialog = EventColorPickerDialog.newInstance(colors,
-                        mModel.getEventColor(), mModel.getCalendarColor(), mView.mIsMultipane);
+                        mModel.getEventColor(), mModel.getCalendarColor());
                 mColorPickerDialog.setOnColorSelectedListener(EditEventFragment.this);
             } else {
                 mColorPickerDialog.setCalendarColor(mModel.getCalendarColor());
@@ -515,6 +507,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             }
             mHandler.startQuery(TOKEN_EVENT, null, mUri, EditEventHelper.EVENT_PROJECTION,
                     null /* selection */, null /* selection args */, null /* sort order */);
+            if (mEventColorInitialized) {
+                colorActivity(mModel.getEventColor());
+            }
         } else {
             mOutstandingQueries = TOKEN_CALENDARS | TOKEN_COLORS;
             if (DEBUG) {
@@ -552,34 +547,14 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         mModel = new CalendarEventModel(activity, mIntent);
         mInputMethodManager = (InputMethodManager)
                 activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        mUseCustomActionBar = !Utils.getConfigBool(mActivity, R.bool.multiple_pane_config);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-//        mContext.requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        View view;
-        if (mIsReadOnly) {
-            view = inflater.inflate(R.layout.edit_event_single_column, null);
-        } else {
-            view = inflater.inflate(R.layout.edit_event, null);
-        }
-        mView = new EditEventView(mActivity, view, mOnDone, mTimeSelectedWasStartTime,
-                mDateSelectedWasStartDate);
+        View view = inflater.inflate(R.layout.edit_event, null);
+        mView = new EditEventView(mActivity, view, mOnDone);
         startQuery();
-
-        if (mUseCustomActionBar) {
-            View actionBarButtons = inflater.inflate(R.layout.edit_event_custom_actionbar,
-                    new LinearLayout(mActivity), false);
-            View cancelActionView = actionBarButtons.findViewById(R.id.action_cancel);
-            cancelActionView.setOnClickListener(mActionBarListener);
-            View doneActionView = actionBarButtons.findViewById(R.id.action_done);
-            doneActionView.setOnClickListener(mActionBarListener);
-
-            mActivity.getActionBar().setCustomView(actionBarButtons);
-        }
 
         return view;
     }
@@ -587,10 +562,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        if (mUseCustomActionBar) {
-            mActivity.getActionBar().setCustomView(null);
-        }
     }
 
     @Override
@@ -614,14 +585,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             if (savedInstanceState.containsKey(BUNDLE_KEY_READ_ONLY)) {
                 mIsReadOnly = savedInstanceState.getBoolean(BUNDLE_KEY_READ_ONLY);
             }
-            if (savedInstanceState.containsKey("EditEventView_timebuttonclicked")) {
-                mTimeSelectedWasStartTime = savedInstanceState.getBoolean(
-                        "EditEventView_timebuttonclicked");
-            }
-            if (savedInstanceState.containsKey(BUNDLE_KEY_DATE_BUTTON_CLICKED)) {
-                mDateSelectedWasStartDate = savedInstanceState.getBoolean(
-                        BUNDLE_KEY_DATE_BUTTON_CLICKED);
-            }
             if (savedInstanceState.containsKey(BUNDLE_KEY_SHOW_COLOR_PALETTE)) {
                 mShowColorPalette = savedInstanceState.getBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE);
             }
@@ -633,26 +596,12 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-
-        if (!mUseCustomActionBar) {
-            inflater.inflate(R.menu.edit_event_title_bar, menu);
-        }
+        inflater.inflate(R.menu.edit_event_title_bar, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return onActionBarItemSelected(item.getItemId());
-    }
-
-    /**
-     * Handles menu item selections, whether they come from our custom action bar buttons or from
-     * the standard menu items. Depends on the menu item ids matching the custom action bar button
-     * ids.
-     *
-     * @param itemId the button or menu item id
-     * @return whether the event was handled here
-     */
-    private boolean onActionBarItemSelected(int itemId) {
+        final int itemId = item.getItemId();
         if (itemId == R.id.action_done) {
             if (EditEventHelper.canModifyEvent(mModel) || EditEventHelper.canRespond(mModel)) {
                 if (mView != null && mView.prepareForSave()) {
@@ -662,8 +611,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                     mOnDone.setDoneCode(Utils.DONE_SAVE | Utils.DONE_EXIT);
                     mOnDone.run();
                 } else {
-                    mOnDone.setDoneCode(Utils.DONE_REVERT);
-                    mOnDone.run();
+                    doRevert();
                 }
             } else if (EditEventHelper.canAddReminders(mModel) && mModel.mId != -1
                     && mOriginalModel != null && mView.prepareForSave()) {
@@ -671,12 +619,10 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 mOnDone.setDoneCode(Utils.DONE_EXIT);
                 mOnDone.run();
             } else {
-                mOnDone.setDoneCode(Utils.DONE_REVERT);
-                mOnDone.run();
+                doRevert();
             }
-        } else if (itemId == R.id.action_cancel) {
-            mOnDone.setDoneCode(Utils.DONE_REVERT);
-            mOnDone.run();
+        } else if (itemId == android.R.id.home) {
+            doRevert();
         }
         return true;
     }
@@ -799,10 +745,10 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
             if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null
                     && (EditEventHelper.canRespond(mModel)
-                            || EditEventHelper.canModifyEvent(mModel))
+                            || EditEventHelper.canModifyEvent(mModel)
+                            || EditEventHelper.canAddReminders(mModel))
                     && mView.prepareForSave()
                     && !isEmptyNewEvent()
-                    && mModel.normalizeReminders()
                     && mHelper.saveEvent(mModel, mOriginalModel, mModification)) {
                 int stringResource;
                 if (!mModel.mAttendeesList.isEmpty()) {
@@ -949,9 +895,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         outState.putSerializable(BUNDLE_KEY_EVENT, mEventBundle);
         outState.putBoolean(BUNDLE_KEY_READ_ONLY, mIsReadOnly);
         outState.putBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE, mView.isColorPaletteVisible());
-
-        outState.putBoolean("EditEventView_timebuttonclicked", mView.mTimeSelectedWasStartTime);
-        outState.putBoolean(BUNDLE_KEY_DATE_BUTTON_CLICKED, mView.mDateSelectedWasStartDate);
     }
 
     @Override
@@ -985,6 +928,53 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         if (!mModel.isEventColorInitialized() || mModel.getEventColor() != color) {
             mModel.setEventColor(color);
             mView.updateHeadlineColor(mModel, color);
+            colorActivity(color);
+        }
+    }
+
+    public void colorActivity(int color) {
+        ActionBar bar = getActivity().getActionBar();
+        if (bar != null) {
+            bar.setBackgroundDrawable(new ColorDrawable(color));
+        }
+        Window window = getActivity().getWindow();
+        window.setStatusBarColor(Utils.shiftColorDown(color));
+    }
+
+    public void revert() {
+        // TODO only show if modified
+        //CancelEditDialogFragment.show(this);
+    }
+
+    public void doRevert() {
+        mOnDone.setDoneCode(Utils.DONE_REVERT | Utils.DONE_EXIT);
+        mOnDone.run();
+    }
+
+    public static class CancelEditDialogFragment extends DialogFragment {
+
+        public static void show(EditEventFragment fragment) {
+            CancelEditDialogFragment dialog = new CancelEditDialogFragment();
+            dialog.setTargetFragment(fragment, 0);
+            dialog.show(fragment.getFragmentManager(), "cancelEditor");
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                    .setIconAttribute(android.R.attr.alertDialogIcon)
+                    .setMessage(R.string.cancel_confirmation_dialog_message)
+                    .setPositiveButton(android.R.string.ok,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int whichButton) {
+                                ((EditEventFragment) getTargetFragment()).doRevert();
+                            }
+                        }
+                    )
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create();
+            return dialog;
         }
     }
 }

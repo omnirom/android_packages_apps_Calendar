@@ -17,10 +17,12 @@
 package com.android.calendar.month;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -32,6 +34,7 @@ import android.os.Message;
 import android.provider.CalendarContract.Attendees;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Instances;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
@@ -98,17 +101,40 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     private int mEventsLoadingDelay;
     private boolean mShowCalendarControls;
     private boolean mIsDetached;
+    private CharSequence[] mLongPressItems;
+    private String mLongPressTitle;
 
     private Handler mEventDialogHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
-            final FragmentManager manager = getFragmentManager();
+            final Time day = (Time) msg.obj;
+            int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
+            final long time = day.toMillis(false);
+            if (DateFormat.is24HourFormat(mContext)) {
+                flags |= DateUtils.FORMAT_24HOUR;
+            }
+            mLongPressTitle = Utils.formatDateRange(mContext, time, time, flags);
+            new AlertDialog.Builder(mContext).setTitle(mLongPressTitle)
+                .setItems(mLongPressItems, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            long extraLong = CalendarController.EXTRA_CREATE_ALL_DAY;
+                            CalendarController controller = CalendarController.getInstance(mContext);
+                            controller.sendEventRelatedEventWithExtra(this,
+                                    EventType.CREATE_EVENT, -1, time, 0, -1,
+                                    -1, extraLong, -1);
+                        }
+                    }
+                }).show().setCanceledOnTouchOutside(true);
+                
+            /*final FragmentManager manager = getFragmentManager();
             if (manager != null) {
                 Time day = (Time) msg.obj;
                 mEventDialog = new CreateEventDialogFragment(day);
                 mEventDialog.show(manager, TAG_EVENT_DIALOG);
-            }
+            }*/
         }
     };
 
@@ -248,6 +274,10 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
             mEventsLoadingDelay = res.getInteger(R.integer.calendar_controls_animation_time);
         }
         mShowDetailsInMonth = res.getBoolean(R.bool.show_details_in_month);
+        mLongPressItems = new CharSequence[] {
+            res.getString(R.string.new_event_dialog_option)
+        };
+        mLongPressTitle = res.getString(R.string.new_event_dialog_label);
     }
 
     @Override
@@ -476,7 +506,8 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
                 long offset = useSelected ? 0 : DateUtils.WEEK_IN_MILLIS * mNumWeeks / 3;
                 controller.setTime(newTime + offset);
             }
-            controller.sendEvent(this, EventType.UPDATE_TITLE, time, time, time, -1,
+            Time monthEnd = Utils.changeMonth(mFirstDayOfMonth, 1);
+            controller.sendEvent(this, EventType.UPDATE_TITLE, mFirstDayOfMonth, monthEnd, null, -1,
                     ViewType.CURRENT, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
                             | DateUtils.FORMAT_SHOW_YEAR, null, null);
         }

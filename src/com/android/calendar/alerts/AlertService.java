@@ -129,13 +129,12 @@ public class AlertService extends Service {
         ArrayList<NotificationWrapper> mNw;
 
         public NotificationWrapper(Notification n, int notificationId, long eventId,
-                long startMillis, long endMillis, boolean doPopup) {
+                long startMillis, long endMillis) {
             mNotification = n;
             mEventId = eventId;
             mBegin = startMillis;
             mEnd = endMillis;
 
-            // popup?
             // notification id?
         }
 
@@ -379,7 +378,7 @@ public class AlertService extends Service {
                         info.allDay, info.location);
                 notification = AlertReceiver.makeBasicNotification(context, info.eventName,
                         summaryText, info.startMillis, info.endMillis, info.eventId,
-                        AlertUtils.EXPIRED_GROUP_NOTIFICATION_ID, false,
+                        AlertUtils.EXPIRED_GROUP_NOTIFICATION_ID,
                         Notification.PRIORITY_MIN);
             } else {
                 // Multiple expired events are listed in a digest.
@@ -870,7 +869,7 @@ public class AlertService extends Service {
         String tickerText = getTickerText(info.eventName, info.location);
         NotificationWrapper notification = AlertReceiver.makeExpandingNotification(context,
                 info.eventName, summaryText, info.description, info.startMillis,
-                info.endMillis, info.eventId, notificationId, prefs.getDoPopup(), priorityVal);
+                info.endMillis, info.eventId, notificationId, priorityVal);
 
         boolean quietUpdate = true;
         String ringtone = NotificationPrefs.EMPTY_RINGTONE;
@@ -964,7 +963,6 @@ public class AlertService extends Service {
         private SharedPreferences prefs;
 
         // These are lazily initialized, do not access any of the following directly; use getters.
-        private int doPopup = -1;
         private int defaultVibrate = -1;
         private String ringtone = null;
 
@@ -974,17 +972,6 @@ public class AlertService extends Service {
             this.context = context;
             this.prefs = prefs;
             this.quietUpdate = quietUpdate;
-        }
-
-        private boolean getDoPopup() {
-            if (doPopup < 0) {
-                if (prefs.getBoolean(GeneralPreferences.KEY_ALERTS_POPUP, false)) {
-                    doPopup = 1;
-                } else {
-                    doPopup = 0;
-                }
-            }
-            return doPopup == 1;
         }
 
         private boolean getDefaultVibrate() {
