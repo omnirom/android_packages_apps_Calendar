@@ -90,6 +90,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
                     ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME|
                     ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
         }
+        getActionBar().setElevation(0);
 
         if (mEditFragment == null) {
             Intent intent = null;
@@ -170,5 +171,9 @@ public class EditEventActivity extends AbstractCalendarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void colorActivity(int color) {
+        mEditFragment.colorActivity(color);
     }
 }

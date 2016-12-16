@@ -24,6 +24,7 @@ import static com.android.calendar.CalendarController.EVENT_EDIT_ON_LAUNCH;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -45,6 +46,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -1614,6 +1616,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         String eventTimezone = mEventCursor.getString(EVENT_INDEX_EVENT_TIMEZONE);
 
         mHeadlines.setBackgroundColor(mCurrentColor);
+        colorActivity(mCurrentColor);
 
         // What
         if (eventName != null) {
@@ -2395,5 +2398,15 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mCurrentColor = color;
         mCurrentColorKey = mDisplayColorKeyMap.get(color);
         mHeadlines.setBackgroundColor(color);
+        colorActivity(color);
+    }
+
+    private void colorActivity(int color) {
+        ActionBar bar = getActivity().getActionBar();
+        if (bar != null) {
+            bar.setBackgroundDrawable(new ColorDrawable(color));
+        }
+        Window window = getActivity().getWindow();
+        window.setStatusBarColor(Utils.shiftColorDown(color));
     }
 }

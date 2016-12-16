@@ -18,6 +18,7 @@ package com.android.calendar;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.TimePickerDialog;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +44,9 @@ import android.provider.CalendarContract;
 import android.provider.CalendarContract.CalendarCache;
 import android.provider.SearchRecentSuggestions;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.text.format.Time;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.calendar.alerts.AlertReceiver;
@@ -95,6 +98,15 @@ public class GeneralPreferences extends PreferenceFragment implements
     public static final String KEY_DETAILED_VIEW = "preferred_detailedView";
     public static final String KEY_DEFAULT_CALENDAR = "preference_defaultCalendar";
 
+    public static final String KEY_HOURS_FILTER_START = "preferences_hours_filter_start";
+    public static final String KEY_HOURS_FILTER_END = "preferences_hours_filter_end";
+    public static final int KEY_HOURS_FILTER_START_DEFAULT = 8;
+    public static final int KEY_HOURS_FILTER_END_DEFAULT = 21;
+    private static final int START_LISTENER = 1;
+    private static final int END_LISTENER = 2;
+    private static final String format24Hour = "%H:%M";
+    private static final String format12Hour = "%I:%M%P";
+
     // These must be in sync with the array preferences_week_start_day_values
     public static final String WEEK_START_DEFAULT = "-1";
     public static final String WEEK_START_SATURDAY = "7";
@@ -126,7 +138,10 @@ public class GeneralPreferences extends PreferenceFragment implements
     TimeZonePickerUtils mTzPickerUtils;
     ListPreference mWeekStart;
     ListPreference mDefaultReminder;
-
+    private Preference mStartHour;
+    private TimeSetListener mTimePickerListenerStartTime;
+    private Preference mEndHour;
+    private TimeSetListener mTimePickerListenerEndTime;
     private String mTimeZoneId;
 
     /** Return a properly configured SharedPreferences instance */
@@ -222,6 +237,18 @@ public class GeneralPreferences extends PreferenceFragment implements
         migrateOldPreferences(sharedPreferences);
 
         updateChildPreferences();
+
+        int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
+                KEY_HOURS_FILTER_START_DEFAULT);
+        mStartHour = findPreference(KEY_HOURS_FILTER_START);
+        mTimePickerListenerStartTime = new TimeSetListener(START_LISTENER);
+        mStartHour.setSummary(formatTime(startHour, 0));
+
+        int endHour = prefs.getInt(KEY_HOURS_FILTER_END,
+                KEY_HOURS_FILTER_END_DEFAULT);
+        mEndHour = findPreference(KEY_HOURS_FILTER_END);
+        mTimePickerListenerEndTime = new TimeSetListener(END_LISTENER);
+        mEndHour.setSummary(formatTime(endHour, 0));
     }
 
     private void showTimezoneDialog() {
@@ -405,6 +432,8 @@ public class GeneralPreferences extends PreferenceFragment implements
     public boolean onPreferenceTreeClick(
             PreferenceScreen preferenceScreen, Preference preference) {
         final String key = preference.getKey();
+        SharedPreferences prefs = CalendarUtils.getSharedPreferences(getActivity(),
+                Utils.SHARED_PREFS_NAME);
         if (KEY_CLEAR_SEARCH_HISTORY.equals(key)) {
             SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getActivity(),
                     Utils.getSearchAuthority(getActivity()),
@@ -412,6 +441,22 @@ public class GeneralPreferences extends PreferenceFragment implements
             suggestions.clearHistory();
             Toast.makeText(getActivity(), R.string.search_history_cleared,
                     Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (preference == mStartHour) {
+            int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
+                KEY_HOURS_FILTER_START_DEFAULT);
+            TimePickerDialog timePicker = new TimePickerDialog(
+                getActivity(), mTimePickerListenerStartTime,
+                startHour, 0, DateFormat.is24HourFormat(getActivity()));
+            timePicker.show();
+            return true;
+        } else if (preference == mEndHour) {
+            int endHour = prefs.getInt(KEY_HOURS_FILTER_END,
+                KEY_HOURS_FILTER_END_DEFAULT);
+            TimePickerDialog timePicker = new TimePickerDialog(
+                getActivity(), mTimePickerListenerEndTime,
+                endHour, 0, DateFormat.is24HourFormat(getActivity()));
+            timePicker.show();
             return true;
         } else {
             return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -428,5 +473,57 @@ public class GeneralPreferences extends PreferenceFragment implements
                 getActivity(), tzi.mTzId, System.currentTimeMillis(), false);
         mHomeTZ.setSummary(timezoneName);
         Utils.setTimeZone(getActivity(), tzi.mTzId);
+    }
+
+    private class TimeSetListener implements TimePickerDialog.OnTimeSetListener {
+        private int mListenerId;
+
+        public TimeSetListener(int listenerId) {
+            mListenerId = listenerId;
+        }
+
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+            int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
+                KEY_HOURS_FILTER_START_DEFAULT);
+            int endHour = prefs.getInt(KEY_HOURS_FILTER_END,
+                KEY_HOURS_FILTER_END_DEFAULT);
+            String summary = formatTime(hourOfDay, 0);
+            switch (mListenerId) {
+                case (START_LISTENER):
+                    if (hourOfDay >= endHour) {
+                        Toast.makeText(getActivity(), R.string.start_hour_invalid, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    mStartHour.setSummary(summary);
+                    prefs.edit().putInt(KEY_HOURS_FILTER_START, hourOfDay).commit();
+                    break;
+                case (END_LISTENER):
+                    if (hourOfDay == 0) {
+                        hourOfDay = 24;
+                    }
+                    if (hourOfDay <= startHour) {
+                        Toast.makeText(getActivity(), R.string.end_hour_invalid, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    mEndHour.setSummary(summary);
+                    prefs.edit().putInt(KEY_HOURS_FILTER_END, hourOfDay).commit();
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @param hourOfDay the hour of the day (0-24)
+     * @param minute
+     * @return human-readable string formatted based on 24-hour mode.
+     */
+    private String formatTime(int hourOfDay, int minute) {
+        Time time = new Time();
+        time.hour = hourOfDay;
+        time.minute = minute;
+        String format = DateFormat.is24HourFormat(getActivity())? format24Hour : format12Hour;
+        return time.format(format);
     }
 }
