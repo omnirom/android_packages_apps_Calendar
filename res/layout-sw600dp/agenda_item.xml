@@ -62,8 +62,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:ellipsize="marquee"
-            android:textColor="@color/agenda_item_standard_color"
-            style="?android:attr/textAppearanceMediumInverse" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <TextView
             android:id="@+id/when"
@@ -72,8 +71,7 @@
             android:singleLine="true"
             android:textSize="14sp"
             android:ellipsize="marquee"
-            android:textColor="@color/agenda_item_where_text_color"
-            style="?android:attr/textAppearanceSmallInverse" />
+            android:textColor="?android:attr/textColorSecondary" />
 
         <TextView
             android:id="@+id/where"
@@ -83,8 +81,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:textSize="14sp"
-            android:textColor="@color/agenda_item_where_text_color"
-            style="?android:attr/textAppearanceSmallInverse" />
+            android:textColor="?android:attr/textColorSecondary" />
     </LinearLayout>
     <ImageView
         android:id="@+id/selected_marker"

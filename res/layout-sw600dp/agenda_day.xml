@@ -51,7 +51,7 @@
         android:textSize="24sp"
         android:singleLine="true"
         android:minHeight="42dip"
-        android:textColor="@color/agenda_day_item_text_color" />
+        android:textColor="?android:attr/textColorPrimary" />
     <TextView
         android:id="@+id/day"
         android:layout_height="wrap_content"
@@ -67,5 +67,5 @@
         android:textSize="14sp"
         android:singleLine="true"
         android:minHeight="42dip"
-        android:textColor="@color/agenda_day_item_text_color" />
+        android:textColor="?android:attr/textColorPrimary" />
 </GridLayout>

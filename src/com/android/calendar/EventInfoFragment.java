@@ -24,6 +24,7 @@ import static com.android.calendar.CalendarController.EVENT_EDIT_ON_LAUNCH;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -45,6 +46,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -134,9 +136,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     protected static final String BUNDLE_KEY_EVENT_ID = "key_event_id";
     protected static final String BUNDLE_KEY_START_MILLIS = "key_start_millis";
     protected static final String BUNDLE_KEY_END_MILLIS = "key_end_millis";
-    protected static final String BUNDLE_KEY_IS_DIALOG = "key_fragment_is_dialog";
-    protected static final String BUNDLE_KEY_DELETE_DIALOG_VISIBLE = "key_delete_dialog_visible";
-    protected static final String BUNDLE_KEY_WINDOW_STYLE = "key_window_style";
     protected static final String BUNDLE_KEY_CALENDAR_COLOR = "key_calendar_color";
     protected static final String BUNDLE_KEY_CALENDAR_COLOR_INIT = "key_calendar_color_init";
     protected static final String BUNDLE_KEY_CURRENT_COLOR = "key_current_color";
@@ -164,12 +163,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
      */
     static final int UPDATE_SINGLE = 0;
     static final int UPDATE_ALL = 1;
-
-    // Style of view
-    public static final int FULL_WINDOW_STYLE = 0;
-    public static final int DIALOG_WINDOW_STYLE = 1;
-
-    private int mWindowStyle = DIALOG_WINDOW_STYLE;
 
     // Query tokens for QueryHandler
     private static final int TOKEN_QUERY_EVENT = 1 << 0;
@@ -337,7 +330,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private boolean mIsBusyFreeCalendar;
     private int mNumOfAttendees;
     private EditResponseHelper mEditResponseHelper;
-    private boolean mDeleteDialogVisible = false;
     private DeleteEventHelper mDeleteHelper;
 
     private int mOriginalAttendeeResponse;
@@ -359,9 +351,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private TextView mWhere;
     private ExpandableTextView mDesc;
     private AttendeesView mLongAttendees;
-    private Button emailAttendeesButton;
+    private TextView emailAttendeesButton;
     private Menu mMenu = null;
     private View mHeadlines;
+    private View mEventInfo;
     private ScrollView mScrollView;
     private View mLoadingMsgView;
     private View mErrorMsgView;
@@ -428,7 +421,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         public void run() {
             // Since this is run after a delay, make sure to only show the message
             // if the event's data is not shown yet.
-            if (!mAnimateAlpha.isRunning() && mScrollView.getAlpha() == 0) {
+            if (!mAnimateAlpha.isRunning() && mEventInfo.getAlpha() == 0) {
                 mLoadingMsgStartTime = System.currentTimeMillis();
                 mLoadingMsgView.setAlpha(1);
             }
@@ -437,16 +430,11 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
     private OnItemSelectedListener mReminderChangeListener;
 
-    private static int mDialogWidth = 500;
-    private static int mDialogHeight = 600;
-    private static int DIALOG_TOP_MARGIN = 8;
-    private boolean mIsDialog = false;
     private boolean mIsPaused = true;
     private boolean mDismissOnResume = false;
     private int mX = -1;
     private int mY = -1;
     private int mMinTop;         // Dialog cannot be above this location
-    private boolean mIsTabletConfig;
     private Activity mActivity;
     private Context mContext;
 
@@ -561,13 +549,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                         Log.d("Color", "H:" + hsv[0] + ",S:" + hsv[1] + ",V:" + hsv[2]);
                     }
                 }
-                if (mCanModifyCalendar) {
-                    View button = mView.findViewById(R.id.change_color);
-                    if (button != null && mColors.length > 0) {
-                        button.setEnabled(true);
-                        button.setVisibility(View.VISIBLE);
-                    }
-                }
                 updateMenu();
                 break;
             case TOKEN_QUERY_ATTENDEES:
@@ -618,6 +599,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
             // All queries are done, show the view.
             if (mCurrentQuery == TOKEN_QUERY_ALL) {
+                mLoadingMsgView.setVisibility(View.GONE);
                 if (mLoadingMsgView.getAlpha() == 1) {
                     // Loading message is showing, let it stay a bit more (to prevent
                     // flashing) by adding a start delay to the event animation
@@ -630,7 +612,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 if (!mAnimateAlpha.isRunning() &&!mAnimateAlpha.isStarted() && !mNoCrossFade) {
                     mAnimateAlpha.start();
                 } else {
-                    mScrollView.setAlpha(1);
+                    mEventInfo.setAlpha(1);
                     mLoadingMsgView.setVisibility(View.GONE);
                 }
             }
@@ -645,30 +627,20 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     }
 
     public EventInfoFragment(Context context, Uri uri, long startMillis, long endMillis,
-            int attendeeResponse, boolean isDialog, int windowStyle,
-            ArrayList<ReminderEntry> reminders) {
+            int attendeeResponse, ArrayList<ReminderEntry> reminders) {
 
         Resources r = context.getResources();
         if (mScale == 0) {
             mScale = context.getResources().getDisplayMetrics().density;
             if (mScale != 1) {
                 mCustomAppIconSize *= mScale;
-                if (isDialog) {
-                    DIALOG_TOP_MARGIN *= mScale;
-                }
             }
         }
-        if (isDialog) {
-            setDialogSize(r);
-        }
-        mIsDialog = isDialog;
 
-        setStyle(DialogFragment.STYLE_NO_TITLE, 0);
         mUri = uri;
         mStartMillis = startMillis;
         mEndMillis = endMillis;
         mAttendeeResponseFromIntent = attendeeResponse;
-        mWindowStyle = windowStyle;
 
         // Pass in null if no reminders are being specified.
         // This may be used to explicitly show certain reminders already known
@@ -681,10 +653,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     }
 
     public EventInfoFragment(Context context, long eventId, long startMillis, long endMillis,
-            int attendeeResponse, boolean isDialog, int windowStyle,
-            ArrayList<ReminderEntry> reminders) {
+            int attendeeResponse, ArrayList<ReminderEntry> reminders) {
         this(context, ContentUris.withAppendedId(Events.CONTENT_URI, eventId), startMillis,
-                endMillis, attendeeResponse, isDialog, windowStyle, reminders);
+                endMillis, attendeeResponse, reminders);
         mEventId = eventId;
     }
 
@@ -709,16 +680,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
         };
 
-        if (savedInstanceState != null) {
-            mIsDialog = savedInstanceState.getBoolean(BUNDLE_KEY_IS_DIALOG, false);
-            mWindowStyle = savedInstanceState.getInt(BUNDLE_KEY_WINDOW_STYLE,
-                    DIALOG_WINDOW_STYLE);
-        }
-
-        if (mIsDialog) {
-            applyDialogParams();
-        }
-
         final Activity activity = getActivity();
         mContext = activity;
         mColorPickerDialog = (EventColorPickerDialog) activity.getFragmentManager()
@@ -726,40 +687,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (mColorPickerDialog != null) {
             mColorPickerDialog.setOnColorSelectedListener(this);
         }
-    }
-
-    private void applyDialogParams() {
-        Dialog dialog = getDialog();
-        dialog.setCanceledOnTouchOutside(true);
-
-        Window window = dialog.getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-        WindowManager.LayoutParams a = window.getAttributes();
-        a.dimAmount = .4f;
-
-        a.width = mDialogWidth;
-        a.height = mDialogHeight;
-
-
-        // On tablets , do smart positioning of dialog
-        // On phones , use the whole screen
-
-        if (mX != -1 || mY != -1) {
-            a.x = mX - mDialogWidth / 2;
-            a.y = mY - mDialogHeight / 2;
-            if (a.y < mMinTop) {
-                a.y = mMinTop + DIALOG_TOP_MARGIN;
-            }
-            a.gravity = Gravity.LEFT | Gravity.TOP;
-        }
-        window.setAttributes(a);
-    }
-
-    public void setDialogParams(int x, int y, int minTop) {
-        mX = x;
-        mY = y;
-        mMinTop = minTop;
     }
 
     // Implements OnCheckedChangeListener
@@ -804,8 +731,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mActivity = activity;
-        // Ensure that mIsTabletConfig is set before creating the menu.
-        mIsTabletConfig = Utils.getConfigBool(mActivity, R.bool.tablet_config);
         mController = CalendarController.getInstance(mActivity);
         mController.registerEventHandler(R.layout.event_info, this);
         mEditResponseHelper = new EditResponseHelper(activity);
@@ -854,9 +779,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mWhichEvents = mEditResponseHelper.getWhichEvents();
         }
         mHandler = new QueryHandler(activity);
-        if (!mIsDialog) {
-            setHasOptionsMenu(true);
-        }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -864,11 +787,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             Bundle savedInstanceState) {
 
         if (savedInstanceState != null) {
-            mIsDialog = savedInstanceState.getBoolean(BUNDLE_KEY_IS_DIALOG, false);
-            mWindowStyle = savedInstanceState.getInt(BUNDLE_KEY_WINDOW_STYLE,
-                    DIALOG_WINDOW_STYLE);
-            mDeleteDialogVisible =
-                savedInstanceState.getBoolean(BUNDLE_KEY_DELETE_DIALOG_VISIBLE,false);
             mCalendarColor = savedInstanceState.getInt(BUNDLE_KEY_CALENDAR_COLOR);
             mCalendarColorInitialized =
                     savedInstanceState.getBoolean(BUNDLE_KEY_CALENDAR_COLOR_INIT);
@@ -903,11 +821,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mReminders = Utils.readRemindersFromBundle(savedInstanceState);
         }
 
-        if (mWindowStyle == DIALOG_WINDOW_STYLE) {
-            mView = inflater.inflate(R.layout.event_info_dialog, container, false);
-        } else {
-            mView = inflater.inflate(R.layout.event_info, container, false);
-        }
+        mView = inflater.inflate(R.layout.event_info, container, false);
+        mEventInfo = mView.findViewById(R.id.event_info);
         mScrollView = (ScrollView) mView.findViewById(R.id.event_info_scroll_view);
         mLoadingMsgView = mView.findViewById(R.id.event_info_loading_msg);
         mErrorMsgView = mView.findViewById(R.id.event_info_error_msg);
@@ -928,38 +843,22 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mEndMillis = savedInstanceState.getLong(BUNDLE_KEY_END_MILLIS);
         }
 
-        mAnimateAlpha = ObjectAnimator.ofFloat(mScrollView, "Alpha", 0, 1);
+        mAnimateAlpha = ObjectAnimator.ofFloat(mEventInfo, "Alpha", 0, 1);
         mAnimateAlpha.setDuration(FADE_IN_TIME);
         mAnimateAlpha.addListener(new AnimatorListenerAdapter() {
-            int defLayerType;
 
             @Override
             public void onAnimationStart(Animator animation) {
-                // Use hardware layer for better performance during animation
-                defLayerType = mScrollView.getLayerType();
-                mScrollView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 // Ensure that the loading message is gone before showing the
                 // event info
                 mLoadingMsgView.removeCallbacks(mLoadingMsgAlphaUpdater);
                 mLoadingMsgView.setVisibility(View.GONE);
             }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mScrollView.setLayerType(defLayerType, null);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mScrollView.setLayerType(defLayerType, null);
-                // Do not cross fade after the first time
-                mNoCrossFade = true;
-            }
         });
 
         mLoadingMsgView.setAlpha(0);
-        mScrollView.setAlpha(0);
-        mErrorMsgView.setVisibility(View.INVISIBLE);
+        mEventInfo.setAlpha(0);
+        mErrorMsgView.setVisibility(View.GONE);
         mLoadingMsgView.postDelayed(mLoadingMsgAlphaUpdater, LOADING_MSG_DELAY);
 
         // start loading the data
@@ -967,40 +866,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mHandler.startQuery(TOKEN_QUERY_EVENT, null, mUri, EVENT_PROJECTION,
                 null, null, null);
 
-        View b = mView.findViewById(R.id.delete);
-        b.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mCanModifyCalendar) {
-                    return;
-                }
-                mDeleteHelper =
-                        new DeleteEventHelper(mContext, mActivity, !mIsDialog && !mIsTabletConfig /* exitWhenDone */);
-                mDeleteHelper.setDeleteNotificationListener(EventInfoFragment.this);
-                mDeleteHelper.setOnDismissListener(createDeleteOnDismissListener());
-                mDeleteDialogVisible = true;
-                mDeleteHelper.delete(mStartMillis, mEndMillis, mEventId, -1, onDeleteRunnable);
-            }
-        });
-
-        b = mView.findViewById(R.id.change_color);
-        b.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mCanModifyCalendar) {
-                    return;
-                }
-                showEventColorPickerDialog();
-            }
-        });
-
-        // Hide Edit/Delete buttons if in full screen mode on a phone
-        if (!mIsDialog && !mIsTabletConfig || mWindowStyle == EventInfoFragment.FULL_WINDOW_STYLE) {
-            mView.findViewById(R.id.event_info_buttons_container).setVisibility(View.GONE);
-        }
-
         // Create a listener for the email guests button
-        emailAttendeesButton = (Button) mView.findViewById(R.id.email_attendees_button);
+        emailAttendeesButton = (TextView) mView.findViewById(R.id.email_attendees_button);
         if (emailAttendeesButton != null) {
             emailAttendeesButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1159,9 +1026,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         outState.putLong(BUNDLE_KEY_EVENT_ID, mEventId);
         outState.putLong(BUNDLE_KEY_START_MILLIS, mStartMillis);
         outState.putLong(BUNDLE_KEY_END_MILLIS, mEndMillis);
-        outState.putBoolean(BUNDLE_KEY_IS_DIALOG, mIsDialog);
-        outState.putInt(BUNDLE_KEY_WINDOW_STYLE, mWindowStyle);
-        outState.putBoolean(BUNDLE_KEY_DELETE_DIALOG_VISIBLE, mDeleteDialogVisible);
         outState.putInt(BUNDLE_KEY_CALENDAR_COLOR, mCalendarColor);
         outState.putBoolean(BUNDLE_KEY_CALENDAR_COLOR_INIT, mCalendarColorInitialized);
         outState.putInt(BUNDLE_KEY_ORIGINAL_COLOR, mOriginalColor);
@@ -1213,21 +1077,13 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        // Show color/edit/delete buttons only in non-dialog configuration
-        if (!mIsDialog && !mIsTabletConfig || mWindowStyle == EventInfoFragment.FULL_WINDOW_STYLE) {
-            inflater.inflate(R.menu.event_info_title_bar, menu);
-            mMenu = menu;
-            updateMenu();
-        }
+        inflater.inflate(R.menu.event_info_title_bar, menu);
+        mMenu = menu;
+        updateMenu();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        // If we're a dialog we don't want to handle menu buttons
-        if (mIsDialog) {
-            return false;
-        }
         // Handles option menu selections:
         // Home button - close event info activity and start the main calendar
         // one
@@ -1248,8 +1104,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mDeleteHelper =
                     new DeleteEventHelper(mActivity, mActivity, true /* exitWhenDone */);
             mDeleteHelper.setDeleteNotificationListener(EventInfoFragment.this);
-            mDeleteHelper.setOnDismissListener(createDeleteOnDismissListener());
-            mDeleteDialogVisible = true;
             mDeleteHelper.delete(mStartMillis, mEndMillis, mEventId, -1, onDeleteRunnable);
         } else if (itemId == R.id.info_action_change_color) {
             showEventColorPickerDialog();
@@ -1327,7 +1181,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 filePrefix = "invite";
             }
             File inviteFile = File.createTempFile(filePrefix, ".ics",
-                    mActivity.getExternalCacheDir());
+                    mActivity.getCacheDir());
             if (IcalendarUtils.writeCalendarToFile(calendar, inviteFile)) {
                 inviteFile.setReadable(true,false);     // set world-readable
                 Intent shareIntent = new Intent();
@@ -1356,7 +1210,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private void showEventColorPickerDialog() {
         if (mColorPickerDialog == null) {
             mColorPickerDialog = EventColorPickerDialog.newInstance(mColors, mCurrentColor,
-                    mCalendarColor, mIsTabletConfig);
+                    mCalendarColor);
             mColorPickerDialog.setOnColorSelectedListener(this);
         }
         final FragmentManager fragmentManager = getFragmentManager();
@@ -1561,7 +1415,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
     private void displayEventNotFound() {
         mErrorMsgView.setVisibility(View.VISIBLE);
-        mScrollView.setVisibility(View.GONE);
+        mEventInfo.setVisibility(View.GONE);
         mLoadingMsgView.setVisibility(View.GONE);
     }
 
@@ -1614,6 +1468,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         String eventTimezone = mEventCursor.getString(EVENT_INDEX_EVENT_TIMEZONE);
 
         mHeadlines.setBackgroundColor(mCurrentColor);
+        colorActivity(mCurrentColor);
 
         // What
         if (eventName != null) {
@@ -1710,8 +1565,12 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
 
         // Description
-        if (description != null && description.length() != 0) {
-            mDesc.setText(description);
+        if (description != null && description.trim().length() != 0) {
+            Log.d("maxwen", "description = " + description);
+            mDesc.setText(description.trim());
+            mDesc.setVisibility(View.VISIBLE);
+        } else {
+            mDesc.setVisibility(View.GONE);
         }
 
         // Launch Custom App
@@ -1722,7 +1581,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
     private void updateCustomAppButton() {
         buttonSetup: {
-            final Button launchButton = (Button) mView.findViewById(R.id.launch_custom_app_button);
+            final TextView launchButton = (TextView) mView.findViewById(R.id.launch_custom_app_button);
             if (launchButton == null)
                 break buttonSetup;
 
@@ -1878,44 +1737,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mIsBusyFreeCalendar =
                     mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL) == Calendars.CAL_ACCESS_FREEBUSY;
 
-            if (!mIsBusyFreeCalendar) {
-
-                View b = mView.findViewById(R.id.edit);
-                b.setEnabled(true);
-                b.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        doEdit();
-                        // For dialogs, just close the fragment
-                        // For full screen, close activity on phone, leave it for tablet
-                        if (mIsDialog) {
-                            EventInfoFragment.this.dismiss();
-                        }
-                        else if (!mIsTabletConfig){
-                            getActivity().finish();
-                        }
-                    }
-                });
-            }
-            View button;
-            if (mCanModifyCalendar) {
-                button = mView.findViewById(R.id.delete);
-                if (button != null) {
-                    button.setEnabled(true);
-                    button.setVisibility(View.VISIBLE);
-                }
-            }
-            if (mCanModifyEvent) {
-                button = mView.findViewById(R.id.edit);
-                if (button != null) {
-                    button.setEnabled(true);
-                    button.setVisibility(View.VISIBLE);
-                }
-            }
-            if ((!mIsDialog && !mIsTabletConfig ||
-                    mWindowStyle == EventInfoFragment.FULL_WINDOW_STYLE) && mMenu != null) {
-                mActivity.invalidateOptionsMenu();
-            }
+            mActivity.invalidateOptionsMenu();
         } else {
             setVisibilityCommon(view, R.id.calendar, View.GONE);
             sendAccessibilityEventIfQueryDone(TOKEN_QUERY_DUPLICATE_CALENDARS);
@@ -1932,6 +1754,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         MenuItem delete = mMenu.findItem(R.id.info_action_delete);
         MenuItem edit = mMenu.findItem(R.id.info_action_edit);
         MenuItem changeColor = mMenu.findItem(R.id.info_action_change_color);
+        MenuItem share = mMenu.findItem(R.id.info_action_share_event);
         if (delete != null) {
             delete.setVisible(mCanModifyCalendar);
             delete.setEnabled(mCanModifyCalendar);
@@ -1944,6 +1767,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             changeColor.setVisible(mCanModifyCalendar);
             changeColor.setEnabled(mCanModifyCalendar);
         }
+        // TODO fix share
+        share.setVisible(false);
     }
 
     private void updateAttendees(View view) {
@@ -2165,12 +1990,11 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         // Remove event deletion alert box since it is being rebuild in the OnResume
         // This is done to get the same behavior on OnResume since the AlertDialog is gone on
         // rotation but not if you press the HOME key
-        if (mDeleteDialogVisible && mDeleteHelper != null) {
+        if (mDeleteHelper != null) {
             mDeleteHelper.dismissAlertDialog();
             mDeleteHelper = null;
         }
-        if (mTentativeUserSetResponse != Attendees.ATTENDEE_STATUS_NONE
-                && mEditResponseHelper != null) {
+        if (mEditResponseHelper != null) {
             mEditResponseHelper.dismissAlertDialog();
         }
     }
@@ -2178,25 +2002,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     @Override
     public void onResume() {
         super.onResume();
-        if (mIsDialog) {
-            setDialogSize(getActivity().getResources());
-            applyDialogParams();
-        }
+
         mIsPaused = false;
         if (mDismissOnResume) {
             mHandler.post(onDeleteRunnable);
-        }
-        // Display the "delete confirmation" or "edit response helper" dialog if needed
-        if (mDeleteDialogVisible) {
-            mDeleteHelper = new DeleteEventHelper(
-                    mContext, mActivity,
-                    !mIsDialog && !mIsTabletConfig /* exitWhenDone */);
-            mDeleteHelper.setOnDismissListener(createDeleteOnDismissListener());
-            mDeleteHelper.delete(mStartMillis, mEndMillis, mEventId, -1, onDeleteRunnable);
-        } else if (mTentativeUserSetResponse != Attendees.ATTENDEE_STATUS_NONE) {
-            int buttonId = findButtonIdForResponse(mTentativeUserSetResponse);
-            mResponseRadioGroup.check(buttonId);
-            mEditResponseHelper.showDialog(mEditResponseHelper.getWhichEvents());
         }
     }
 
@@ -2362,19 +2171,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mEventDeletionStarted = true;
     }
 
-    private Dialog.OnDismissListener createDeleteOnDismissListener() {
-        return new Dialog.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        // Since OnPause will force the dialog to dismiss , do
-                        // not change the dialog status
-                        if (!mIsPaused) {
-                            mDeleteDialogVisible = false;
-                        }
-                    }
-                };
-    }
-
     public long getEventId() {
         return mEventId;
     }
@@ -2385,15 +2181,21 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     public long getEndMillis() {
         return mEndMillis;
     }
-    private void setDialogSize(Resources r) {
-        mDialogWidth = (int)r.getDimension(R.dimen.event_info_dialog_width);
-        mDialogHeight = (int)r.getDimension(R.dimen.event_info_dialog_height);
-    }
 
     @Override
     public void onColorSelected(int color) {
         mCurrentColor = color;
         mCurrentColorKey = mDisplayColorKeyMap.get(color);
         mHeadlines.setBackgroundColor(color);
+        colorActivity(color);
+    }
+
+    private void colorActivity(int color) {
+        ActionBar bar = getActivity().getActionBar();
+        if (bar != null) {
+            bar.setBackgroundDrawable(new ColorDrawable(color));
+        }
+        Window window = getActivity().getWindow();
+        window.setStatusBarColor(Utils.shiftColorDown(color));
     }
 }
