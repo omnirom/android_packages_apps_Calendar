@@ -306,4 +306,13 @@
         <item >on every fourth Saturday</item>
         <item >on every last Saturday</item>
     </string-array>
+
+    <!-- Strings for buttons in drop down menu -->
+    <string-array name="buttons_list_new" translatable="false" >
+        <item>@string/day_view</item>
+        <item>@string/three_days_view</item>
+        <item>@string/week_view</item>
+        <item>@string/month_view</item>
+        <item>@string/agenda_view</item>
+    </string-array>
 </resources>

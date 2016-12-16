@@ -34,7 +34,7 @@ import android.view.MenuItem;
 import java.util.List;
 
 public class CalendarSettingsActivity extends PreferenceActivity {
-    private static final int CHECK_ACCOUNTS_DELAY = 3000;
+    private static final int CHECK_ACCOUNTS_DELAY = 1000;
     private Account[] mAccounts;
     private Handler mHandler = new Handler();
     private boolean mHideMenuButtons = false;
@@ -62,12 +62,6 @@ public class CalendarSettingsActivity extends PreferenceActivity {
             }
         }
         mAccounts = accounts;
-        if (Utils.getTardis() + DateUtils.MINUTE_IN_MILLIS > System.currentTimeMillis()) {
-            Header tardisHeader = new Header();
-            tardisHeader.title = getString(R.string.preferences_experimental_category);
-            tardisHeader.fragment = "com.android.calendar.OtherPreferences";
-            target.add(tardisHeader);
-        }
     }
 
     @Override

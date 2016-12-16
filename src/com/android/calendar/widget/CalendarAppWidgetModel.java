@@ -35,7 +35,7 @@ import java.util.TimeZone;
 
 class CalendarAppWidgetModel {
     private static final String TAG = CalendarAppWidgetModel.class.getSimpleName();
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = true;
 
     private String mHomeTZName;
     private boolean mShowTZ;
@@ -86,6 +86,7 @@ class CalendarAppWidgetModel {
         long end;
         boolean allDay;
         int color;
+        int day;
 
         public EventInfo() {
             visibWhen = View.GONE;
@@ -247,8 +248,10 @@ class CalendarAppWidgetModel {
     final long mNow;
     final int mTodayJulianDay;
     final int mMaxJulianDay;
+    final String mTimeZone;
 
     public CalendarAppWidgetModel(Context context, String timeZone) {
+        mTimeZone = timeZone;
         mNow = System.currentTimeMillis();
         Time time = new Time(timeZone);
         time.setToNow(); // This is needed for gmtoff to be set
@@ -385,6 +388,7 @@ class CalendarAppWidgetModel {
         eventInfo.visibWhen = visibWhen;
         eventInfo.color = color;
         eventInfo.selfAttendeeStatus = selfStatus;
+        eventInfo.day = startDay;
 
         // What
         if (TextUtils.isEmpty(title)) {
@@ -406,16 +410,16 @@ class CalendarAppWidgetModel {
 
     private DayInfo populateDayInfo(int julianDay, Time recycle) {
         long millis = recycle.setJulianDay(julianDay);
-        int flags = DateUtils.FORMAT_ABBREV_ALL | DateUtils.FORMAT_SHOW_DATE;
+        int flags = DateUtils.FORMAT_ABBREV_WEEKDAY | DateUtils.FORMAT_SHOW_DATE;
 
         String label;
-        if (julianDay == mTodayJulianDay + 1) {
+        /*if (julianDay == mTodayJulianDay + 1) {
             label = mContext.getString(R.string.agenda_tomorrow,
                     Utils.formatDateRange(mContext, millis, millis, flags).toString());
-        } else {
+        } else {*/
             flags |= DateUtils.FORMAT_SHOW_WEEKDAY;
             label = Utils.formatDateRange(mContext, millis, millis, flags);
-        }
+        //}
         return new DayInfo(julianDay, label);
     }
 

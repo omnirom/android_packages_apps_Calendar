@@ -65,7 +65,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private int mRowCount = 0;
 
     private FragmentManager mFragmentManager;
-    private boolean mIsTablet;
     private int mColorViewTouchAreaIncrease;
 
     private int mIdColumn;
@@ -80,6 +79,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private int mColorCalendarHidden;
     private int mColorCalendarSecondaryVisible;
     private int mColorCalendarSecondaryHidden;
+    private int mAccessLevelColumn;
 
     private CalendarColorCache mCache;
 
@@ -91,6 +91,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         String accountType;
         int color;
         boolean selected;
+        int accessLevel;
     }
 
     public SelectCalendarsSimpleAdapter(Context context, int layout, Cursor c, FragmentManager fm) {
@@ -116,7 +117,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         mFragmentManager = fm;
         mColorPickerDialog = (CalendarColorPickerDialog)
                 fm.findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
-        mIsTablet = Utils.getConfigBool(context, R.bool.tablet_config);
         mColorViewTouchAreaIncrease = context.getResources()
                 .getDimensionPixelSize(R.dimen.color_view_touch_area_increase);
     }
@@ -190,6 +190,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         mOwnerAccountColumn = c.getColumnIndexOrThrow(Calendars.OWNER_ACCOUNT);
         mAccountNameColumn = c.getColumnIndexOrThrow(Calendars.ACCOUNT_NAME);
         mAccountTypeColumn = c.getColumnIndexOrThrow(Calendars.ACCOUNT_TYPE);
+        mAccessLevelColumn = c.getColumnIndexOrThrow(Calendars.CALENDAR_ACCESS_LEVEL);
 
         mRowCount = c.getCount();
         mData = new CalendarRow[(c.getCount())];
@@ -204,6 +205,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
             mData[p].ownerAccount = c.getString(mOwnerAccountColumn);
             mData[p].accountName = c.getString(mAccountNameColumn);
             mData[p].accountType = c.getString(mAccountTypeColumn);
+            mData[p].accessLevel = c.getInt(mAccessLevelColumn);
             p++;
         }
     }
@@ -258,8 +260,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
                 }
 
                 if (mColorPickerDialog == null) {
-                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id,
-                            mIsTablet);
+                    mColorPickerDialog = CalendarColorPickerDialog.newInstance(mData[position].id);
                 } else {
                     mColorPickerDialog.setCalendarId(mData[position].id);
                 }
@@ -279,7 +280,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         calendarName.setTextColor(textColor);
 
         CheckBox syncCheckBox = (CheckBox) view.findViewById(R.id.sync);
-        if (syncCheckBox != null) {
 
             // Full screen layout
             syncCheckBox.setChecked(selected);
@@ -307,22 +307,6 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
 
             calendarName.setLayoutParams(layoutParam);
 
-        } else {
-            // Tablet layout
-            view.findViewById(R.id.color).setEnabled(selected && hasMoreColors(position));
-            view.setBackgroundDrawable(getBackground(position, selected));
-            ViewGroup.LayoutParams newParams = view.getLayoutParams();
-            if (position == mData.length - 1) {
-                newParams.height = BOTTOM_ITEM_HEIGHT;
-            } else {
-                newParams.height = NORMAL_ITEM_HEIGHT;
-            }
-            view.setLayoutParams(newParams);
-            CheckBox visibleCheckBox = (CheckBox) view.findViewById(R.id.visible_check_box);
-            if (visibleCheckBox != null) {
-                visibleCheckBox.setChecked(selected);
-            }
-        }
         view.invalidate();
         return view;
     }

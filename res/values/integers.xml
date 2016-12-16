@@ -12,10 +12,6 @@
 -->
 <resources
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- size of event title font in month view  -->
-    <integer name="text_size_event_title">14</integer>
-    <!-- size of day date font in month view  -->
-    <integer name="text_size_month_number">14</integer>
     <!-- max number of lines in the description without showing More/Less button  -->
     <integer name="event_info_desc_line_num">8</integer>
     <!-- The alpha level of photos of attendees that didn't respond -->
@@ -24,10 +20,6 @@
     <integer name="default_attendee_photo_alpha_level">255</integer>
     <!-- margin between the day number and the edge of the day in month view -->
     <integer name="month_day_number_margin">6</integer>
-    <!-- The size of the color chip in the agenda view for all day events -->
-    <integer name="color_chip_all_day_height">48</integer>
-    <!-- The size of the color chip in the agenda view -->
-    <integer name="color_chip_height">24</integer>
     <!-- The time of day in minutes usually considered the start of the work day, eg. 6am in the US -->
     <integer name="work_start_minutes">360</integer>
     <!-- The time of day in minutes usually considered the end of the work day, eg. 8pm in the US -->
