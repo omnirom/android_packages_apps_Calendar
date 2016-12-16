@@ -566,7 +566,7 @@
     <!-- Widget -->
     <skip/>
     <!-- Title for calendar gadget when displayed in list of all other gadgets -->
-    <string name="gadget_title">Calendar</string>
+    <string name="gadget_title">@string/agenda_view</string>
 
     <!-- Shown in month view next to event icon when additional events exist for that day, but no
         room remaining -->
@@ -770,4 +770,16 @@
     <!-- This is a label on a menu item. Pressing this menu item allows the
          user to go to the calendars to display [CHAR LIMIT=20] -->
     <string name="go_to">Go to</string>
+
+    <string name="three_days_view">3 Day</string>
+
+    <string name="preferences_hours_filter_start_title">Start hour</string>
+    <string name="preferences_hours_filter_end_title">End hour</string>
+    <string name="start_hour_invalid">Start hour must be before end hour</string>
+    <string name="end_hour_invalid">End hour must be after start hour</string>
+    <string name="cancel_confirmation_dialog_message">Discard your changes and quit editing?</string>
+    <string name="calendar_filter">Enable hour filter</string>
+    <string name="calendar_type_mine">Owner</string>
+    <string name="calendar_type_other">Other</string>
+    
 </resources>

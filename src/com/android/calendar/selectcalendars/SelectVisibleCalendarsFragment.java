@@ -56,11 +56,12 @@ public class SelectVisibleCalendarsFragment extends Fragment
         Calendars.CALENDAR_COLOR,
         Calendars.VISIBLE,
         Calendars.SYNC_EVENTS,
+        Calendars.CALENDAR_ACCESS_LEVEL,
         "(" + Calendars.ACCOUNT_NAME + "=" + Calendars.OWNER_ACCOUNT + ") AS " + IS_PRIMARY,
       };
     private static int mUpdateToken;
     private static int mQueryToken;
-    private static int mCalendarItemLayout = R.layout.mini_calendar_item;
+    private static int mCalendarItemLayout = R.layout.calendar_sync_item;
 
     private View mView = null;
     private CalendarController mController;
@@ -114,17 +115,6 @@ public class SelectVisibleCalendarsFragment extends Fragment
         super.onCreateView(inflater, container, savedInstanceState);
         mView = inflater.inflate(R.layout.select_calendars_fragment, null);
         mList = (ListView)mView.findViewById(R.id.list);
-
-        // Hide the Calendars to Sync button on tablets for now.
-        // Long terms stick it in the list of calendars
-        if (Utils.getConfigBool(getActivity(), R.bool.multiple_pane_config)) {
-            // Don't show dividers on tablets
-            mList.setDivider(null);
-            View v = mView.findViewById(R.id.manage_sync_set);
-            if (v != null) {
-                v.setVisibility(View.GONE);
-            }
-        }
         return mView;
     }
 

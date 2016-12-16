@@ -31,6 +31,12 @@
             android:entries="@array/preferences_week_start_day_labels"
             android:entryValues="@array/preferences_week_start_day_values"
             android:dialogTitle="@string/preferences_week_start_day_dialog" />
+        <Preference
+            android:key="preferences_hours_filter_start"
+            android:title="@string/preferences_hours_filter_start_title" />
+        <Preference
+            android:key="preferences_hours_filter_end"
+            android:title="@string/preferences_hours_filter_end_title" />
         <CheckBoxPreference
             android:key="preferences_home_tz_enabled"
             android:defaultValue="false"
@@ -66,12 +72,6 @@
             android:key="preferences_alerts_vibrate"
             android:title="@string/preferences_alerts_vibrateWhen_title"
             android:defaultValue="false" />
-
-        <CheckBoxPreference
-            android:layout="?android:attr/preferenceLayoutChild"
-            android:key="preferences_alerts_popup"
-            android:defaultValue="false"
-            android:title="@string/preferences_alerts_popup_title" />
 
         <ListPreference
             android:key="preferences_default_reminder"

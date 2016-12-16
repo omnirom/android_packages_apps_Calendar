@@ -19,106 +19,42 @@
     android:id="@+id/event_info_headline"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_weight="1"
     android:orientation="vertical"
     android:paddingBottom="16dip"
     android:paddingLeft="16dip"
     android:paddingRight="16dip"
     android:paddingTop="8dip" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- WHAT -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <!-- WHAT -->
-        <TextView
-            android:id="@+id/title"
-            style="?android:attr/textAppearanceLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight=".8"
-            android:autoLink="all"
-            android:textColor="@color/event_info_headline_color"
-            android:textColorLink="@color/event_info_headline_color"
-            android:textIsSelectable="true"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-        <!-- BUTTONS -->
-
-        <LinearLayout
-            android:id="@+id/event_info_buttons_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/change_color"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:visibility="gone"
-                android:text="@string/choose_event_color_label"
-                android:textColor="@color/event_info_headline_color" />
-
-            <Button
-                android:id="@+id/edit"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/edit_event_label"
-                android:textColor="@color/event_info_headline_color" />
-
-            <Button
-                android:id="@+id/delete"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/delete_label"
-                android:textColor="@color/event_info_headline_color" />
-        </LinearLayout>
-    </LinearLayout>
+        android:layout_weight=".8"
+        android:autoLink="all"
+        android:textColor="@color/event_info_headline_color"
+        android:textColorLink="@color/event_info_headline_color"
+        android:textIsSelectable="true"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <!-- WHEN -->
 
     <TextView
         android:id="@+id/when_datetime"
-        style="?android:attr/textAppearanceLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dip"
         android:textColor="@color/event_info_headline_color"
         android:textIsSelectable="true"
-        android:textSize="14sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/when_repeat"
-        style="?android:attr/textAppearanceLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="-3dip"
         android:textColor="@color/event_info_headline_transparent_color"
-        android:textSize="14sp" />
-
-    <!-- WHERE -->
-
-    <TextView
-        android:id="@+id/where"
-        style="?android:attr/textAppearanceLarge"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dip"
-        android:ellipsize="end"
-        android:singleLine="false"
-        android:textColor="@color/event_info_headline_color"
-        android:textColorLink="@color/event_info_headline_link_color"
-        android:textIsSelectable="true"
-        android:textSize="14sp" />
+        android:textSize="16sp" />
 
 </LinearLayout>

@@ -21,6 +21,7 @@ import com.android.calendar.CalendarController.EventType;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.view.LayoutInflater;
@@ -36,7 +37,8 @@ import android.widget.ViewSwitcher.ViewFactory;
 /**
  * This is the base class for Day and Week Activities.
  */
-public class DayFragment extends Fragment implements CalendarController.EventHandler, ViewFactory {
+public class DayFragment extends Fragment implements CalendarController.EventHandler, ViewFactory,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     /**
      * The view id used for all the views we create. It's OK to have all child
      * views have the same ID. This ID is used to pick which view receives
@@ -134,6 +136,9 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
         view = (DayView) mViewSwitcher.getNextView();
         view.handleOnResume();
         view.restartCurrentTimeUpdates();
+        
+        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(getActivity());
+        prefs.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -158,6 +163,9 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
         // Stop events cross-fade animation
         view.stopEventsAnimation();
         ((DayView) mViewSwitcher.getNextView()).stopEventsAnimation();
+
+        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(getActivity());
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     void startProgressSpinner() {
@@ -271,6 +279,15 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
                     (msg.extraLong & CalendarController.EXTRA_GOTO_TODAY) != 0);
         } else if (msg.eventType == EventType.EVENTS_CHANGED) {
             eventsChanged();
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        if (key != null && key.equals(GeneralPreferences.KEY_HOURS_FILTER_ENABLED)) {
+            DayView view = (DayView) mViewSwitcher.getCurrentView();
+            view.updateTimeFilter();
+            getNextView().updateTimeFilter();
         }
     }
 }

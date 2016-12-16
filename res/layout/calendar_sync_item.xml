@@ -49,12 +49,12 @@
             style="@style/TextAppearance.SelectCalendar_Name"
             android:duplicateParentState="true"
             android:textSize="16sp" />
-
+        
         <TextView
             android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:maxLines="2"
             android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:duplicateParentState="true" />
