@@ -552,7 +552,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     protected final Resources mResources;
     protected final Drawable mExpandAlldayDrawable;
     protected final Drawable mCollapseAlldayDrawable;
-    protected Drawable mAcceptedOrTentativeEventBoxDrawable;
     private String mAmString;
     private String mPmString;
     private final DeleteEventHelper mDeleteEventHelper;
@@ -728,8 +727,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mExpandAlldayDrawable = mResources.getDrawable(R.drawable.ic_expand_down);
         mCollapseAlldayDrawable = mResources.getDrawable(R.drawable.ic_expand_up);
         mNewEventHintColor =  mResources.getColor(R.color.new_event_hint_text_color);
-        mAcceptedOrTentativeEventBoxDrawable = mResources
-                .getDrawable(R.drawable.panel_month_event_holo_light);
         mCurrentTimeLineColor =  mResources.getColor(R.color.current_time_line_color);
         mEventLoader = eventLoader;
         mEventGeometry = new EventGeometry();
