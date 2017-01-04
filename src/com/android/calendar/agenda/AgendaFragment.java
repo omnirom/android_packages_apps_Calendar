@@ -70,6 +70,8 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     private AgendaWindowAdapter mAdapter = null;
     private boolean mForceReplace = true;
     private long mLastShownEventId = -1;
+    private boolean mUserScrolled;
+    private boolean mResumed;
 
 
 
@@ -209,9 +211,6 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onResume() {
         super.onResume();
-        if (DEBUG) {
-            Log.v(TAG, "OnResume to " + mTime.toString());
-        }
 
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(
                 getActivity());
@@ -224,6 +223,9 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             mLastHandledEventTime = null;
             mLastHandledEventId = -1;
         } else {
+            if (DEBUG) {
+                Log.v(TAG, "OnResume to " + mTime.toString());
+            }
             mAgendaListView.goTo(mTime, -1, mQuery, true, false);
         }
         mAgendaListView.onResume();
@@ -236,6 +238,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 //        registerReceiver(mIntentReceiver, filter);
 //
 //        mContentResolver.registerContentObserver(Events.CONTENT_URI, true, mObserver);
+        mResumed = true;
     }
 
     @Override
@@ -310,6 +313,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
 
         // Record Agenda View as the (new) default detailed view.
 //        Utils.setDefaultView(this, CalendarApplication.AGENDA_VIEW_ID);
+        mResumed = false;
     }
 
     private void goTo(EventInfo event, boolean animate) {
@@ -322,6 +326,9 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             // The view hasn't been set yet. Just save the time and use it
             // later.
             return;
+        }
+        if (DEBUG) {
+            Log.v(TAG, "goTo to " + mTime.toString());
         }
         mAgendaListView.goTo(mTime, event.id, mQuery, false,
                 ((event.extraLong & CalendarController.EXTRA_GOTO_TODAY) != 0  &&
@@ -368,7 +375,9 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             mLastHandledEventId = event.id;
             mLastHandledEventTime =
                     (event.selectedTime != null) ? event.selectedTime : event.startTime;
-            goTo(event, true);
+            if (mResumed) {
+                goTo(event, true);
+            }
         } else if (event.eventType == EventType.SEARCH) {
             search(event.query, event.startTime);
         } else if (event.eventType == EventType.EVENTS_CHANGED) {
@@ -442,6 +451,11 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
         if (mAdapter != null) {
             mAdapter.setScrollState(scrollState);
         }
+        if(scrollState == OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
+            mUserScrolled = true;
+        } else {
+            mUserScrolled = false;
+        }
     }
 
     // Gets the time of the first visible view. If it is a new time, send a message to update
@@ -449,6 +463,9 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
             int totalItemCount) {
+        if (!mUserScrolled) {
+            return;
+        }
         int julianDay = mAgendaListView.getJulianDayFromPosition(firstVisibleItem
                 - mAgendaListView.getHeaderViewsCount());
         // On error - leave the old view
@@ -460,6 +477,9 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
             mJulianDayOnTop = julianDay;
             Time t = new Time(mTimeZone);
             t.setJulianDay(mJulianDayOnTop);
+            if (DEBUG) {
+                Log.d(TAG, "onScroll setTime:" + t);
+            }
             mController.setTime(t.toMillis(true));
             // Cannot sent a message that eventually may change the layout of the views
             // so instead post a runnable that will run when the layout is done
