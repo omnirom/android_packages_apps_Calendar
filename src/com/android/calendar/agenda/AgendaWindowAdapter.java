@@ -221,6 +221,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     private String mSearchQuery;
 
     private long mSelectedInstanceId = -1;
+    private int mSavedPosition = -1;
 
     // Types of Query
     private static final int QUERY_TYPE_OLDER = 0; // Query for older events
@@ -680,6 +681,7 @@ public class AgendaWindowAdapter extends BaseAdapter
             int endDay = startDay + MIN_QUERY_DURATION;
 
             mSelectedInstanceId = -1;
+            mSavedPosition = -1;
             mCleanQueryInitiated = true;
             queueQuery(startDay, endDay, goToTime, searchQuery, QUERY_TYPE_CLEAN, id);
 
@@ -940,11 +942,16 @@ public class AgendaWindowAdapter extends BaseAdapter
                     if (listPositionOffset != 0) {
                         mAgendaListView.shiftSelection(listPositionOffset);
                     }
+                    if (mSavedPosition != -1) {
+                        mAgendaListView.setSelectionFromTop(mSavedPosition + OFF_BY_ONE_BUG,
+                                mStickyHeaderSize);
+                    }
                 } else { // refresh() called. Go to the designated position
                     final Time goToTime = data.goToTime;
                     notifyDataSetChanged();
                     newPosition = findEventPositionNearestTime(goToTime, data.id);
                     if (newPosition >= 0) {
+                        mSavedPosition = newPosition;
                         if (mListViewScrollState == OnScrollListener.SCROLL_STATE_FLING) {
                             mAgendaListView.smoothScrollBy(0, 0);
                         }
