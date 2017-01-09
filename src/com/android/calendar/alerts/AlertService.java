@@ -16,6 +16,7 @@
 
 package com.android.calendar.alerts;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -25,6 +26,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -56,7 +58,7 @@ import java.util.TimeZone;
  * This service is used to handle calendar event reminders.
  */
 public class AlertService extends Service {
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
     private static final String TAG = "AlertService";
 
     private volatile Looper mServiceLooper;
@@ -262,6 +264,11 @@ public class AlertService extends Service {
     }
 
     static boolean updateAlertNotification(Context context) {
+        if (!isPermissionEnabled(context)) {
+            Log.e(TAG, "Blocked updateAlertNotification because of missing permissions");
+            return false;
+        }
+
         ContentResolver cr = context.getContentResolver();
         NotificationMgr nm = new NotificationMgrWrapper(
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE));
@@ -1098,11 +1105,16 @@ public class AlertService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            Message msg = mServiceHandler.obtainMessage();
-            msg.arg1 = startId;
-            msg.obj = intent.getExtras();
-            mServiceHandler.sendMessage(msg);
+        if (isPermissionEnabled(this)) {
+            if (intent != null) {
+                Message msg = mServiceHandler.obtainMessage();
+                msg.arg1 = startId;
+                msg.obj = intent.getExtras();
+                mServiceHandler.sendMessage(msg);
+            }
+        } else {
+            Log.e(TAG, "Blocked onStartCommand because of missing permissions");
+            return START_NOT_STICKY;
         }
         return START_REDELIVER_INTENT;
     }
@@ -1115,5 +1127,15 @@ public class AlertService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private static boolean isPermissionEnabled(Context context) {
+        if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+        }
+        return true;
     }
 }

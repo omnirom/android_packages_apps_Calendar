@@ -623,8 +623,11 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        mOnSaveInstanceStateCalled = true;
         super.onSaveInstanceState(outState);
+        if (mController == null) {
+            return;
+        }
+        mOnSaveInstanceStateCalled = true;
         outState.putLong(BUNDLE_KEY_RESTORE_TIME, mController.getTime());
         outState.putInt(BUNDLE_KEY_RESTORE_VIEW, mCurrentView);
         if (mCurrentView == ViewType.EDIT) {
@@ -829,6 +832,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        if (mController == null) {
+            return false;
+        }
         MenuItem filterItem = menu.findItem(R.id.action_filter);
         if (filterItem != null) {
             filterItem.setVisible(mController.getViewType() == ViewType.DAY ||
