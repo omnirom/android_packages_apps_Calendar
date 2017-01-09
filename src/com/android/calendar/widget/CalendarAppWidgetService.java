@@ -16,6 +16,7 @@
 
 package com.android.calendar.widget;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -374,6 +376,10 @@ public class CalendarAppWidgetService extends RemoteViewsService {
          * @param selection The selection string for the loader to filter the query with.
          */
         public void initLoader(String selection) {
+            if (!isPermissionEnabled()) {
+                Log.e(TAG, "initLoader blocked because of missing permission");
+                return;
+            }
             if (LOGD)
                 Log.d(TAG, "Querying for widget events...");
 
@@ -600,6 +606,16 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                     }
                 }
             });
+        }
+
+        private boolean isPermissionEnabled() {
+            if (mContext.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                        != PackageManager.PERMISSION_GRANTED ||
+                mContext.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+            }
+            return true;
         }
     }
 
