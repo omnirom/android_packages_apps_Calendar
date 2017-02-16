@@ -73,6 +73,7 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
     private int mNumDays;
 
     public DayFragment() {
+        mNumDays = 1;
         mSelectedDay.setToNow();
     }
 

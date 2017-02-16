@@ -16,8 +16,10 @@
 
 package com.android.calendar;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Process;
@@ -31,7 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EventLoader {
-
+    private static final String TAG = "EventLoader";
     private Context mContext;
     private Handler mHandler = new Handler();
     private AtomicInteger mSequenceNumber = new AtomicInteger();
@@ -173,7 +175,7 @@ public class EventLoader {
                 // The put() method fails with InterruptedException if the
                 // queue is full. This should never happen because the queue
                 // has no limit.
-                Log.e("Cal", "LoaderThread.shutdown() interrupted!");
+                Log.e(TAG, "LoaderThread.shutdown() interrupted!");
             }
         }
 
@@ -200,7 +202,7 @@ public class EventLoader {
                     }
                     request.processRequest(mEventLoader);
                 } catch (InterruptedException ex) {
-                    Log.e("Cal", "background LoaderThread interrupted!");
+                    Log.e(TAG, "background LoaderThread interrupted!");
                 }
             }
         }
@@ -238,7 +240,10 @@ public class EventLoader {
      */
     public void loadEventsInBackground(final int numDays, final ArrayList<Event> events,
             int startDay, final Runnable successCallback, final Runnable cancelCallback) {
-
+        if (!isPermissionEnabled()) {
+            Log.e(TAG, "loadEventsInBackground blocked because of missing permission");
+            return;
+        }
         // Increment the sequence number for requests.  We don't care if the
         // sequence numbers wrap around because we test for equality with the
         // latest one.
@@ -254,7 +259,7 @@ public class EventLoader {
             // The put() method fails with InterruptedException if the
             // queue is full. This should never happen because the queue
             // has no limit.
-            Log.e("Cal", "loadEventsInBackground() interrupted!");
+            Log.e(TAG, "loadEventsInBackground() interrupted!");
         }
     }
 
@@ -271,6 +276,10 @@ public class EventLoader {
     void loadEventDaysInBackground(int startDay, int numDays, boolean[] eventDays,
         final Runnable uiCallback)
     {
+        if (!isPermissionEnabled()) {
+            Log.e(TAG, "loadEventsInBackground blocked because of missing permission");
+            return;
+        }
         // Send load request to the background thread
         LoadEventDaysRequest request = new LoadEventDaysRequest(startDay, numDays,
                 eventDays, uiCallback);
@@ -280,7 +289,17 @@ public class EventLoader {
             // The put() method fails with InterruptedException if the
             // queue is full. This should never happen because the queue
             // has no limit.
-            Log.e("Cal", "loadEventDaysInBackground() interrupted!");
+            Log.e(TAG, "loadEventDaysInBackground() interrupted!");
         }
+    }
+
+    private boolean isPermissionEnabled() {
+        if (mContext.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED ||
+            mContext.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+        }
+        return true;
     }
 }

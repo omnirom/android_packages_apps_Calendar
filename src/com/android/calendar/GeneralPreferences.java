@@ -88,6 +88,9 @@ public class GeneralPreferences extends PreferenceFragment implements
     public static final String KEY_DEFAULT_CELL_HEIGHT = "preferences_default_cell_height";
     public static final String KEY_VERSION = "preferences_version";
 
+    public static final String KEY_WIDGET_DAYS = "preferences_widget_days";
+    public static final String KEY_WIDGET_DAYS_DEFAULT = "14";
+
     /** Key to SharePreference for default view (CalendarController.ViewType) */
     public static final String KEY_START_VIEW = "preferred_startView";
     /**
@@ -143,6 +146,7 @@ public class GeneralPreferences extends PreferenceFragment implements
     private Preference mEndHour;
     private TimeSetListener mTimePickerListenerEndTime;
     private String mTimeZoneId;
+    private ListPreference mWidgetDays;
 
     /** Return a properly configured SharedPreferences instance */
     public static SharedPreferences getSharedPreferences(Context context) {
@@ -198,6 +202,8 @@ public class GeneralPreferences extends PreferenceFragment implements
         mHomeTZ = preferenceScreen.findPreference(KEY_HOME_TZ);
         mWeekStart.setSummary(mWeekStart.getEntry());
         mDefaultReminder.setSummary(mDefaultReminder.getEntry());
+        mWidgetDays = (ListPreference) preferenceScreen.findPreference(KEY_WIDGET_DAYS);
+        mWidgetDays.setSummary(mWidgetDays.getEntry());
 
         // This triggers an asynchronous call to the provider to refresh the data in shared pref
         mTimeZoneId = Utils.getTimeZone(activity, null);
@@ -290,6 +296,7 @@ public class GeneralPreferences extends PreferenceFragment implements
         mRingtone.setOnPreferenceChangeListener(listener);
         mHideDeclined.setOnPreferenceChangeListener(listener);
         mVibrate.setOnPreferenceChangeListener(listener);
+        mWidgetDays.setOnPreferenceChangeListener(listener);
     }
 
     @Override
@@ -357,6 +364,13 @@ public class GeneralPreferences extends PreferenceFragment implements
             return true;
         } else if (preference == mVibrate) {
             mVibrate.setChecked((Boolean) newValue);
+            return true;
+        } else if (preference == mWidgetDays) {
+            mWidgetDays.setValue((String) newValue);
+            mWidgetDays.setSummary(mWidgetDays.getEntry());
+            Intent intent = new Intent(Utils.getWidgetScheduledUpdateAction(activity));
+            intent.setDataAndType(CalendarContract.CONTENT_URI, Utils.APPWIDGET_DATA_TYPE);
+            activity.sendBroadcast(intent);
             return true;
         } else {
             return true;
