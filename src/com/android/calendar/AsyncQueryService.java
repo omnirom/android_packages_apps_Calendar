@@ -18,11 +18,13 @@ package com.android.calendar;
 
 import com.android.calendar.AsyncQueryServiceHelper.OperationInfo;
 
+import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -168,6 +170,10 @@ public class AsyncQueryService extends Handler {
      */
     public void startQuery(int token, Object cookie, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String orderBy) {
+
+        if (!isPermissionEnabled()) {
+            return;
+        }
         OperationInfo info = new OperationInfo();
         info.op = Operation.EVENT_ARG_QUERY;
         info.resolver = mContext.getContentResolver();
@@ -200,6 +206,9 @@ public class AsyncQueryService extends Handler {
      */
     public void startInsert(int token, Object cookie, Uri uri, ContentValues initialValues,
             long delayMillis) {
+        if (!isPermissionEnabled()) {
+            return;
+        }
         OperationInfo info = new OperationInfo();
         info.op = Operation.EVENT_ARG_INSERT;
         info.resolver = mContext.getContentResolver();
@@ -236,6 +245,9 @@ public class AsyncQueryService extends Handler {
      */
     public void startUpdate(int token, Object cookie, Uri uri, ContentValues values,
             String selection, String[] selectionArgs, long delayMillis) {
+        if (!isPermissionEnabled()) {
+            return;
+        }
         OperationInfo info = new OperationInfo();
         info.op = Operation.EVENT_ARG_UPDATE;
         info.resolver = mContext.getContentResolver();
@@ -273,6 +285,9 @@ public class AsyncQueryService extends Handler {
      */
     public void startDelete(int token, Object cookie, Uri uri, String selection,
             String[] selectionArgs, long delayMillis) {
+        if (!isPermissionEnabled()) {
+            return;
+        }
         OperationInfo info = new OperationInfo();
         info.op = Operation.EVENT_ARG_DELETE;
         info.resolver = mContext.getContentResolver();
@@ -304,6 +319,9 @@ public class AsyncQueryService extends Handler {
      */
     public void startBatch(int token, Object cookie, String authority,
             ArrayList<ContentProviderOperation> cpo, long delayMillis) {
+        if (!isPermissionEnabled()) {
+            return;
+        }
         OperationInfo info = new OperationInfo();
         info.op = Operation.EVENT_ARG_BATCH;
         info.resolver = mContext.getContentResolver();
@@ -433,5 +451,15 @@ public class AsyncQueryService extends Handler {
 //    @VisibleForTesting
     protected void setTestHandler(Handler handler) {
         mHandler = handler;
+    }
+
+    private boolean isPermissionEnabled() {
+        if (mContext.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED ||
+            mContext.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+        }
+        return true;
     }
 }

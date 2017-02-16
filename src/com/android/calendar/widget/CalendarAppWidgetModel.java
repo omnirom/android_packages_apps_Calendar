@@ -254,23 +254,27 @@ class CalendarAppWidgetModel {
     final String mTimeZone;
 
     public CalendarAppWidgetModel(Context context, String timeZone) {
+        mContext = context;
         mTimeZone = timeZone;
         mNow = System.currentTimeMillis();
         Time time = new Time(timeZone);
         time.setToNow(); // This is needed for gmtoff to be set
         mTodayJulianDay = Time.getJulianDay(mNow, time.gmtoff);
-        mMaxJulianDay = mTodayJulianDay + CalendarAppWidgetService.MAX_DAYS - 1;
+        mMaxJulianDay = mTodayJulianDay + getWidgetDays() - 1;
         mEventInfos = new ArrayList<EventInfo>(50);
         mRowInfos = new ArrayList<RowInfo>(50);
         mDayInfos = new ArrayList<DayInfo>(8);
-        mContext = context;
+    }
+
+    private int getWidgetDays() {
+        return Utils.getWidgetDays(mContext);
     }
 
     public void buildFromCursor(Cursor cursor, String timeZone) {
         final Time recycle = new Time(timeZone);
         final ArrayList<LinkedList<RowInfo>> mBuckets =
-                new ArrayList<LinkedList<RowInfo>>(CalendarAppWidgetService.MAX_DAYS);
-        for (int i = 0; i < CalendarAppWidgetService.MAX_DAYS; i++) {
+                new ArrayList<LinkedList<RowInfo>>(getWidgetDays());
+        for (int i = 0; i < getWidgetDays(); i++) {
             mBuckets.add(new LinkedList<RowInfo>());
         }
         recycle.setToNow();

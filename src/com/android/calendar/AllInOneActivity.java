@@ -43,7 +43,6 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -96,7 +95,7 @@ import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
 public class AllInOneActivity extends AbstractCalendarActivity implements EventHandler,
-        OnSharedPreferenceChangeListener, SearchView.OnQueryTextListener, ActionBar.TabListener,
+        SearchView.OnQueryTextListener, ActionBar.TabListener,
         ActionBar.OnNavigationListener, OnSuggestionListener {
     private static final String TAG = "AllInOneActivity";
     private static final boolean DEBUG = true;
@@ -129,7 +128,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private int mPreviousView;
     private int mCurrentView;
     private boolean mPaused = true;
-    private boolean mUpdateOnResume = false;
     private boolean mHideControls = false;
     private boolean mShowSideViews = true;
     private boolean mShowWeekNum = false;
@@ -361,6 +359,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                 != PackageManager.PERMISSION_GRANTED ||
             checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED) {
+            doCreate(mBundle);
             requestPermissions(new String[] {
                 Manifest.permission.READ_CONTACTS,
                 Manifest.permission.WRITE_CALENDAR}, PERMISSIONS_REQUEST_CALENDAR);
@@ -374,20 +373,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (icicle != null && icicle.containsKey(BUNDLE_KEY_CHECK_ACCOUNTS)) {
             mCheckForAccounts = icicle.getBoolean(BUNDLE_KEY_CHECK_ACCOUNTS);
         }
-        // Launch add google account if this is first time and there are no
-        // accounts yet
-        if (mCheckForAccounts
-                && !Utils.getSharedPreference(this, GeneralPreferences.KEY_SKIP_SETUP, false)) {
-
-            mHandler = new QueryHandler(this.getContentResolver());
-            mHandler.startQuery(0, null, Calendars.CONTENT_URI, new String[] {
-                Calendars._ID
-            }, null, null /* selection args */, null /* sort order */);
-        }
-
         // This needs to be created before setContentView
         mController = CalendarController.getInstance(this);
-
+        mContentResolver = getContentResolver();
 
         // Get time from intent or icicle
         long timeMillis = -1;
@@ -411,8 +399,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (viewType == -1 || viewType > ViewType.MAX_VALUE) {
             viewType = Utils.getViewTypeFromIntentAndSharedPref(this);
         }
-        Time t = new Time(mTimeZone);
-        t.set(timeMillis);
 
         if (DEBUG) {
             if (icicle != null && intent != null) {
@@ -432,11 +418,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mDateRange = (TextView) getLayoutInflater().inflate(R.layout.date_range_title, null);
         }
 
-        // configureActionBar auto-selects the first tab you add, so we need to
-        // call it before we set up our own fragments to make sure it doesn't
-        // overwrite us
-        configureActionBar(viewType);
-
         mHomeTime = (TextView) findViewById(R.id.home_time);
         mMiniMonth = findViewById(R.id.mini_month);
         if (mIsTabletConfig && mOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -447,21 +428,14 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         mMiniMonthContainer = findViewById(R.id.mini_month_container);
         mSecondaryPane = findViewById(R.id.secondary_pane);
 
-        // Must register as the first activity because this activity can modify
-        // the list of event handlers in it's handle method. This affects who
-        // the rest of the handlers the controller dispatches to are.
-        mController.registerFirstEventHandler(HANDLER_KEY, this);
-
-        initFragments(timeMillis, viewType, icicle);
-
-        // Listen for changes that would require this to be refreshed
-        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(this);
-        prefs.registerOnSharedPreferenceChangeListener(this);
-
-        mContentResolver = getContentResolver();
-
         // clean up cached ics files - in case onDestroy() didn't run the last time
         cleanupCachedIcsFiles();
+
+        if (mPermsDone) {
+            doRunWithPermissions(timeMillis, viewType);
+            // Check if the upgrade code has ever been run. If not, force a sync just this one time.
+            Utils.trySyncAndDisableUpgradeReceiver(this);
+        }
     }
 
     private long parseViewAction(final Intent intent) {
@@ -530,12 +504,12 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     protected void onResume() {
         super.onResume();
 
-        if (!mPermsDone) {
-            return;
+        if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            mPermsDone = false;
         }
-
-        // Check if the upgrade code has ever been run. If not, force a sync just this one time.
-        Utils.trySyncAndDisableUpgradeReceiver(this);
 
         // Must register as the first activity because this activity can modify
         // the list of event handlers in it's handle method. This affects who
@@ -544,15 +518,17 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         mOnSaveInstanceStateCalled = false;
         mContentResolver.registerContentObserver(CalendarContract.Events.CONTENT_URI,
-                true, mObserver);
-        if (mUpdateOnResume) {
+                    true, mObserver);
+
+        if (mPermsDone) {
             initFragments(mController.getTime(), mController.getViewType(), null);
-            mUpdateOnResume = false;
         }
+
         Time t = new Time(mTimeZone);
         t.set(mController.getTime());
         mController.sendEvent(this, EventType.UPDATE_TITLE, t, t, -1, ViewType.CURRENT,
                 mController.getDateFlags(), null, null);
+
         // Make sure the drop-down menu will get its date updated at midnight
         if (mActionBarMenuSpinnerAdapter != null) {
             mActionBarMenuSpinnerAdapter.refresh(this);
@@ -589,10 +565,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     protected void onPause() {
         super.onPause();
 
-        if (!mPermsDone) {
-            return;
-        }
-
         mController.deregisterEventHandler(HANDLER_KEY);
         mPaused = true;
         mHomeTime.removeCallbacks(mHomeTimeUpdater);
@@ -600,11 +572,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mActionBarMenuSpinnerAdapter.onPause();
         }
         mContentResolver.unregisterContentObserver(mObserver);
-        if (isFinishing()) {
-            // Stop listening for changes that would require this to be refreshed
-            SharedPreferences prefs = GeneralPreferences.getSharedPreferences(this);
-            prefs.unregisterOnSharedPreferenceChangeListener(this);
-        }
         // FRAG_TODO save highlighted days of the week;
         if (mController.getViewType() != ViewType.EDIT) {
             Utils.setDefaultView(this, mController.getViewType());
@@ -645,12 +612,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!mPermsDone) {
-            return;
-        }
-
-        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(this);
-        prefs.unregisterOnSharedPreferenceChangeListener(this);
 
         mController.deregisterAllEventHandlers();
 
@@ -935,17 +896,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             }
             mVerticalControlsParams.height = Math.max(0, mControlsAnimateHeight - controlsOffset);
             mMiniMonthContainer.setLayoutParams(mVerticalControlsParams);
-        }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (key.equals(GeneralPreferences.KEY_WEEK_START_DAY)) {
-            if (mPaused) {
-                mUpdateOnResume = true;
-            } else {
-                initFragments(mController.getTime(), mController.getViewType(), null);
-            }
         }
     }
 
@@ -1301,7 +1251,9 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         } else if (event.eventType == EventType.UPDATE_TITLE) {
             setTitleInActionBar(event);
             if (!mIsTabletConfig) {
-                mActionBarMenuSpinnerAdapter.setTime(mController.getTime());
+                if (mActionBarMenuSpinnerAdapter != null) {
+                    mActionBarMenuSpinnerAdapter.setTime(mController.getTime());
+                }
             }
         }
         updateSecondaryTitleFields(displayTime);
@@ -1482,12 +1434,27 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     mPermsDone = true;
-                    doCreate(mBundle);
+                    doRunWithPermissions(mController.getTime(), mController.getViewType());
                 } else {
                     finish();
                 }
             }
             return;
         }
+    }
+
+    private void doRunWithPermissions(long timeInMillis, int viewType) {
+        configureActionBar(viewType);
+        initFragments(timeInMillis, viewType, mBundle);
+        if (mCheckForAccounts && !Utils.getSharedPreference(this, GeneralPreferences.KEY_SKIP_SETUP, false)) {
+            mHandler = new QueryHandler(this.getContentResolver());
+            mHandler.startQuery(0, null, Calendars.CONTENT_URI, new String[] {
+            Calendars._ID
+            }, null, null /* selection args */, null /* sort order */);
+        }
+        // update widget to recheck permissions
+        Intent widgetIntent = new Intent(Utils.getWidgetScheduledUpdateAction(this));
+        widgetIntent.setDataAndType(CalendarContract.CONTENT_URI, Utils.APPWIDGET_DATA_TYPE);
+        sendBroadcast(widgetIntent);
     }
 }

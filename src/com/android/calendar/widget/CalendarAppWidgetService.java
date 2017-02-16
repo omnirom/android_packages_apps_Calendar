@@ -97,9 +97,6 @@ public class CalendarAppWidgetService extends RemoteViewsService {
             EVENT_PROJECTION[INDEX_COLOR] = Instances.CALENDAR_COLOR;
         }
     }
-    static final int MAX_DAYS = 14;
-
-    private static final long SEARCH_DURATION = MAX_DAYS * DateUtils.DAY_IN_MILLIS;
 
     /**
      * Update interval used when no next-update calculated, or bad trigger time in past.
@@ -178,6 +175,10 @@ public class CalendarAppWidgetService extends RemoteViewsService {
         public CalendarFactory() {
             // This is being created as part of onReceive
 
+        }
+
+        private long getSearchDuration() {
+            return Utils.getWidgetDays(mContext) * DateUtils.DAY_IN_MILLIS;
         }
 
         @Override
@@ -412,7 +413,7 @@ public class CalendarAppWidgetService extends RemoteViewsService {
             long now = System.currentTimeMillis();
             // Add a day on either side to catch all-day events
             long begin = now - DateUtils.DAY_IN_MILLIS;
-            long end = now + SEARCH_DURATION + DateUtils.DAY_IN_MILLIS;
+            long end = now + getSearchDuration() + DateUtils.DAY_IN_MILLIS;
 
             Uri uri = Uri.withAppendedPath(Instances.CONTENT_URI, Long.toString(begin) + "/" + end);
             return uri;

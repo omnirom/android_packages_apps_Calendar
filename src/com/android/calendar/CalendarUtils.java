@@ -16,11 +16,13 @@
 
 package com.android.calendar;
 
+import android.Manifest;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Looper;
 import android.provider.CalendarContract.CalendarCache;
@@ -268,6 +270,9 @@ public class CalendarUtils {
          * @return The string value representing the time zone Calendar should display
          */
         public String getTimeZone(Context context, Runnable callback) {
+            if (!isPermissionEnabled(context)) {
+                return mUseHomeTZ ? mHomeTZ : Time.getCurrentTimezone();
+            }
             synchronized (mTZCallbacks){
                 if (mFirstTZRequest) {
                     SharedPreferences prefs = getSharedPreferences(context, mPrefsName);
@@ -353,4 +358,14 @@ public class CalendarUtils {
         public static SharedPreferences getSharedPreferences(Context context, String prefsName) {
             return context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
         }
+
+    public static boolean isPermissionEnabled(Context context) {
+        if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+        }
+        return true;
+    }
 }

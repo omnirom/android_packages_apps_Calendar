@@ -2138,4 +2138,11 @@ public class Utils {
         nextMonth.set(c.getTimeInMillis());
         return nextMonth;
     }
+
+    public static int getWidgetDays(Context context) {
+        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(context);
+        String pref = prefs.getString(
+                GeneralPreferences.KEY_WIDGET_DAYS, GeneralPreferences.KEY_WIDGET_DAYS_DEFAULT);
+        return Integer.valueOf(pref);
+    }
 }
