@@ -471,7 +471,7 @@ public class GeneralPreferences extends PreferenceFragment implements
             switch (mListenerId) {
                 case (START_LISTENER):
                     if (hourOfDay >= endHour) {
-                        Toast.makeText(getActivity(), R.string.start_hour_invalid, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.hour_margin_invalid, Toast.LENGTH_LONG).show();
                         return;
                     }
                     mStartHour.setSummary(summary);
@@ -482,7 +482,7 @@ public class GeneralPreferences extends PreferenceFragment implements
                         hourOfDay = 24;
                     }
                     if (hourOfDay <= startHour) {
-                        Toast.makeText(getActivity(), R.string.end_hour_invalid, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.hour_margin_invalid, Toast.LENGTH_LONG).show();
                         return;
                     }
                     mEndHour.setSummary(summary);

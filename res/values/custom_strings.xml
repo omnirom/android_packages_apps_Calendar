@@ -18,15 +18,14 @@
 
     <string name="preferences_hours_filter_start_title">Start hour</string>
     <string name="preferences_hours_filter_end_title">End hour</string>
-    <string name="start_hour_invalid">Start hour must be before end hour</string>
-    <string name="end_hour_invalid">End hour must be after start hour</string>
+    <string name="hour_margin_invalid">Invalid time span</string>
     <string name="cancel_confirmation_dialog_message">Discard your changes and quit editing?</string>
     <string name="calendar_filter">Enable hour filter</string>
     <string name="calendar_type_mine">Owner</string>
     <string name="calendar_type_other">Other</string>
 
     <string name="preferences_widget_title">Widget</string>
-    <string name="preferences_widget_days_default">14</string>
+    <string name="preferences_widget_days_default" translatable="false" >14</string>
     <string name="preferences_widget_days_title">Display period</string>
     <string name="one_week">1 week</string>
     <string name="two_weeks">2 weeks</string>
