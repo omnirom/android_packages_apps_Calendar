@@ -227,11 +227,11 @@ public class CalendarViewAdapter extends BaseAdapter {
                     break;
                 case ViewType.WEEK:
                     lunarInfo.setVisibility(View.GONE);
+                    weekDay.setVisibility(View.VISIBLE);
                     if (Utils.getShowWeekNumber(mContext)) {
-                        weekDay.setVisibility(View.VISIBLE);
-                        weekDay.setText(buildWeekNum());
+                        weekDay.setText(buildWeekDate() + " / " + buildWeekNum());
                     } else {
-                        weekDay.setVisibility(View.GONE);
+                        weekDay.setText(buildWeekDate());
                     }
                     date.setText(buildMonthYearDate());
                     break;
@@ -248,11 +248,11 @@ public class CalendarViewAdapter extends BaseAdapter {
                     break;
                 case ViewType.THREE:
                     lunarInfo.setVisibility(View.GONE);
+                    weekDay.setVisibility(View.VISIBLE);
                     if (Utils.getShowWeekNumber(mContext)) {
-                        weekDay.setVisibility(View.VISIBLE);
-                        weekDay.setText(buildWeekNum());
+                        weekDay.setText(buildThreeDate() + " / " + buildWeekNum());
                     } else {
-                        weekDay.setVisibility(View.GONE);
+                        weekDay.setText(buildThreeDate());
                     }
                     date.setText(buildMonthYearDate());
                     break;
