@@ -110,7 +110,8 @@
         android:paddingLeft="16dip"
         android:paddingRight="16dip"
         android:paddingBottom="10dip"
-        android:scrollbars="none" >
+        android:scrollbars="none"
+        android:clipToPadding="false" >
 
         <LinearLayout
             android:id="@+id/two_pane"
