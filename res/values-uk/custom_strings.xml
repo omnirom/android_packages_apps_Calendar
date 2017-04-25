@@ -14,4 +14,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 дні</string>
+  <string name="preferences_hours_filter_start_title">Час початку</string>
+  <string name="preferences_hours_filter_end_title">Час закінчення</string>
+  <string name="hour_margin_invalid">Неприпустимий інтервал</string>
+  <string name="cancel_confirmation_dialog_message">Скасувати зміни та закрити редагування?</string>
+  <string name="calendar_filter">Увімкнути фільтр часу</string>
+  <string name="calendar_type_mine">Власник</string>
+  <string name="calendar_type_other">Інші</string>
+  <string name="preferences_widget_title">Віджет</string>
+  <string name="one_week">1 тиждень</string>
+  <string name="two_weeks">2 тижні</string>
+  <string name="three_weeks">3 тижні</string>
+  <string name="one_month">1 місяць</string>
+  <string name="three_months">3 місяці</string>
+</resources>

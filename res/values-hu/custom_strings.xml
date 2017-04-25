@@ -18,14 +18,12 @@
   <string name="three_days_view">3 nap</string>
   <string name="preferences_hours_filter_start_title">Kezdő óra</string>
   <string name="preferences_hours_filter_end_title">Vége óra</string>
-  <string name="start_hour_invalid">Kezdetnek a vége előtt kell lennie</string>
-  <string name="end_hour_invalid">A végének a kezdet után kell lennie</string>
+  <string name="hour_margin_invalid">Érvénytelen időtartam</string>
   <string name="cancel_confirmation_dialog_message">Módosítások elvetése és kilép a szerkesztésből?</string>
   <string name="calendar_filter">Óra szűrők engedélyezése</string>
   <string name="calendar_type_mine">Tulajdonos</string>
   <string name="calendar_type_other">Egyéb</string>
   <string name="preferences_widget_title">Modul</string>
-  <string name="preferences_widget_days_default">14</string>
   <string name="preferences_widget_days_title">Időszak megjelenítése</string>
   <string name="one_week">1 hét</string>
   <string name="two_weeks">2 hét</string>

@@ -18,14 +18,12 @@
   <string name="three_days_view">3 Tage</string>
   <string name="preferences_hours_filter_start_title">Start</string>
   <string name="preferences_hours_filter_end_title">Ende</string>
-  <string name="start_hour_invalid">Start muss vor dem Ende sein</string>
-  <string name="end_hour_invalid">Ende muss nach dem Start sein</string>
+  <string name="hour_margin_invalid">Ungültige Zeitspanne</string>
   <string name="cancel_confirmation_dialog_message">Änderungen verwerfen und Bearbeitung beenden?</string>
   <string name="calendar_filter">Stunden-Filter aktivieren</string>
   <string name="calendar_type_mine">Eigentümer</string>
   <string name="calendar_type_other">Sonstige</string>
   <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_default">14</string>
   <string name="preferences_widget_days_title">Anzeigezeitraum</string>
   <string name="one_week">1 Woche</string>
   <string name="two_weeks">2 Wochen</string>

@@ -18,5 +18,4 @@
   <string name="three_days_view">3 dagen</string>
   <string name="preferences_hours_filter_start_title">Start uur</string>
   <string name="preferences_hours_filter_end_title">Einde uur</string>
-  <string name="start_hour_invalid">Start uur moet vóór het einde uur ingevuld worden</string>
 </resources>

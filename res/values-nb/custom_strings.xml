@@ -14,4 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 dager</string>
+  <string name="preferences_hours_filter_start_title">Time start</string>
+  <string name="preferences_hours_filter_end_title">Time slutt</string>
+  <string name="hour_margin_invalid">Ugyldig tidsrom</string>
+  <string name="cancel_confirmation_dialog_message">Forkaste endringene og avslutte redigering?</string>
+  <string name="calendar_filter">Aktiver time filter</string>
+  <string name="calendar_type_mine">Eier</string>
+  <string name="calendar_type_other">Annen</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="preferences_widget_days_title">Visningsperiode</string>
+  <string name="one_week">1 uke</string>
+  <string name="two_weeks">2 uker</string>
+  <string name="three_weeks">3 uker</string>
+  <string name="one_month">1 måned</string>
+  <string name="three_months">3 måneder</string>
+</resources>

@@ -16,11 +16,16 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="three_days_view">3 дня</string>
+  <string name="preferences_hours_filter_start_title">Время начала</string>
+  <string name="preferences_hours_filter_end_title">Время конца</string>
+  <string name="hour_margin_invalid">Недопустимый интервал</string>
   <string name="cancel_confirmation_dialog_message">Отменить ваши изменения и выйти из режима редактирования?</string>
+  <string name="calendar_filter">Включить фильтр времени</string>
   <string name="calendar_type_mine">Владелец</string>
   <string name="calendar_type_other">Другие</string>
   <string name="preferences_widget_title">Виджет</string>
-  <string name="preferences_widget_days_default">14</string>
+  <string name="preferences_widget_days_title">Показать период</string>
+  <string name="one_week">1 неделю</string>
   <string name="two_weeks">2 недели</string>
   <string name="three_weeks">3 недели</string>
   <string name="one_month">1 месяц</string>

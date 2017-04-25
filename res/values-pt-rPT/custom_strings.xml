@@ -14,4 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 dias</string>
+  <string name="preferences_hours_filter_start_title">Hora de início</string>
+  <string name="preferences_hours_filter_end_title">Hora de fim</string>
+  <string name="hour_margin_invalid">Intervalo de tempo inválido</string>
+  <string name="cancel_confirmation_dialog_message">Descartar as suas alterações e sair do modo de edição?</string>
+  <string name="calendar_filter">Activar o filtro de hora</string>
+  <string name="calendar_type_mine">Proprietário</string>
+  <string name="calendar_type_other">Outro</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="preferences_widget_days_title">Período de visualização</string>
+  <string name="one_week">1 semana</string>
+  <string name="two_weeks">2 semanas</string>
+  <string name="three_weeks">3 semanas</string>
+  <string name="one_month">1 mês</string>
+  <string name="three_months">3 meses</string>
+</resources>

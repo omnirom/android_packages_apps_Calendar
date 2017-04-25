@@ -18,14 +18,12 @@
   <string name="three_days_view">3 dny</string>
   <string name="preferences_hours_filter_start_title">Začátek</string>
   <string name="preferences_hours_filter_end_title">Konec</string>
-  <string name="start_hour_invalid">Hodina zahájení musí být dřívější než hodina konce</string>
-  <string name="end_hour_invalid">Hodina konce musí být pozdější než hodina začátku</string>
+  <string name="hour_margin_invalid">Neplatný časový rozsah</string>
   <string name="cancel_confirmation_dialog_message">Zahodit změny a ukončit úpravy?</string>
   <string name="calendar_filter">Povolit filtr</string>
   <string name="calendar_type_mine">Vlastník</string>
   <string name="calendar_type_other">Ostatní</string>
   <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_default">14</string>
   <string name="preferences_widget_days_title">Doba zobrazení</string>
   <string name="one_week">1 týden</string>
   <string name="two_weeks">2 týdny</string>
