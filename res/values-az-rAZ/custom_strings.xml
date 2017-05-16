@@ -14,4 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 Gün</string>
+  <string name="preferences_hours_filter_start_title">Başlama saatı</string>
+  <string name="preferences_hours_filter_end_title">Qurtarma saatı</string>
+  <string name="hour_margin_invalid">Naməlum vaxt aşımı</string>
+  <string name="cancel_confirmation_dialog_message">Dəyişiklikləri ləğv edib, redaktəni ləğv etsin?</string>
+  <string name="calendar_filter">Saat filtrini aktivləşdir</string>
+  <string name="calendar_type_mine">Yaradıcı</string>
+  <string name="calendar_type_other">Digər</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="preferences_widget_days_title">Ekran periyodu</string>
+  <string name="one_week">1 həftə</string>
+  <string name="two_weeks">2 həftə</string>
+  <string name="three_weeks">3 həftə</string>
+  <string name="one_month">1 ay</string>
+  <string name="three_months">3 ay</string>
+</resources>

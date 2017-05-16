@@ -18,6 +18,7 @@
   <string name="three_days_view">3 天</string>
   <string name="preferences_hours_filter_start_title">开始时间</string>
   <string name="preferences_hours_filter_end_title">结束时间</string>
+  <string name="hour_margin_invalid">时间跨度无效</string>
   <string name="cancel_confirmation_dialog_message">放弃更改并退出编辑吗？</string>
   <string name="calendar_filter">启用时间过滤规则</string>
   <string name="calendar_type_mine">所有者</string>
