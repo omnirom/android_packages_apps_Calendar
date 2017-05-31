@@ -18,4 +18,16 @@
   <string name="three_days_view">3 dagen</string>
   <string name="preferences_hours_filter_start_title">Start uur</string>
   <string name="preferences_hours_filter_end_title">Einde uur</string>
+  <string name="hour_margin_invalid">Ongeldige tijd span</string>
+  <string name="cancel_confirmation_dialog_message">Uw wijzigingen negeren en stoppen met bewerken?</string>
+  <string name="calendar_filter">Uur filter inschakelen</string>
+  <string name="calendar_type_mine">Eigenaar</string>
+  <string name="calendar_type_other">Overig</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="preferences_widget_days_title">Display periode</string>
+  <string name="one_week">1 week</string>
+  <string name="two_weeks">2 weken</string>
+  <string name="three_weeks">3 weken</string>
+  <string name="one_month">1 maand</string>
+  <string name="three_months">3 maanden</string>
 </resources>

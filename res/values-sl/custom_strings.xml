@@ -18,6 +18,7 @@
   <string name="three_days_view">3 dni</string>
   <string name="preferences_hours_filter_start_title">Začetni čas</string>
   <string name="preferences_hours_filter_end_title">Končni čas</string>
+  <string name="hour_margin_invalid">Neveljaven časovni razpon</string>
   <string name="cancel_confirmation_dialog_message">Zavrzi spremembe in končaj urejanje?</string>
   <string name="calendar_filter">Omogoči časovni filter</string>
   <string name="calendar_type_mine">Lastnik</string>
