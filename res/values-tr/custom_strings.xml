@@ -24,7 +24,7 @@
   <string name="calendar_type_mine">Sahibi</string>
   <string name="calendar_type_other">Diğer</string>
   <string name="preferences_widget_title">Araç</string>
-  <string name="preferences_widget_days_title">Görüntüleme dönemi</string>
+  <string name="preferences_widget_days_title">Görüntüleme devri</string>
   <string name="one_week">1 hafta</string>
   <string name="two_weeks">2 hafta</string>
   <string name="three_weeks">3 hafta</string>

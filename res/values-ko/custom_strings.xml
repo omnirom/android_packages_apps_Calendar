@@ -14,4 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3일</string>
+  <string name="preferences_hours_filter_start_title">시작 시간</string>
+  <string name="preferences_hours_filter_end_title">종료 시간</string>
+  <string name="hour_margin_invalid">잘못된 시간 범위</string>
+  <string name="cancel_confirmation_dialog_message">변경 내용을 취소하고 편집을 종료하시겠습니까?</string>
+  <string name="calendar_filter">시간 필터 사용</string>
+  <string name="calendar_type_mine">소유자</string>
+  <string name="calendar_type_other">기타</string>
+  <string name="preferences_widget_title">위젯</string>
+  <string name="preferences_widget_days_title">표시 기간</string>
+  <string name="one_week">1주</string>
+  <string name="two_weeks">2주</string>
+  <string name="three_weeks">3주</string>
+  <string name="one_month">1개월</string>
+  <string name="three_months">3개월</string>
+</resources>
