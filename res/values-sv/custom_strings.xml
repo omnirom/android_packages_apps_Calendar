@@ -14,4 +14,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 dagar</string>
+  <string name="preferences_hours_filter_start_title">Starttimme</string>
+  <string name="preferences_hours_filter_end_title">Sluttimme</string>
+  <string name="hour_margin_invalid">Ogiltigt tidsintervall</string>
+  <string name="calendar_filter">Aktivera timfilter</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="one_week">1 vecka</string>
+  <string name="two_weeks">2 veckor</string>
+  <string name="three_weeks">3 veckor</string>
+  <string name="one_month">1 månad</string>
+  <string name="three_months">3 månader</string>
+</resources>
