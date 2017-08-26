@@ -226,7 +226,7 @@ public class AlertService extends Service {
             GlobalDismissManager.syncSenderDismissCache(this);
             updateAlertNotification(this);
         } else if (action.equals(Intent.ACTION_TIME_CHANGED) ||
-                action.equals(Intent.TIMEZONE_CHANGED)) {
+                action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
             doTimeChanged();
         } else if (action.equals(AlertReceiver.ACTION_DISMISS_OLD_REMINDERS)) {
             dismissOldAlerts(this);
