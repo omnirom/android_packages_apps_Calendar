@@ -21,10 +21,9 @@
         package="com.android.calendar"
         android:sharedUserLabel="@string/app_label">
 
-    <!--
-       NOTE: and original-package cannot be used, since the Eclair
-       version was using a shared user ID with the provider.
-    -->
+    <uses-sdk
+        android:minSdkVersion="24"
+        android:targetSdkVersion="25" />
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
@@ -36,7 +35,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.mail" />
 
     <application android:name="CalendarApplication"
@@ -178,15 +176,13 @@
 
         <receiver android:name=".alerts.AlertReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.EVENT_REMINDER" />
                 <action android:name="android.intent.action.TIME_SET" />
-                <data android:scheme="content" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.EVENT_REMINDER" />
+                <data android:scheme="content" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.PROVIDER_CHANGED"/>
@@ -198,24 +194,11 @@
         <receiver android:name=".alerts.GlobalDismissManager"
                   android:exported="false" />
 
-        <receiver android:name=".UpgradeReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <data android:scheme="package"/>
-            </intent-filter>
-        </receiver>
-
         <service android:name=".alerts.AlertService" />
 
         <service android:name=".alerts.DismissAlarmsService" />
 
         <service android:name=".alerts.SnoozeAlarmsService" />
-
-        <service android:name=".alerts.InitAlarmsService" />
 
         <!-- Declarations for the widget -->
         <receiver android:name=".widget.CalendarAppWidgetProvider" android:label="@string/gadget_title">
