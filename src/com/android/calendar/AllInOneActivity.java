@@ -433,8 +433,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         if (mPermsDone) {
             doRunWithPermissions(timeMillis, viewType);
-            // Check if the upgrade code has ever been run. If not, force a sync just this one time.
-            Utils.trySyncAndDisableUpgradeReceiver(this);
         }
     }
 
