@@ -1097,7 +1097,7 @@ public class AlertService extends Service {
         if (isPermissionEnabled(this)) {
             if (intent != null) {
                 Notification notification = (new Notification.Builder(this)).
-                    setContentTitle(getString(R.string.no_title_label)).
+                    setContentTitle(getString(R.string.calendar_refresh)).
                     setSmallIcon(R.drawable.stat_notify_calendar).
                     setShowWhen(false).
                     build();
