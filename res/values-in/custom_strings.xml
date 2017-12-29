@@ -14,4 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 Hari</string>
+  <string name="preferences_hours_filter_start_title">Jam mulai</string>
+  <string name="preferences_hours_filter_end_title">Jam akhir</string>
+  <string name="hour_margin_invalid">Rentang waktu tidak benar</string>
+  <string name="cancel_confirmation_dialog_message">Hapus perubahan dan berhenti mengedit?</string>
+  <string name="calendar_filter">Aktifkan filter jam</string>
+  <string name="calendar_type_mine">Pemilik</string>
+  <string name="calendar_type_other">Lainnya</string>
+  <string name="preferences_widget_title">Widget</string>
+  <string name="preferences_widget_days_title">Periode tampilan</string>
+  <string name="one_week">1 minggu</string>
+  <string name="two_weeks">2 minggu</string>
+  <string name="three_weeks">3 minggu</string>
+  <string name="one_month">1 bulan</string>
+  <string name="three_months">3 bulan</string>
+</resources>
