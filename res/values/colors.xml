@@ -144,5 +144,6 @@
     <color name="day_event_clicked_background_color">#33999999</color>
     <color name="day_clicked_background_color">#33999999</color>
     <color name="current_time_line_color">@color/primary_color</color>
-    
+
+    <color name="ic_launcher_background">#ffffff</color>
 </resources>
