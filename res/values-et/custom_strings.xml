@@ -15,6 +15,14 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 päeva</string>
+  <string name="calendar_type_mine">Omanik</string>
+  <string name="calendar_type_other">Muu</string>
+  <string name="preferences_widget_title">Vidin</string>
+  <string name="preferences_widget_days_title">Kuvatav periood</string>
+  <string name="one_week">1 nädal</string>
   <string name="two_weeks">2 nädalat</string>
   <string name="three_weeks">3 nädalat</string>
+  <string name="one_month">1 kuu</string>
+  <string name="three_months">3 kuud</string>
 </resources>
