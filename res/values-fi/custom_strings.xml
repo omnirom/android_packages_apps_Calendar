@@ -14,4 +14,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 päivää</string>
+  <string name="calendar_type_mine">Omistaja</string>
+  <string name="calendar_type_other">Muu</string>
+  <string name="preferences_widget_title">Widgetti</string>
+  <string name="preferences_widget_days_title">Näyttöjakso</string>
+  <string name="one_week">1 viikko</string>
+  <string name="two_weeks">2 viikkoa</string>
+  <string name="three_weeks">3 viikkoa</string>
+  <string name="one_month">1 kuukausi</string>
+  <string name="three_months">3 kuukautta</string>
+</resources>

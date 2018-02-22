@@ -19,6 +19,7 @@
   <string name="preferences_hours_filter_start_title">Algustund</string>
   <string name="preferences_hours_filter_end_title">Lõpptund</string>
   <string name="hour_margin_invalid">Sobimatu ajavahemik</string>
+  <string name="cancel_confirmation_dialog_message">Tühistad oma muudatused ja väljud muutmisest?</string>
   <string name="calendar_filter">Luba tunnifilter</string>
   <string name="calendar_type_mine">Omanik</string>
   <string name="calendar_type_other">Muu</string>
