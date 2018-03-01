@@ -26,6 +26,8 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.provider.CalendarContract.CalendarAlerts;
 
+import com.android.calendar.Utils;
+
 /**
  * Service for asynchronously marking a fired alarm as dismissed and scheduling
  * a new alarm in the future.
@@ -76,7 +78,7 @@ public class SnoozeAlarmsService extends IntentService {
             resolver.update(uri, dismissValues, selection, null);
 
             // Add a new alarm
-            long alarmTime = System.currentTimeMillis() + AlertUtils.SNOOZE_DELAY;
+            long alarmTime = System.currentTimeMillis() + Utils.getDefaultSnoozeTime(this);
             ContentValues values = AlertUtils.makeContentValues(eventId, eventStart, eventEnd,
                     alarmTime, 0);
             resolver.insert(uri, values);

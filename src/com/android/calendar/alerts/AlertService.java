@@ -112,6 +112,7 @@ public class AlertService extends Service {
 
     // Hard limit to the number of notifications displayed.
     public static final int MAX_NOTIFICATIONS = 20;
+    public static final int REFRESH_NOTIFICATION_ID = MAX_NOTIFICATIONS + 1;
 
     // Shared prefs key for storing whether the EVENT_REMINDER event from the provider
     // was ever received.  Some OEMs modified this provider broadcast, so we had to
@@ -163,11 +164,17 @@ public class AlertService extends Service {
         @Override
         public void cancel(int id) {
             mNm.cancel(id);
+            if (DEBUG) {
+                Log.d(TAG, "cancel notification id = " + id);
+            }
         }
 
         @Override
         public void notify(int id, NotificationWrapper nw) {
             mNm.notify(id, nw.mNotification);
+            if (DEBUG) {
+                Log.d(TAG, "notify notification id = " + id);
+            }
         }
     }
 
@@ -321,8 +328,7 @@ public class AlertService extends Service {
 
         long nextRefreshTime = Long.MAX_VALUE;
         int currentNotificationId = 1;
-        NotificationPrefs notificationPrefs = new NotificationPrefs(context, prefs,
-                (numFired == 0));
+        NotificationPrefs notificationPrefs = new NotificationPrefs(context, prefs);
 
         // If there are more high/medium priority events than we can show, bump some to
         // the low priority digest.
@@ -375,7 +381,7 @@ public class AlertService extends Service {
                 notification = AlertReceiver.makeBasicNotification(context, info.eventName,
                         summaryText, info.startMillis, info.endMillis, info.eventId,
                         AlertUtils.EXPIRED_GROUP_NOTIFICATION_ID,
-                        Notification.PRIORITY_MIN);
+                        Notification.PRIORITY_DEFAULT);
             } else {
                 // Multiple expired events are listed in a digest.
                 notification = AlertReceiver.makeDigestNotification(context,
@@ -867,17 +873,8 @@ public class AlertService extends Service {
                 info.eventName, summaryText, info.description, info.startMillis,
                 info.endMillis, info.eventId, notificationId, priorityVal);
 
-        boolean quietUpdate = true;
-        String ringtone = NotificationPrefs.EMPTY_RINGTONE;
-        if (info.newAlert) {
-            quietUpdate = prefs.quietUpdate;
-
-            // If we've already played a ringtone, don't play any more sounds so only
-            // 1 sound per group of notifications.
-            ringtone = prefs.getRingtoneAndSilence();
-        }
-        addNotificationOptions(notification, quietUpdate, tickerText,
-                prefs.getDefaultVibrate(), ringtone,
+        addNotificationOptions(notification, false, tickerText,
+                prefs.getDefaultVibrate(), prefs.getRingtoneAndSilence(),
                 true); /* Show the LED for these non-expired events */
 
         // Post the notification.
@@ -885,8 +882,7 @@ public class AlertService extends Service {
 
         if (DEBUG) {
             Log.d(TAG, "Posting individual alarm notification, eventId:" + info.eventId
-                    + ", notificationId:" + notificationId
-                    + (TextUtils.isEmpty(ringtone) ? ", quiet" : ", LOUD")
+                    + ", notificationId:" + notificationId + ", newAlert: " + info.newAlert 
                     + (highPriority ? ", high-priority" : ""));
         }
     }
@@ -954,40 +950,20 @@ public class AlertService extends Service {
     }
 
     /* package */ static class NotificationPrefs {
-        boolean quietUpdate;
         private Context context;
         private SharedPreferences prefs;
 
-        // These are lazily initialized, do not access any of the following directly; use getters.
-        private int defaultVibrate = -1;
-        private String ringtone = null;
-
-        private static final String EMPTY_RINGTONE = "";
-
-        NotificationPrefs(Context context, SharedPreferences prefs, boolean quietUpdate) {
+        NotificationPrefs(Context context, SharedPreferences prefs) {
             this.context = context;
             this.prefs = prefs;
-            this.quietUpdate = quietUpdate;
         }
 
         private boolean getDefaultVibrate() {
-            if (defaultVibrate < 0) {
-                defaultVibrate = Utils.getDefaultVibrate(context, prefs) ? 1 : 0;
-            }
-            return defaultVibrate == 1;
+            return Utils.getDefaultVibrate(context, prefs);
         }
 
         private String getRingtoneAndSilence() {
-            if (ringtone == null) {
-                if (quietUpdate) {
-                    ringtone = EMPTY_RINGTONE;
-                } else {
-                    ringtone = Utils.getRingTonePreference(context);
-                }
-            }
-            String retVal = ringtone;
-            ringtone = EMPTY_RINGTONE;
-            return retVal;
+            return Utils.getRingTonePreference(context);
         }
     }
 
@@ -1101,7 +1077,7 @@ public class AlertService extends Service {
                     setSmallIcon(R.drawable.stat_notify_calendar).
                     setShowWhen(false).
                     build();
-                startForeground(1, notification);
+                startForeground(REFRESH_NOTIFICATION_ID, notification);
 
                 Message msg = mServiceHandler.obtainMessage();
                 msg.arg1 = startId;

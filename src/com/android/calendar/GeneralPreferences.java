@@ -131,6 +131,8 @@ public class GeneralPreferences extends PreferenceFragment implements
     public static final boolean DEFAULT_SHOW_WEEK_NUM = false;
     // This should match the XML file.
     public static final String DEFAULT_RINGTONE = "content://settings/system/notification_sound";
+    public static final String SNOOZE_TIME_DEFAULT = "5";
+    public static final String KEY_SNOOZE_TIME = "preferences_snooze_time";
 
     CheckBoxPreference mAlert;
     CheckBoxPreference mVibrate;
@@ -147,6 +149,7 @@ public class GeneralPreferences extends PreferenceFragment implements
     private TimeSetListener mTimePickerListenerEndTime;
     private String mTimeZoneId;
     private ListPreference mWidgetDays;
+    private ListPreference mSnoozeTime;
 
     /** Return a properly configured SharedPreferences instance */
     public static SharedPreferences getSharedPreferences(Context context) {
@@ -204,6 +207,8 @@ public class GeneralPreferences extends PreferenceFragment implements
         mDefaultReminder.setSummary(mDefaultReminder.getEntry());
         mWidgetDays = (ListPreference) preferenceScreen.findPreference(KEY_WIDGET_DAYS);
         mWidgetDays.setSummary(mWidgetDays.getEntry());
+        mSnoozeTime= (ListPreference) preferenceScreen.findPreference(KEY_SNOOZE_TIME);
+        mSnoozeTime.setSummary(mSnoozeTime.getEntry());
 
         // This triggers an asynchronous call to the provider to refresh the data in shared pref
         mTimeZoneId = Utils.getTimeZone(activity, null);
@@ -238,8 +243,6 @@ public class GeneralPreferences extends PreferenceFragment implements
         if (tzpd != null) {
             tzpd.setOnTimeZoneSetListener(this);
         }
-
-        updateChildPreferences();
 
         int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
                 KEY_HOURS_FILTER_START_DEFAULT);
@@ -297,6 +300,7 @@ public class GeneralPreferences extends PreferenceFragment implements
         mHideDeclined.setOnPreferenceChangeListener(listener);
         mVibrate.setOnPreferenceChangeListener(listener);
         mWidgetDays.setOnPreferenceChangeListener(listener);
+        mSnoozeTime.setOnPreferenceChangeListener(listener);
     }
 
     @Override
@@ -311,7 +315,6 @@ public class GeneralPreferences extends PreferenceFragment implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Activity a = getActivity();
         if (key.equals(KEY_ALERTS)) {
-            updateChildPreferences();
             if (a != null) {
                 Intent intent = new Intent();
                 intent.setClass(a, AlertReceiver.class);
@@ -372,6 +375,10 @@ public class GeneralPreferences extends PreferenceFragment implements
             intent.setDataAndType(CalendarContract.CONTENT_URI, Utils.APPWIDGET_DATA_TYPE);
             activity.sendBroadcast(intent);
             return true;
+        } else if (preference == mSnoozeTime) {
+            mSnoozeTime.setValue((String) newValue);
+            mSnoozeTime.setSummary(mSnoozeTime.getEntry());
+            return true;
         } else {
             return true;
         }
@@ -389,22 +396,6 @@ public class GeneralPreferences extends PreferenceFragment implements
         }
         return null;
     }
-
-    /**
-     * Keeps the dependent settings in sync with the parent preference, so for
-     * example, when notifications are turned off, we disable the preferences
-     * for configuring the exact notification behavior.
-     */
-    private void updateChildPreferences() {
-        if (mAlert.isChecked()) {
-            mVibrate.setEnabled(true);
-            mRingtone.setEnabled(true);
-        } else {
-            mVibrate.setEnabled(false);
-            mRingtone.setEnabled(false);
-        }
-    }
-
 
     @Override
     public boolean onPreferenceTreeClick(

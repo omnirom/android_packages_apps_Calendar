@@ -73,13 +73,24 @@
             android:key="preferences_alerts_ringtone"
             android:title="@string/preferences_alerts_ringtone_title"
             android:ringtoneType="notification"
-            android:defaultValue="content://settings/system/notification_sound" />
+            android:defaultValue="content://settings/system/notification_sound"
+            android:dependency="preferences_alerts" />
 
         <CheckBoxPreference
             android:layout="?android:attr/preferenceLayoutChild"
             android:key="preferences_alerts_vibrate"
             android:title="@string/preferences_alerts_vibrateWhen_title"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            android:dependency="preferences_alerts" />
+
+        <ListPreference
+            android:key="preferences_snooze_time"
+            android:defaultValue="@string/preferences_snooze_time_default"
+            android:title="@string/preferences_snooze_time_title"
+            android:entries="@array/preferences_snooze_time_labels"
+            android:entryValues="@array/preferences_snooze_time_values"
+            android:dialogTitle="@string/preferences_snooze_time_title"
+            android:dependency="preferences_alerts" />
 
         <ListPreference
             android:key="preferences_default_reminder"

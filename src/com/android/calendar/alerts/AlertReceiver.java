@@ -485,8 +485,7 @@ public class AlertReceiver extends BroadcastReceiver {
         if (Utils.isJellybeanOrLater()) {
             // New-style notification...
 
-            // Set to min priority to encourage the notification manager to collapse it.
-            notificationBuilder.setPriority(Notification.PRIORITY_MIN);
+            notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT);
 
             if (expandable) {
                 // Multiple reminders.  Combine into an expanded digest notification.

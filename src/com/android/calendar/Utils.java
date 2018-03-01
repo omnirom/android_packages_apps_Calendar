@@ -2123,4 +2123,11 @@ public class Utils {
                 GeneralPreferences.KEY_WIDGET_DAYS, GeneralPreferences.KEY_WIDGET_DAYS_DEFAULT);
         return Integer.valueOf(pref);
     }
+
+    public static long getDefaultSnoozeTime(Context context) {
+        SharedPreferences prefs = GeneralPreferences.getSharedPreferences(context);
+        String pref = prefs.getString(GeneralPreferences.KEY_SNOOZE_TIME, GeneralPreferences.SNOOZE_TIME_DEFAULT);
+        long snoozeTime = Integer.valueOf(pref);
+        return snoozeTime * 60 * 1000L;
+    }
 }
