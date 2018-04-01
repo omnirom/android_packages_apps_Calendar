@@ -30,4 +30,9 @@
   <string name="three_weeks">3 周</string>
   <string name="one_month">1个月</string>
   <string name="three_months">3个月</string>
+  <string name="preferences_snooze_time_title">默认暂停时间</string>
+  <string name="five_minutes">5 分钟</string>
+  <string name="ten_minutes">10 分钟</string>
+  <string name="fifteen_minites">15 分钟</string>
+  <string name="thirty_minutes">30 分钟</string>
 </resources>

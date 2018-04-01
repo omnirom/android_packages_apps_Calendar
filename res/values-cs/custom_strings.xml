@@ -30,4 +30,9 @@
   <string name="three_weeks">3 týdny</string>
   <string name="one_month">1 měsíc</string>
   <string name="three_months">3 měsíce</string>
+  <string name="preferences_snooze_time_title">Výchozí čas odložení</string>
+  <string name="five_minutes">5 minut</string>
+  <string name="ten_minutes">10 minut</string>
+  <string name="fifteen_minites">15 minut</string>
+  <string name="thirty_minutes">30 minut</string>
 </resources>

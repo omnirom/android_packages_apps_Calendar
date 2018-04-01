@@ -30,4 +30,9 @@
   <string name="three_weeks">3 hét</string>
   <string name="one_month">1 hónap</string>
   <string name="three_months">3 hónap</string>
+  <string name="preferences_snooze_time_title">Alapértelmezett szundi idő</string>
+  <string name="five_minutes">5 perc</string>
+  <string name="ten_minutes">10 perc</string>
+  <string name="fifteen_minites">15 perc</string>
+  <string name="thirty_minutes">30 perc</string>
 </resources>

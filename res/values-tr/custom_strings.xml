@@ -30,4 +30,9 @@
   <string name="three_weeks">3 hafta</string>
   <string name="one_month">1 ay</string>
   <string name="three_months">3 ay</string>
+  <string name="preferences_snooze_time_title">Standart erteleme müddeti</string>
+  <string name="five_minutes">5 dakika</string>
+  <string name="ten_minutes">10 dakika</string>
+  <string name="fifteen_minites">15 dakika</string>
+  <string name="thirty_minutes">30 dakika</string>
 </resources>

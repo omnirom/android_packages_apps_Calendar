@@ -30,4 +30,9 @@
   <string name="three_weeks">3 semaines</string>
   <string name="one_month">1 mois</string>
   <string name="three_months">3 mois</string>
+  <string name="preferences_snooze_time_title">Temps de veille par défaut</string>
+  <string name="five_minutes">5 minutes</string>
+  <string name="ten_minutes">10 minutes</string>
+  <string name="fifteen_minites">15 minutes</string>
+  <string name="thirty_minutes">30 minutes</string>
 </resources>
