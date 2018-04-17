@@ -30,4 +30,8 @@
   <string name="three_weeks">3 semanas</string>
   <string name="one_month">1 mês</string>
   <string name="three_months">3 meses</string>
+  <string name="five_minutes">5 minutos</string>
+  <string name="ten_minutes">10 minutos</string>
+  <string name="fifteen_minites">15 minutos</string>
+  <string name="thirty_minutes">30 minutos</string>
 </resources>

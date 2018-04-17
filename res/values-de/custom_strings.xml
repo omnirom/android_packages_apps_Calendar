@@ -30,4 +30,9 @@
   <string name="three_weeks">3 Wochen</string>
   <string name="one_month">1 Monat</string>
   <string name="three_months">3 Monate</string>
+  <string name="preferences_snooze_time_title">Standardmäßige Schlummerzeit</string>
+  <string name="five_minutes">5 Minuten</string>
+  <string name="ten_minutes">10 Minuten</string>
+  <string name="fifteen_minites">15 Minuten</string>
+  <string name="thirty_minutes">30 Minuten</string>
 </resources>
