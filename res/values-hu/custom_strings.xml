@@ -16,8 +16,8 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="three_days_view">3 nap</string>
-  <string name="preferences_hours_filter_start_title">Kezdő óra</string>
-  <string name="preferences_hours_filter_end_title">Vége óra</string>
+  <string name="preferences_hours_filter_start_title">Kezdés ideje</string>
+  <string name="preferences_hours_filter_end_title">Befejezés ideje</string>
   <string name="hour_margin_invalid">Érvénytelen időtartam</string>
   <string name="cancel_confirmation_dialog_message">Módosítások elvetése és kilép a szerkesztésből?</string>
   <string name="calendar_filter">Óra szűrők engedélyezése</string>
