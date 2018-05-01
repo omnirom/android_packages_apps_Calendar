@@ -30,6 +30,7 @@
   <string name="three_weeks">3 недели</string>
   <string name="one_month">1 месяц</string>
   <string name="three_months">3 месяца</string>
+  <string name="preferences_snooze_time_title">Время повтора по умолчанию</string>
   <string name="five_minutes">5 мин.</string>
   <string name="ten_minutes">10 мин.</string>
   <string name="fifteen_minites">15 мин.</string>
