@@ -30,4 +30,9 @@
   <string name="three_weeks">3 tygodnie</string>
   <string name="one_month">Miesiąc</string>
   <string name="three_months">3 miesiące</string>
+  <string name="preferences_snooze_time_title">Domyślny czas drzemki</string>
+  <string name="five_minutes">5 minut</string>
+  <string name="ten_minutes">10 minut</string>
+  <string name="fifteen_minites">15 minut</string>
+  <string name="thirty_minutes">30 minut</string>
 </resources>
