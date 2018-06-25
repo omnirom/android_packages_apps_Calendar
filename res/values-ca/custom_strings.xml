@@ -14,4 +14,25 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"></resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="three_days_view">3 dies</string>
+  <string name="preferences_hours_filter_start_title">Hora d\'inici</string>
+  <string name="preferences_hours_filter_end_title">Hora de finalització</string>
+  <string name="hour_margin_invalid">Interval de temps no vàlid</string>
+  <string name="cancel_confirmation_dialog_message">Voleu descartar el canvis i sortir de l\'edició?</string>
+  <string name="calendar_filter">Habilita el filtre horari</string>
+  <string name="calendar_type_mine">Usuari</string>
+  <string name="calendar_type_other">Altre</string>
+  <string name="preferences_widget_title">Giny</string>
+  <string name="preferences_widget_days_title">Període de visualització</string>
+  <string name="one_week">1 setmana</string>
+  <string name="two_weeks">2 setmanes</string>
+  <string name="three_weeks">3 setmanes</string>
+  <string name="one_month">1 mes</string>
+  <string name="three_months">3 mesos</string>
+  <string name="preferences_snooze_time_title">Temps de repetició per defecte</string>
+  <string name="five_minutes">5 minuts</string>
+  <string name="ten_minutes">10 minuts</string>
+  <string name="fifteen_minites">15 minuts</string>
+  <string name="thirty_minutes">30 minuts</string>
+</resources>
