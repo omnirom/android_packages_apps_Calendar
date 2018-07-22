@@ -21,7 +21,7 @@
   <string name="hour_margin_invalid">Interval de temps no vàlid</string>
   <string name="cancel_confirmation_dialog_message">Voleu descartar el canvis i sortir de l\'edició?</string>
   <string name="calendar_filter">Habilita el filtre horari</string>
-  <string name="calendar_type_mine">Usuari</string>
+  <string name="calendar_type_mine">Propietari</string>
   <string name="calendar_type_other">Altre</string>
   <string name="preferences_widget_title">Giny</string>
   <string name="preferences_widget_days_title">Període de visualització</string>
