@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 jours</string>
-  <string name="preferences_hours_filter_start_title">Heure de début</string>
-  <string name="preferences_hours_filter_end_title">Heure de fin</string>
-  <string name="hour_margin_invalid">Plage horaire invalide</string>
-  <string name="cancel_confirmation_dialog_message">Ignorer les modifications et quitter l’édition ?</string>
-  <string name="calendar_filter">Activer le filtre horaire</string>
-  <string name="calendar_type_mine">Propriétaire</string>
-  <string name="calendar_type_other">Autre</string>
-  <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_title">Période d’affichage</string>
-  <string name="one_week">1 semaine</string>
-  <string name="two_weeks">2 semaines</string>
-  <string name="three_weeks">3 semaines</string>
-  <string name="one_month">1 mois</string>
-  <string name="three_months">3 mois</string>
-  <string name="preferences_snooze_time_title">Temps de veille par défaut</string>
-  <string name="five_minutes">5 minutes</string>
-  <string name="ten_minutes">10 minutes</string>
-  <string name="fifteen_minites">15 minutes</string>
-  <string name="thirty_minutes">30 minutes</string>
+    <string name="three_days_view">3 jours</string>
+    <string name="preferences_hours_filter_start_title">Heure de début</string>
+    <string name="preferences_hours_filter_end_title">Heure de fin</string>
+    <string name="hour_margin_invalid">Plage horaire invalide</string>
+    <string name="cancel_confirmation_dialog_message">Ignorer les modifications et quitter l’édition ?</string>
+    <string name="calendar_filter">Activer le filtre horaire</string>
+    <string name="calendar_type_mine">Propriétaire</string>
+    <string name="calendar_type_other">Autre</string>
+    <string name="preferences_widget_title">Widget</string>
+    <string name="preferences_widget_days_title">Période d’affichage</string>
+    <string name="one_week">1 semaine</string>
+    <string name="two_weeks">2 semaines</string>
+    <string name="three_weeks">3 semaines</string>
+    <string name="one_month">1 mois</string>
+    <string name="three_months">3 mois</string>
+    <string name="preferences_snooze_time_title">Temps de veille par défaut</string>
+    <string name="five_minutes">5 minutes</string>
+    <string name="ten_minutes">10 minutes</string>
+    <string name="fifteen_minites">15 minutes</string>
+    <string name="thirty_minutes">30 minutes</string>
 </resources>

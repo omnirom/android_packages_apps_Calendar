@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 dny</string>
-  <string name="preferences_hours_filter_start_title">Začátek</string>
-  <string name="preferences_hours_filter_end_title">Konec</string>
-  <string name="hour_margin_invalid">Neplatný časový rozsah</string>
-  <string name="cancel_confirmation_dialog_message">Zahodit změny a ukončit úpravy?</string>
-  <string name="calendar_filter">Povolit filtr</string>
-  <string name="calendar_type_mine">Vlastník</string>
-  <string name="calendar_type_other">Ostatní</string>
-  <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_title">Doba zobrazení</string>
-  <string name="one_week">1 týden</string>
-  <string name="two_weeks">2 týdny</string>
-  <string name="three_weeks">3 týdny</string>
-  <string name="one_month">1 měsíc</string>
-  <string name="three_months">3 měsíce</string>
-  <string name="preferences_snooze_time_title">Výchozí čas odložení</string>
-  <string name="five_minutes">5 minut</string>
-  <string name="ten_minutes">10 minut</string>
-  <string name="fifteen_minites">15 minut</string>
-  <string name="thirty_minutes">30 minut</string>
+    <string name="three_days_view">3 dny</string>
+    <string name="preferences_hours_filter_start_title">Začátek</string>
+    <string name="preferences_hours_filter_end_title">Konec</string>
+    <string name="hour_margin_invalid">Neplatný časový rozsah</string>
+    <string name="cancel_confirmation_dialog_message">Zahodit změny a ukončit úpravy?</string>
+    <string name="calendar_filter">Povolit filtr</string>
+    <string name="calendar_type_mine">Vlastník</string>
+    <string name="calendar_type_other">Ostatní</string>
+    <string name="preferences_widget_title">Widget</string>
+    <string name="preferences_widget_days_title">Doba zobrazení</string>
+    <string name="one_week">1 týden</string>
+    <string name="two_weeks">2 týdny</string>
+    <string name="three_weeks">3 týdny</string>
+    <string name="one_month">1 měsíc</string>
+    <string name="three_months">3 měsíce</string>
+    <string name="preferences_snooze_time_title">Výchozí čas odložení</string>
+    <string name="five_minutes">5 minut</string>
+    <string name="ten_minutes">10 minut</string>
+    <string name="fifteen_minites">15 minut</string>
+    <string name="thirty_minutes">30 minut</string>
 </resources>

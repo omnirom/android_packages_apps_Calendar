@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 天</string>
-  <string name="preferences_hours_filter_start_title">開始時間</string>
-  <string name="preferences_hours_filter_end_title">結束時間</string>
-  <string name="hour_margin_invalid">無效的時間間隔</string>
-  <string name="cancel_confirmation_dialog_message">放棄更改並退出編輯？</string>
-  <string name="calendar_filter">啟用將已過去的小時過濾</string>
-  <string name="calendar_type_mine">擁有者</string>
-  <string name="calendar_type_other">其他</string>
-  <string name="preferences_widget_title">小工具</string>
-  <string name="preferences_widget_days_title">顯示期間</string>
-  <string name="one_week">1周</string>
-  <string name="two_weeks">2周</string>
-  <string name="three_weeks">3周</string>
-  <string name="one_month">1個月</string>
-  <string name="three_months">3個月</string>
-  <string name="preferences_snooze_time_title">預設暫停時間</string>
-  <string name="five_minutes">5 分鐘</string>
-  <string name="ten_minutes">10 分鐘</string>
-  <string name="fifteen_minites">15 分鐘</string>
-  <string name="thirty_minutes">30 分鐘</string>
+    <string name="three_days_view">3 天</string>
+    <string name="preferences_hours_filter_start_title">開始時間</string>
+    <string name="preferences_hours_filter_end_title">結束時間</string>
+    <string name="hour_margin_invalid">無效的時間間隔</string>
+    <string name="cancel_confirmation_dialog_message">放棄更改並退出編輯？</string>
+    <string name="calendar_filter">啟用將已過去的小時過濾</string>
+    <string name="calendar_type_mine">擁有者</string>
+    <string name="calendar_type_other">其他</string>
+    <string name="preferences_widget_title">小工具</string>
+    <string name="preferences_widget_days_title">顯示期間</string>
+    <string name="one_week">1周</string>
+    <string name="two_weeks">2周</string>
+    <string name="three_weeks">3周</string>
+    <string name="one_month">1個月</string>
+    <string name="three_months">3個月</string>
+    <string name="preferences_snooze_time_title">預設暫停時間</string>
+    <string name="five_minutes">5 分鐘</string>
+    <string name="ten_minutes">10 分鐘</string>
+    <string name="fifteen_minites">15 分鐘</string>
+    <string name="thirty_minutes">30 分鐘</string>
 </resources>

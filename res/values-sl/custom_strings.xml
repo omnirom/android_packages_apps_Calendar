@@ -15,19 +15,19 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 dni</string>
-  <string name="preferences_hours_filter_start_title">Začetni čas</string>
-  <string name="preferences_hours_filter_end_title">Končni čas</string>
-  <string name="hour_margin_invalid">Neveljaven časovni razpon</string>
-  <string name="cancel_confirmation_dialog_message">Zavrzi spremembe in končaj urejanje?</string>
-  <string name="calendar_filter">Omogoči časovni filter</string>
-  <string name="calendar_type_mine">Lastnik</string>
-  <string name="calendar_type_other">Drugo</string>
-  <string name="preferences_widget_title">Pripomoček</string>
-  <string name="preferences_widget_days_title">Obdobje prikaza</string>
-  <string name="one_week">1 teden</string>
-  <string name="two_weeks">2 tedna</string>
-  <string name="three_weeks">3 tedne</string>
-  <string name="one_month">1 mesec</string>
-  <string name="three_months">3 mesece</string>
+    <string name="three_days_view">3 dni</string>
+    <string name="preferences_hours_filter_start_title">Začetni čas</string>
+    <string name="preferences_hours_filter_end_title">Končni čas</string>
+    <string name="hour_margin_invalid">Neveljaven časovni razpon</string>
+    <string name="cancel_confirmation_dialog_message">Zavrzi spremembe in končaj urejanje?</string>
+    <string name="calendar_filter">Omogoči časovni filter</string>
+    <string name="calendar_type_mine">Lastnik</string>
+    <string name="calendar_type_other">Drugo</string>
+    <string name="preferences_widget_title">Pripomoček</string>
+    <string name="preferences_widget_days_title">Obdobje prikaza</string>
+    <string name="one_week">1 teden</string>
+    <string name="two_weeks">2 tedna</string>
+    <string name="three_weeks">3 tedne</string>
+    <string name="one_month">1 mesec</string>
+    <string name="three_months">3 mesece</string>
 </resources>

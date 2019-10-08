@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 Gün</string>
-  <string name="preferences_hours_filter_start_title">Başlangıç sâati</string>
-  <string name="preferences_hours_filter_end_title">Bitiş sâati</string>
-  <string name="hour_margin_invalid">Geçersiz sâat aralığı</string>
-  <string name="cancel_confirmation_dialog_message">Değişiklikleri iptal etmek ve düzenlemekten vazgeçmek istediğinize emin misiniz?</string>
-  <string name="calendar_filter">Sâat süzgecini etkinleştir</string>
-  <string name="calendar_type_mine">Sahibi</string>
-  <string name="calendar_type_other">Diğer</string>
-  <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_title">Gösterme devri</string>
-  <string name="one_week">1 hafta</string>
-  <string name="two_weeks">2 hafta</string>
-  <string name="three_weeks">3 hafta</string>
-  <string name="one_month">1 ay</string>
-  <string name="three_months">3 ay</string>
-  <string name="preferences_snooze_time_title">Standart erteleme müddeti</string>
-  <string name="five_minutes">5 dakîka</string>
-  <string name="ten_minutes">10 dakîka</string>
-  <string name="fifteen_minites">15 dakîka</string>
-  <string name="thirty_minutes">30 dakîka</string>
+    <string name="three_days_view">3 Gün</string>
+    <string name="preferences_hours_filter_start_title">Başlangıç sâati</string>
+    <string name="preferences_hours_filter_end_title">Bitiş sâati</string>
+    <string name="hour_margin_invalid">Geçersiz sâat aralığı</string>
+    <string name="cancel_confirmation_dialog_message">Değişiklikleri iptal etmek ve düzenlemekten vazgeçmek istediğinize emin misiniz?</string>
+    <string name="calendar_filter">Sâat süzgecini etkinleştir</string>
+    <string name="calendar_type_mine">Sahibi</string>
+    <string name="calendar_type_other">Diğer</string>
+    <string name="preferences_widget_title">Widget</string>
+    <string name="preferences_widget_days_title">Gösterme devri</string>
+    <string name="one_week">1 hafta</string>
+    <string name="two_weeks">2 hafta</string>
+    <string name="three_weeks">3 hafta</string>
+    <string name="one_month">1 ay</string>
+    <string name="three_months">3 ay</string>
+    <string name="preferences_snooze_time_title">Standart erteleme müddeti</string>
+    <string name="five_minutes">5 dakîka</string>
+    <string name="ten_minutes">10 dakîka</string>
+    <string name="fifteen_minites">15 dakîka</string>
+    <string name="thirty_minutes">30 dakîka</string>
 </resources>

@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 päeva</string>
-  <string name="preferences_hours_filter_start_title">Algustund</string>
-  <string name="preferences_hours_filter_end_title">Lõpptund</string>
-  <string name="hour_margin_invalid">Sobimatu ajavahemik</string>
-  <string name="cancel_confirmation_dialog_message">Tühistad oma muudatused ja väljud muutmisest?</string>
-  <string name="calendar_filter">Luba tunnifilter</string>
-  <string name="calendar_type_mine">Omanik</string>
-  <string name="calendar_type_other">Muu</string>
-  <string name="preferences_widget_title">Vidin</string>
-  <string name="preferences_widget_days_title">Kuvatav periood</string>
-  <string name="one_week">1 nädal</string>
-  <string name="two_weeks">2 nädalat</string>
-  <string name="three_weeks">3 nädalat</string>
-  <string name="one_month">1 kuu</string>
-  <string name="three_months">3 kuud</string>
-  <string name="preferences_snooze_time_title">Vaikimisi edasilükkamisaeg</string>
-  <string name="five_minutes">5 minutit</string>
-  <string name="ten_minutes">10 minutit</string>
-  <string name="fifteen_minites">15 minutit</string>
-  <string name="thirty_minutes">30 minutit</string>
+    <string name="three_days_view">3 päeva</string>
+    <string name="preferences_hours_filter_start_title">Algustund</string>
+    <string name="preferences_hours_filter_end_title">Lõpptund</string>
+    <string name="hour_margin_invalid">Sobimatu ajavahemik</string>
+    <string name="cancel_confirmation_dialog_message">Tühistad oma muudatused ja väljud muutmisest?</string>
+    <string name="calendar_filter">Luba tunnifilter</string>
+    <string name="calendar_type_mine">Omanik</string>
+    <string name="calendar_type_other">Muu</string>
+    <string name="preferences_widget_title">Vidin</string>
+    <string name="preferences_widget_days_title">Kuvatav periood</string>
+    <string name="one_week">1 nädal</string>
+    <string name="two_weeks">2 nädalat</string>
+    <string name="three_weeks">3 nädalat</string>
+    <string name="one_month">1 kuu</string>
+    <string name="three_months">3 kuud</string>
+    <string name="preferences_snooze_time_title">Vaikimisi kordusaeg</string>
+    <string name="five_minutes">5 minutit</string>
+    <string name="ten_minutes">10 minutit</string>
+    <string name="fifteen_minites">15 minutit</string>
+    <string name="thirty_minutes">30 minutit</string>
 </resources>

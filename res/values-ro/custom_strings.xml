@@ -15,19 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 zile</string>
-  <string name="preferences_hours_filter_start_title">Ora de începere</string>
-  <string name="preferences_hours_filter_end_title">Ora de sfârşit</string>
-  <string name="hour_margin_invalid">Interval de timp greșit</string>
-  <string name="cancel_confirmation_dialog_message">Renunțați la modificări şi închideți editarea?</string>
-  <string name="calendar_filter">Activare filtru orar</string>
-  <string name="calendar_type_mine">Proprietar</string>
-  <string name="calendar_type_other">Altele</string>
-  <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_title">Perioada de afişare</string>
-  <string name="one_week">1 săptămână</string>
-  <string name="two_weeks">2 săptămâni</string>
-  <string name="three_weeks">3 săptămâni</string>
-  <string name="one_month">1 lună</string>
-  <string name="three_months">3 luni</string>
+    <string name="three_days_view">3 zile</string>
+    <string name="preferences_hours_filter_start_title">Ora de începere</string>
+    <string name="preferences_hours_filter_end_title">Ora de sfârşit</string>
+    <string name="hour_margin_invalid">Interval de timp greșit</string>
+    <string name="cancel_confirmation_dialog_message">Renunțați la modificări şi închideți editarea?</string>
+    <string name="calendar_filter">Activare filtru orar</string>
+    <string name="calendar_type_mine">Proprietar</string>
+    <string name="calendar_type_other">Altele</string>
+    <string name="preferences_widget_title">Widget</string>
+    <string name="preferences_widget_days_title">Perioada de afişare</string>
+    <string name="one_week">1 săptămână</string>
+    <string name="two_weeks">2 săptămâni</string>
+    <string name="three_weeks">3 săptămâni</string>
+    <string name="one_month">1 lună</string>
+    <string name="three_months">3 luni</string>
+    <string name="preferences_snooze_time_title">Durată amânare prestabilită</string>
+    <string name="five_minutes">5 minute</string>
+    <string name="ten_minutes">10 minute</string>
+    <string name="fifteen_minites">15 minute</string>
+    <string name="thirty_minutes">30 de minute</string>
 </resources>

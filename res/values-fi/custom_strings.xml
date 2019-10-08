@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 päivää</string>
-  <string name="preferences_hours_filter_start_title">Aloitustunti</string>
-  <string name="preferences_hours_filter_end_title">Lopetustunti</string>
-  <string name="hour_margin_invalid">Virheellinen aikaväli</string>
-  <string name="cancel_confirmation_dialog_message">Hylkää muutokset ja lopeta muokkaus?</string>
-  <string name="calendar_filter">Ota tuntisuodatin käyttöön</string>
-  <string name="calendar_type_mine">Omistaja</string>
-  <string name="calendar_type_other">Muu</string>
-  <string name="preferences_widget_title">Widgetti</string>
-  <string name="preferences_widget_days_title">Näyttöjakso</string>
-  <string name="one_week">1 viikko</string>
-  <string name="two_weeks">2 viikkoa</string>
-  <string name="three_weeks">3 viikkoa</string>
-  <string name="one_month">1 kuukausi</string>
-  <string name="three_months">3 kuukautta</string>
-  <string name="preferences_snooze_time_title">Oletus torkkuaika</string>
-  <string name="five_minutes">5 minuuttia</string>
-  <string name="ten_minutes">10 minuuttia</string>
-  <string name="fifteen_minites">15 minuuttia</string>
-  <string name="thirty_minutes">30 minuuttia</string>
+    <string name="three_days_view">3 päivää</string>
+    <string name="preferences_hours_filter_start_title">Aloitustunti</string>
+    <string name="preferences_hours_filter_end_title">Lopetustunti</string>
+    <string name="hour_margin_invalid">Virheellinen aikaväli</string>
+    <string name="cancel_confirmation_dialog_message">Hylkää muutokset ja lopeta muokkaus?</string>
+    <string name="calendar_filter">Ota tuntisuodatin käyttöön</string>
+    <string name="calendar_type_mine">Omistaja</string>
+    <string name="calendar_type_other">Muu</string>
+    <string name="preferences_widget_title">Widgetti</string>
+    <string name="preferences_widget_days_title">Näyttöjakso</string>
+    <string name="one_week">1 viikko</string>
+    <string name="two_weeks">2 viikkoa</string>
+    <string name="three_weeks">3 viikkoa</string>
+    <string name="one_month">1 kuukausi</string>
+    <string name="three_months">3 kuukautta</string>
+    <string name="preferences_snooze_time_title">Oletus torkkuaika</string>
+    <string name="five_minutes">5 minuuttia</string>
+    <string name="ten_minutes">10 minuuttia</string>
+    <string name="fifteen_minites">15 minuuttia</string>
+    <string name="thirty_minutes">30 minuuttia</string>
 </resources>

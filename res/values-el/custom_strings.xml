@@ -15,13 +15,13 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 Ημέρες</string>
-  <string name="preferences_hours_filter_start_title">Ώρα έναρξης</string>
-  <string name="preferences_hours_filter_end_title">Ώρα λήξης</string>
-  <string name="hour_margin_invalid">Μη έγκυρο χρονικό διάστημα</string>
-  <string name="cancel_confirmation_dialog_message">Απόρριψη των αλλαγών σας και κλείσιμο της επεξεργασίας;</string>
-  <string name="calendar_filter">Ενεργοποιήσετε το φίλτρο ώρας</string>
-  <string name="calendar_type_mine">Κάτοχος</string>
-  <string name="calendar_type_other">Άλλο</string>
-  <string name="three_months">3 μήνες</string>
+    <string name="three_days_view">3 Ημέρες</string>
+    <string name="preferences_hours_filter_start_title">Ώρα έναρξης</string>
+    <string name="preferences_hours_filter_end_title">Ώρα λήξης</string>
+    <string name="hour_margin_invalid">Μη έγκυρο χρονικό διάστημα</string>
+    <string name="cancel_confirmation_dialog_message">Απόρριψη των αλλαγών σας και κλείσιμο της επεξεργασίας;</string>
+    <string name="calendar_filter">Ενεργοποιήσετε το φίλτρο ώρας</string>
+    <string name="calendar_type_mine">Κάτοχος</string>
+    <string name="calendar_type_other">Άλλο</string>
+    <string name="three_months">3 μήνες</string>
 </resources>

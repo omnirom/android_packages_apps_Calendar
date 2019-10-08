@@ -15,24 +15,24 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="three_days_view">3 Tage</string>
-  <string name="preferences_hours_filter_start_title">Start</string>
-  <string name="preferences_hours_filter_end_title">Ende</string>
-  <string name="hour_margin_invalid">Ungültige Zeitspanne</string>
-  <string name="cancel_confirmation_dialog_message">Änderungen verwerfen und Bearbeitung beenden?</string>
-  <string name="calendar_filter">Stunden-Filter aktivieren</string>
-  <string name="calendar_type_mine">Eigentümer</string>
-  <string name="calendar_type_other">Sonstige</string>
-  <string name="preferences_widget_title">Widget</string>
-  <string name="preferences_widget_days_title">Anzeigezeitraum</string>
-  <string name="one_week">1 Woche</string>
-  <string name="two_weeks">2 Wochen</string>
-  <string name="three_weeks">3 Wochen</string>
-  <string name="one_month">1 Monat</string>
-  <string name="three_months">3 Monate</string>
-  <string name="preferences_snooze_time_title">Standardmäßige Schlummerzeit</string>
-  <string name="five_minutes">5 Minuten</string>
-  <string name="ten_minutes">10 Minuten</string>
-  <string name="fifteen_minites">15 Minuten</string>
-  <string name="thirty_minutes">30 Minuten</string>
+    <string name="three_days_view">3 Tage</string>
+    <string name="preferences_hours_filter_start_title">Start</string>
+    <string name="preferences_hours_filter_end_title">Ende</string>
+    <string name="hour_margin_invalid">Ungültige Zeitspanne</string>
+    <string name="cancel_confirmation_dialog_message">Änderungen verwerfen und Bearbeitung beenden?</string>
+    <string name="calendar_filter">Stunden-Filter aktivieren</string>
+    <string name="calendar_type_mine">Eigentümer</string>
+    <string name="calendar_type_other">Sonstige</string>
+    <string name="preferences_widget_title">Widget</string>
+    <string name="preferences_widget_days_title">Anzeigezeitraum</string>
+    <string name="one_week">1 Woche</string>
+    <string name="two_weeks">2 Wochen</string>
+    <string name="three_weeks">3 Wochen</string>
+    <string name="one_month">1 Monat</string>
+    <string name="three_months">3 Monate</string>
+    <string name="preferences_snooze_time_title">Standardmäßige Schlummerzeit</string>
+    <string name="five_minutes">5 Minuten</string>
+    <string name="ten_minutes">10 Minuten</string>
+    <string name="fifteen_minites">15 Minuten</string>
+    <string name="thirty_minutes">30 Minuten</string>
 </resources>
