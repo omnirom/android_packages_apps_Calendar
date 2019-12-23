@@ -33,7 +33,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
+import android.widget.Switch;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
@@ -235,7 +235,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         }
         calendarName.setTextColor(textColor);
 
-        CheckBox syncCheckBox = (CheckBox) view.findViewById(R.id.sync);
+        Switch syncCheckBox = (Switch) view.findViewById(R.id.sync);
         syncCheckBox.setChecked(selected);
 
         colorView.setEnabled(hasMoreColors(position));

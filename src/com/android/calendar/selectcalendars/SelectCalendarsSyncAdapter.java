@@ -31,7 +31,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
+import android.widget.Switch;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
@@ -173,7 +173,7 @@ public class SelectCalendarsSyncAdapter extends BaseAdapter
 
         view.setTag(mData[position]);
 
-        CheckBox cb = (CheckBox) view.findViewById(R.id.sync);
+        Switch cb = (Switch) view.findViewById(R.id.sync);
         cb.setChecked(selected);
 
         if (selected) {
@@ -266,7 +266,7 @@ public class SelectCalendarsSyncAdapter extends BaseAdapter
         }
         setText(view, R.id.status, status);
 
-        CheckBox cb = (CheckBox) view.findViewById(R.id.sync);
+        Switch cb = (Switch) view.findViewById(R.id.sync);
         cb.setChecked(row.synced);
 
         // There is some data loss in long -> int, but we should never see it in

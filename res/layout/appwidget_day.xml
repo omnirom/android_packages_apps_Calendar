@@ -24,12 +24,14 @@
     android:paddingLeft="8dip"
     android:paddingRight="8dip"
     android:orientation="vertical"
-    android:foreground="?android:attr/selectableItemBackground" >
+    android:foreground="?android:attr/selectableItemBackground"
+    android:background="@color/agenda_day_bar_background_color">
 
     <TextView
         android:id="@+id/date"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textColor="@color/agenda_day_bar_text_color"/>
 
 </LinearLayout>

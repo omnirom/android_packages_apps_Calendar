@@ -18,13 +18,13 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false" android:state_checked="false"
-          android:drawable="@drawable/ic_recurrence_bubble_outline_disabled" />
+          android:drawable="@drawable/recurrence_bubble_hollow_disabled"/>
     <item android:state_enabled="false" android:state_checked="true"
-          android:drawable="@drawable/ic_recurrence_bubble_disabled" />
+          android:drawable="@drawable/recurrence_bubble_filled_disabled"/>
     <item android:state_pressed="true" android:state_window_focused="true"
-          android:drawable="@drawable/ic_recurrence_bubble_fill"/>
+          android:drawable="@drawable/recurrence_bubble_filled"/>
     <item android:state_checked="true"
-          android:drawable="@drawable/ic_recurrence_bubble_fill"/>
+          android:drawable="@drawable/recurrence_bubble_filled"/>
     <item
-          android:drawable="@drawable/ic_recurrence_bubble_outline"/>
+          android:drawable="@drawable/recurrence_bubble_hollow"/>
 </selector>

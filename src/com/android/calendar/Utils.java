@@ -30,9 +30,15 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
@@ -56,6 +62,7 @@ import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.CalendarEventModel.ReminderEntry;
 import com.android.calendar.CalendarUtils.TimeZoneUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -198,7 +205,8 @@ public class Utils {
     private static final String NANP_ALLOWED_SYMBOLS = "()+-*#.";
     private static final int NANP_MIN_DIGITS = 7;
     private static final int NANP_MAX_DIGITS = 11;
-
+    private static TypedArray sColors;
+    private static int sContactImageSize = -1;
 
     /**
      * Returns whether the SDK is the Jellybean release or later.
@@ -2129,5 +2137,54 @@ public class Utils {
         String pref = prefs.getString(GeneralPreferences.KEY_SNOOZE_TIME, GeneralPreferences.SNOOZE_TIME_DEFAULT);
         long snoozeTime = Integer.valueOf(pref);
         return snoozeTime * 60 * 1000L;
+    }
+
+    public static Bitmap renderLetterTile(Context context, final String name, final String identifier) {
+        final Resources resources = context.getResources();
+        if (sContactImageSize == -1) {
+            sContactImageSize = resources.getDimensionPixelSize(R.dimen.contact_image_size);
+        }
+        final float halfWidth = sContactImageSize / 2;
+        final float halfHeight = sContactImageSize / 2;
+        final int minOfWidthAndHeight = Math.min(sContactImageSize, sContactImageSize);
+        final Bitmap bitmap = Bitmap.createBitmap(sContactImageSize, sContactImageSize, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(getBackgroundColor(context, identifier));
+        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
+        paint.setColor(resources.getColor(R.color.letter_tile_font_color));
+        final float letterToTileRatio = resources.getFraction(R.dimen.letter_to_tile_ratio, 1, 1);
+        paint.setTextSize(letterToTileRatio * minOfWidthAndHeight);
+
+        final String firstCharString = name.substring(0, 1).toUpperCase();
+        final Rect textBound = new Rect();
+        paint.getTextBounds(firstCharString, 0, 1, textBound);
+
+        final Canvas canvas = new Canvas(bitmap);
+        final float xOffset = halfWidth - textBound.centerX();
+        final float yOffset = halfHeight - textBound.centerY();
+        canvas.drawText(firstCharString, xOffset, yOffset, paint);
+
+        return bitmap;
+    }
+
+    private static int getBackgroundColor(Context context, String identifier) {
+        if (sColors == null) {
+            sColors = context.getResources().obtainTypedArray(R.array.letter_tile_colors);
+        }
+        final int color = Math.abs(identifier.hashCode()) % sColors.length();
+        return sColors.getColor(color, context.getResources().getColor(R.color.accent));
+    }
+
+    public static byte[] bitmapToBytes(final Bitmap bitmap) {
+        final int BITMAP_QUALITY = 100;
+        byte[] imageBytes = null;
+        try {
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, BITMAP_QUALITY, os);
+            imageBytes = os.toByteArray();
+        } catch (final OutOfMemoryError e) {
+            imageBytes = null;
+        }
+        return imageBytes;
     }
 }

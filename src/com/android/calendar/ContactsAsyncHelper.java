@@ -19,6 +19,12 @@ package com.android.calendar;
 import com.android.calendar.event.EditEventHelper.AttendeeItem;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -98,8 +104,8 @@ public class ContactsAsyncHelper extends Handler {
                     }
 
                     if (inputStream != null) {
-                        args.result = Drawable.createFromStream(inputStream, args.uri.toString());
-
+                        Drawable d = Drawable.createFromStream(inputStream, args.uri.toString());
+                        args.result = d;
                         if (DBG) Log.d(LOG_TAG, "Loading image: " + msg.arg1 +
                                 " token: " + msg.what + " image URI: " + args.uri);
                     } else {
