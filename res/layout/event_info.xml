@@ -162,7 +162,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:minHeight="52dip"
+                        android:paddingTop="8dp"
                         android:orientation="horizontal">
 
                         <RadioButton
@@ -197,6 +197,50 @@
                     </RadioGroup>
                 </LinearLayout>
 
+                <!-- LAUNCH CUSTOM APP -->
+                <LinearLayout
+                    android:id="@+id/launch_custom_app_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/launch_custom_app_button"
+                        style="@style/TextAppearance.EditEvent_Value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/attendee_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:visibility="gone">
+    
+                    <TextView
+                        style="@style/TextAppearance.EditEvent_Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_event_guests"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/attendees_label" />
+
+                    <!-- GUEST LIST -->
+                    <com.android.calendar.event.AttendeesView
+                        android:id="@+id/long_attendee_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+                
                 <!-- EMAIL GUESTS -->
                 <LinearLayout
                     android:id="@+id/email_attendees_container"
@@ -217,34 +261,6 @@
                         android:gravity="center_vertical"
                         android:text="@string/email_guests_label" />
                 </LinearLayout>
-
-                <!-- LAUNCH CUSTOM APP -->
-                <LinearLayout
-                    android:id="@+id/launch_custom_app_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/launch_custom_app_button"
-                        style="@style/TextAppearance.EditEvent_Value"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:drawablePadding="8dp"
-                        android:gravity="center_vertical" />
-                </LinearLayout>
-
-                <!-- GUEST LIST -->
-                <com.android.calendar.event.AttendeesView
-                    android:id="@+id/long_attendee_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
-                    android:visibility="gone" />
 
                 <!-- REMINDERS -->
 

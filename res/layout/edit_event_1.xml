@@ -89,9 +89,17 @@
                 android:id="@+id/all_day_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingTop="10dip">
+
+                <TextView
+                    style="@style/TextAppearance.EditEvent_Value"
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/edit_event_all_day_label" />
 
                 <Switch
                     android:id="@+id/is_all_day"
@@ -99,8 +107,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/accessibility_all_day"
-                    android:gravity="center_vertical"
-                    android:text="@string/edit_event_all_day_label" />
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
             </LinearLayout>
 
             <!-- FROM - Read/write version which launches the date/time pickers -->

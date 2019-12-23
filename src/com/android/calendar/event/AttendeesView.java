@@ -22,24 +22,36 @@ import com.android.calendar.R;
 import com.android.calendar.Utils;
 import com.android.calendar.event.EditEventHelper.AttendeeItem;
 import com.android.common.Rfc822Validator;
+import com.android.ex.chips.CircularImageView;
+import com.android.colorpicker.ColorStateDrawable;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.CalendarContract.Attendees;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Identity;
+import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.TextUtils;
 import android.text.util.Rfc822Token;
 import android.util.AttributeSet;
@@ -47,9 +59,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,18 +79,27 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     private static final int EMAIL_PROJECTION_CONTACT_ID_INDEX = 0;
     private static final int EMAIL_PROJECTION_CONTACT_LOOKUP_INDEX = 1;
     private static final int EMAIL_PROJECTION_PHOTO_ID_INDEX = 2;
+    private static final int EMAIL_PROJECTION_PHOTO_THUMBNAIL_URI = 3; // String
 
     private static final String[] PROJECTION = new String[] {
         RawContacts.CONTACT_ID,     // 0
         Contacts.LOOKUP_KEY,        // 1
         Contacts.PHOTO_ID,          // 2
+        Contacts.PHOTO_THUMBNAIL_URI, // 3
     };
+
+    private static class PhotoQuery {
+        public static final String[] PROJECTION = {
+            Photo.PHOTO
+        };
+        public static final int BUFFER_SIZE = 1024*16;
+        public static final int PHOTO = 0;
+    }
 
     private final Context mContext;
     private final LayoutInflater mInflater;
     private final PresenceQueryHandler mPresenceQueryHandler;
     private final Drawable mDefaultBadge;
-    private final ColorMatrixColorFilter mGrayscaleFilter;
 
     // TextView shown at the top of each type of attendees
     // e.g.
@@ -82,13 +108,12 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     // No <-- divider
     // example_for_no <exampleno@example.com>
     private final CharSequence[] mEntries;
-    private final View mDividerForYes;
-    private final View mDividerForNo;
-    private final View mDividerForMaybe;
-    private final View mDividerForNoResponse;
-    private final int mNoResponsePhotoAlpha;
-    private final int mDefaultPhotoAlpha;
+    private final TextView mDivider;
+    private final int mNoResponseOverlay;
+    private final int mDeclinedOverlay;
+    private final int mAcceptedOverlay;
     private Rfc822Validator mValidator;
+    private static TypedArray sColors;
 
     // Number of attendees responding or not responding.
     private int mYes;
@@ -107,59 +132,39 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
 
         final Resources resources = context.getResources();
         mDefaultBadge = resources.getDrawable(R.drawable.ic_contact_picture);
-        mNoResponsePhotoAlpha =
-            resources.getInteger(R.integer.noresponse_attendee_photo_alpha_level);
-        mDefaultPhotoAlpha = resources.getInteger(R.integer.default_attendee_photo_alpha_level);
+        mNoResponseOverlay = resources.getColor(R.color.noresponse_attendee_overlay);
+        mDeclinedOverlay = resources.getColor(R.color.declined_attendee_overlay);
+        mAcceptedOverlay = resources.getColor(R.color.accepted_attendee_overlay);
 
         // Create dividers between groups of attendees (accepted, declined, etc...)
-        mEntries = resources.getTextArray(R.array.response_labels1);
-        mDividerForYes = constructDividerView(mEntries[1]);
-        mDividerForNo = constructDividerView(mEntries[3]);
-        mDividerForMaybe = constructDividerView(mEntries[2]);
-        mDividerForNoResponse = constructDividerView(mEntries[0]);
-
-        // Create a filter to convert photos of declined attendees to grayscale.
-        ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0);
-        mGrayscaleFilter = new ColorMatrixColorFilter(matrix);
-
-    }
-
-    // Disable/enable removal of attendings
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        int visibility = isEnabled() ? View.VISIBLE : View.GONE;
-        int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
-            View minusButton = child.findViewById(R.id.contact_remove);
-            if (minusButton != null) {
-                minusButton.setVisibility(visibility);
-            }
-        }
+        mEntries = resources.getTextArray(R.array.response_labels_new);
+        mDivider = (TextView) mInflater.inflate(R.layout.event_info_label, this, false);
     }
 
     public void setRfc822Validator(Rfc822Validator validator) {
         mValidator = validator;
     }
 
-    private View constructDividerView(CharSequence label) {
-        final TextView textView =
-            (TextView)mInflater.inflate(R.layout.event_info_label, this, false);
-        textView.setText(label);
-        textView.setClickable(false);
-        return textView;
-    }
-
-    // Add the number of attendees in the specific status (corresponding to the divider) in
-    // parenthesis next to the label
-    private void updateDividerViewLabel(View divider, CharSequence label, int count) {
-        if (count <= 0) {
-            ((TextView)divider).setText(label);
+    private void updateDividerViewLabel() {
+        StringBuffer buffer = new StringBuffer();
+        if (mNoResponse != 0) {
+            buffer.append(mNoResponse + " " + mEntries[0] + ", ");
         }
-        else {
-            ((TextView)divider).setText(label + " (" + count + ")");
+        if (mYes != 0) {
+            buffer.append(mYes + " " + mEntries[1] + ", ");
+        }
+        if (mMaybe != 0) {
+            buffer.append(mMaybe + " " + mEntries[2] + ", ");
+        }
+        if (mNo != 0) {
+            buffer.append(mNo + " " + mEntries[3] + ", ");
+        }
+        if (buffer.length() > 0) {
+            buffer.delete(buffer.length() - 2, buffer.length());
+            mDivider.setText(buffer.toString());
+            mDivider.setVisibility(View.VISIBLE);
+        } else {
+            mDivider.setVisibility(View.GONE);
         }
     }
 
@@ -169,7 +174,7 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
      * the constructed View object. The object is also stored in {@link AttendeeItem#mView}.
      */
     private View constructAttendeeView(AttendeeItem item) {
-        item.mView = mInflater.inflate(R.layout.contact_item, null);
+        item.mView = mInflater.inflate(R.layout.contact_list_item_view, null);
         return updateAttendeeView(item);
     }
 
@@ -180,30 +185,21 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     private View updateAttendeeView(AttendeeItem item) {
         final Attendee attendee = item.mAttendee;
         final View view = item.mView;
-        final TextView nameView = (TextView) view.findViewById(R.id.name);
-        nameView.setText(TextUtils.isEmpty(attendee.mName) ? attendee.mEmail : attendee.mName);
-        if (item.mRemoved) {
-            nameView.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG | nameView.getPaintFlags());
+        final TextView nameView = (TextView) view.findViewById(android.R.id.title);
+        final TextView emailView = (TextView) view.findViewById(android.R.id.text1);
+        view.findViewById(R.id.chip_indicator_text).setVisibility(View.GONE);
+        view.findViewById(android.R.id.icon1).setVisibility(View.GONE);
+
+        if (TextUtils.isEmpty(attendee.mName)) {
+            nameView.setVisibility(View.GONE);
+            emailView.setText(attendee.mEmail);
         } else {
-            nameView.setPaintFlags((~Paint.STRIKE_THRU_TEXT_FLAG) & nameView.getPaintFlags());
+            nameView.setText(attendee.mName);
+            emailView.setText(attendee.mEmail);
         }
 
-        // Set up the Image button even if the view is disabled
-        // Everything will be ready when the view is enabled later
-        final ImageButton button = (ImageButton) view.findViewById(R.id.contact_remove);
-        button.setVisibility(isEnabled() ? View.VISIBLE : View.GONE);
-        button.setTag(item);
-        if (item.mRemoved) {
-            button.setImageResource(R.drawable.ic_menu_add_black);
-            button.setContentDescription(mContext.getString(R.string.accessibility_add_attendee));
-        } else {
-            button.setImageResource(R.drawable.ic_menu_cancel_black);
-            button.setContentDescription(mContext.
-                    getString(R.string.accessibility_remove_attendee));
-        }
-        button.setOnClickListener(this);
-
-        final QuickContactBadge badgeView = (QuickContactBadge) view.findViewById(R.id.badge);
+        CircularImageView badgeView = view.findViewById(android.R.id.icon);
+        ImageView statusCircle = view.findViewById(R.id.status_color_circle);
 
         Drawable badge = null;
         // Search for photo in recycled photos
@@ -214,28 +210,23 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
             item.mBadge = badge;
         }
         badgeView.setImageDrawable(item.mBadge);
+        statusCircle.setVisibility(View.GONE);
+        Drawable[] colorDrawable = new Drawable[] {
+                    getContext().getResources().getDrawable(R.drawable.calendar_color_oval) };
 
         if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_NONE) {
-            item.mBadge.setAlpha(mNoResponsePhotoAlpha);
-        } else {
-            item.mBadge.setAlpha(mDefaultPhotoAlpha);
+            statusCircle.setVisibility(View.VISIBLE);
+            statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mNoResponseOverlay));
         }
         if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
-            item.mBadge.setColorFilter(mGrayscaleFilter);
-        } else {
-            item.mBadge.setColorFilter(null);
+            statusCircle.setVisibility(View.VISIBLE);
+            statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mDeclinedOverlay));
         }
-
-        // If we know the lookup-uri of the contact, it is a good idea to set this here. This
-        // allows QuickContact to be started without an extra database lookup. If we don't know
-        // the lookup uri (yet), we can set Email and QuickContact will lookup once tapped.
-        if (item.mContactLookupUri != null) {
-            badgeView.assignContactUri(item.mContactLookupUri);
-        } else {
-            badgeView.assignContactFromEmail(item.mAttendee.mEmail, true);
+        if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_ACCEPTED ||
+                item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_TENTATIVE) {
+            statusCircle.setVisibility(View.VISIBLE);
+            statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mAcceptedOverlay));
         }
-        badgeView.setMaxHeight(60);
-
         return view;
     }
 
@@ -283,69 +274,32 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
         }
         final AttendeeItem item = new AttendeeItem(attendee, mDefaultBadge);
         final int status = attendee.mStatus;
-        final int index;
-        boolean firstAttendeeInCategory = false;
         switch (status) {
             case Attendees.ATTENDEE_STATUS_ACCEPTED: {
-                final int startIndex = 0;
-                updateDividerViewLabel(mDividerForYes, mEntries[1], mYes + 1);
-                if (mYes == 0) {
-                    addView(mDividerForYes, startIndex);
-                    firstAttendeeInCategory = true;
-                }
                 mYes++;
-                index = startIndex + mYes;
                 break;
             }
             case Attendees.ATTENDEE_STATUS_DECLINED: {
-                final int startIndex = (mYes == 0 ? 0 : 1 + mYes);
-                updateDividerViewLabel(mDividerForNo, mEntries[3], mNo + 1);
-                if (mNo == 0) {
-                    addView(mDividerForNo, startIndex);
-                    firstAttendeeInCategory = true;
-                }
                 mNo++;
-                index = startIndex + mNo;
                 break;
             }
             case Attendees.ATTENDEE_STATUS_TENTATIVE: {
-                final int startIndex = (mYes == 0 ? 0 : 1 + mYes) + (mNo == 0 ? 0 : 1 + mNo);
-                updateDividerViewLabel(mDividerForMaybe, mEntries[2], mMaybe + 1);
-                if (mMaybe == 0) {
-                    addView(mDividerForMaybe, startIndex);
-                    firstAttendeeInCategory = true;
-                }
                 mMaybe++;
-                index = startIndex + mMaybe;
                 break;
             }
             default: {
-                final int startIndex = (mYes == 0 ? 0 : 1 + mYes) + (mNo == 0 ? 0 : 1 + mNo)
-                        + (mMaybe == 0 ? 0 : 1 + mMaybe);
-                updateDividerViewLabel(mDividerForNoResponse, mEntries[0], mNoResponse + 1);
-                if (mNoResponse == 0) {
-                    addView(mDividerForNoResponse, startIndex);
-                    firstAttendeeInCategory = true;
-                }
                 mNoResponse++;
-                index = startIndex + mNoResponse;
                 break;
             }
         }
+        if (getChildCount() == 0) {
+            addView(mDivider);
+        }
+        updateDividerViewLabel();
 
         final View view = constructAttendeeView(item);
         view.setTag(item);
-        addView(view, index);
-        // Show separator between Attendees
-        if (!firstAttendeeInCategory) {
-            View prevItem = getChildAt(index - 1);
-            if (prevItem != null) {
-                View Separator = prevItem.findViewById(R.id.contact_separator);
-                if (Separator != null) {
-                    Separator.setVisibility(View.VISIBLE);
-                }
-            }
-        }
+        addView(view);
 
         Uri uri;
         String selection = null;
@@ -396,18 +350,6 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
         }
     }
 
-    /**
-     * Returns true when the attendee at that index is marked as "removed" (the name of
-     * the attendee is shown with a strike through line).
-     */
-    public boolean isMarkAsRemoved(int index) {
-        final View view = getChildAt(index);
-        if (view instanceof TextView) { // divider
-            return false;
-        }
-        return ((AttendeeItem) view.getTag()).mRemoved;
-    }
-
     // TODO put this into a Loader for auto-requeries
     private class PresenceQueryHandler extends AsyncQueryHandler {
         public PresenceQueryHandler(ContentResolver cr) {
@@ -435,10 +377,19 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         final String lookupKey =
                                 cursor.getString(EMAIL_PROJECTION_CONTACT_LOOKUP_INDEX);
                         item.mContactLookupUri = Contacts.getLookupUri(contactId, lookupKey);
-
+                        item.mBadge = getResources().getDrawable(R.drawable.ic_contact_picture);
                         final long photoId = cursor.getLong(EMAIL_PROJECTION_PHOTO_ID_INDEX);
-                        // If we found a picture, start the async loading
-                        if (photoId > 0) {
+                        final String photoThumbnailUriStr = cursor.getString(EMAIL_PROJECTION_PHOTO_THUMBNAIL_URI);
+                        if (photoThumbnailUriStr != null) {
+                            fetchPhotoAsync(Uri.parse(photoThumbnailUriStr), item,
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateAttendeeView(item);
+                                        }
+                                    });
+                        } else if (photoId > 0) {
+                            // If we found a picture, start the async loading
                             // Query for this contacts picture
                             ContactsAsyncHelper.retrieveContactPhotoAsync(
                                     mContext, item, new Runnable() {
@@ -448,8 +399,10 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                                         }
                                     }, contactUri);
                         } else {
-                            // call update view to make sure that the lookup key gets set in
-                            // the QuickContactBadge
+                            String letterString = TextUtils.isEmpty(item.mAttendee.mName) ?
+                                    item.mAttendee.mEmail : item.mAttendee.mName;
+                            Bitmap b = Utils.renderLetterTile(mContext, letterString, lookupKey);
+                            item.mBadge = new BitmapDrawable(getResources(), b);
                             updateAttendeeView(item);
                         }
                     } else {
@@ -478,9 +431,63 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
 
     @Override
     public void onClick(View view) {
-        // Button corresponding to R.id.contact_remove.
-        final AttendeeItem item = (AttendeeItem) view.getTag();
-        item.mRemoved = !item.mRemoved;
-        updateAttendeeView(item);
+    }
+
+    private void fetchPhotoAsync(final Uri photoThumbnailUri, final AttendeeItem item,
+            final Runnable callback) {
+        final AsyncTask<Void, Void, byte[]> photoLoadTask = new AsyncTask<Void, Void, byte[]>() {
+            @Override
+            protected byte[] doInBackground(Void... params) {
+                // First try running a query. Images for local contacts are
+                // loaded by sending a query to the ContactsProvider.
+                final Cursor photoCursor = mContext.getContentResolver().query(
+                        photoThumbnailUri, PhotoQuery.PROJECTION, null, null, null);
+                if (photoCursor != null) {
+                    try {
+                        if (photoCursor.moveToFirst()) {
+                            return photoCursor.getBlob(PhotoQuery.PHOTO);
+                        }
+                    } finally {
+                        photoCursor.close();
+                    }
+                } else {
+                    // If the query fails, try streaming the URI directly.
+                    // For remote directory images, this URI resolves to the
+                    // directory provider and the images are loaded by sending
+                    // an openFile call to the provider.
+                    try {
+                        InputStream is = mContext.getContentResolver().openInputStream(
+                                photoThumbnailUri);
+                        if (is != null) {
+                            byte[] buffer = new byte[PhotoQuery.BUFFER_SIZE];
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            try {
+                                int size;
+                                while ((size = is.read(buffer)) != -1) {
+                                    baos.write(buffer, 0, size);
+                                }
+                            } finally {
+                                is.close();
+                            }
+                            return baos.toByteArray();
+                        }
+                    } catch (IOException ex) {
+                        // ignore
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(final byte[] photoBytes) {
+                if (photoBytes != null && photoBytes.length > 0) {
+                    final Bitmap photo = BitmapFactory.decodeByteArray(photoBytes, 0,
+                            photoBytes.length);
+                    item.mBadge = new BitmapDrawable(getResources(), photo);
+                    callback.run();
+                }
+            }
+        };
+        photoLoadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 }

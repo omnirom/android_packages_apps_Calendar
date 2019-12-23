@@ -19,7 +19,7 @@ package com.android.calendar.selectcalendars;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.widget.QuickContactBadge;
+import android.widget.ImageView;
 
 import com.android.calendar.CalendarColorPickerDialog;
 import com.android.calendar.R;
@@ -28,20 +28,20 @@ import com.android.colorpicker.ColorStateDrawable;
 /**
  * The color square used as an entry point to launching the {@link CalendarColorPickerDialog}.
  */
-public class CalendarColorSquare extends QuickContactBadge {
+public class CalendarColorCircle extends ImageView {
 
-    public CalendarColorSquare(Context context, AttributeSet attrs) {
+    public CalendarColorCircle(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CalendarColorSquare(Context context, AttributeSet attrs, int defStyle) {
+    public CalendarColorCircle(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
     @Override
     public void setBackgroundColor(int color) {
         Drawable[] colorDrawable = new Drawable[] {
-                getContext().getResources().getDrawable(R.drawable.calendar_color_square) };
+                getContext().getResources().getDrawable(R.drawable.calendar_color_oval) };
         setImageDrawable(new ColorStateDrawable(colorDrawable, color));
     }
 }

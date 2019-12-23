@@ -181,7 +181,7 @@ public class SimpleDayPickerFragment extends ListFragment implements OnScrollLis
         mSaturdayColor = res.getColor(R.color.month_saturday);
         mSundayColor = res.getColor(R.color.month_sunday);
         mDayNameColor = res.getColor(R.color.month_day_names_color);
-        mTodayColor = res.getColor(R.color.month_today_number);
+        mTodayColor = res.getColor(R.color.month_today_axes);
 
         // Adjust sizes for screen density
         if (mScale == 0) {

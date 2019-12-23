@@ -53,6 +53,8 @@
         android:layout_height="0dip"
         android:layout_weight="1"
         android:dividerHeight="1dip"
-        android:background="@android:color/white"
-        android:scrollbarStyle="outsideOverlay" />
+        android:background="@color/agenda_day_bar_background_color"
+        android:scrollbarStyle="outsideOverlay"
+        android:divider="@color/agenda_day_grid_line_color" />
+
 </LinearLayout>
