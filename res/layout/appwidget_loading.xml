@@ -24,7 +24,8 @@
     android:paddingBottom="4dip"
     android:paddingLeft="8dip"
     android:paddingRight="8dip"
-    android:addStatesFromChildren="true">
+    android:addStatesFromChildren="true"
+    android:background="@color/agenda_day_bar_background_color" >
     
     <!-- Loading -->
     <TextView
