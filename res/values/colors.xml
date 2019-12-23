@@ -18,10 +18,20 @@
 */
 -->
 <resources>
-    <color name="today_highlight_color">@color/primary_color_light</color>
+    <color name="material_grey_50">#fffafafa</color>
+    <color name="material_grey_100">#fff5f5f5</color>
+    <color name="material_grey_200">#ffeeeeee</color>
+    <color name="material_grey_300">#ffe0e0e0</color>
+    <color name="material_grey_600">#ff757575</color>
+    <color name="material_grey_800">#ff424242</color>
+    <color name="material_grey_850">#ff303030</color>
+    <color name="material_grey_900">#ff212121</color>
+    <color name="material_grey_950">#ff101010</color>
+
+    <color name="today_highlight_color">@color/accent</color>
 
     <!-- The app wide background color -->
-    <color name="background_color">#fafafa</color>
+    <color name="background_color">@color/material_grey_300</color>
     <color name="event_background">#ffc3d9ff</color>
     <color name="panel_text_foreground">#ffffffff</color>
     <color name="calendar_event_text_color">#ffFFFFFF</color>
@@ -30,21 +40,20 @@
     <color name="calendar_date_range_color">#80000000</color>
 
     <color name="week_today">@color/primary_color</color>
+    <color name="week_today_bg">@android:color/white</color>
     <color name="week_normal">#FF000000</color>
     
-    <color name="calendar_future_bg_color">#ffffffff</color>
-    <color name="calendar_filter_bg_color">#ffAAAAAA</color>
+    <color name="calendar_future_bg_color">@color/material_grey_200</color>
     <color name="calendar_hour_label">#FF000000</color>
-    <color name="calendar_border_background">#ffffffff</color>
-    <color name="calendar_past_bg_color">#FFDDDDDD</color>
+    <color name="calendar_border_background">@color/material_grey_50</color>
+    <color name="calendar_past_bg_color">@color/material_grey_50</color>
     <color name="calendar_past_text_color">#FF808080</color>
     
     <color name="calendar_date_banner_background">#FFEEEEEE</color>
 
-    <color name="calendar_grid_area_selected">@color/primary_color_light</color>
+    <color name="calendar_grid_area_selected">@color/accent</color>
 
     <color name="calendar_grid_line_color">#FFCCCCCC</color>
-    <color name="calendar_grid_line_highlight_color">#ff707070</color>
     <color name="calendar_grid_scroll_line_color">#ff000000</color>
 
     <color name="mini_month_bg_color">#FFFFFFFF</color>
@@ -54,6 +63,7 @@
     <color name="month_mini_day_number">#FF000000</color>
     <color name="month_day_number_other">@color/calendar_past_text_color</color>
     <color name="month_day_names_color">#FF000000</color>
+    <color name="month_today_axes">@color/primary_color</color>
     <color name="month_today_number">@color/primary_color</color>
     <color name="month_event_color">#FF333333</color>
     <color name="month_event_extra_color">#FF666666</color>
@@ -63,10 +73,10 @@
     <color name="month_sunday">#FF000000</color>
     <color name="month_other_month_day_number">#ff939497</color>
 
-    <color name="month_focus_bgcolor">#FFeeeeee</color>
+    <color name="month_focus_bgcolor">@color/material_grey_50</color>
     <color name="month_selected_week_bgcolor">#FFDDDDDD</color>
-    <color name="month_today_bgcolor">#FFdddddd</color>
-    <color name="month_bgcolor">#FFffffff</color>
+    <color name="month_today_bgcolor">@color/material_grey_200</color>
+    <color name="month_bgcolor">@color/material_grey_300</color>
 
     <color name="month_dna_conflict_time_color">#FF333333</color>
 
@@ -83,16 +93,15 @@
     <!-- Text color of declined events in agenda view -->
     <color name="agenda_item_declined_color">#60000000</color>
     <!-- Text color of non-declined events in agenda view -->
-    <color name="agenda_item_standard_color">#FF000000</color>
+    <color name="agenda_item_standard_color">@android:color/black</color>
     <!-- Background Color of present/future events in agenda view  -->
-    <color name="agenda_day_bar_background_color">@android:color/white</color>
+    <color name="agenda_day_bar_background_color">@color/material_grey_200</color>
     <color name="agenda_day_bar_text_color">@android:color/black</color>
     <color name="agenda_today_text_color">@color/primary_color</color>
+    <color name="agenda_today_bg_color">@color/calendar_past_bg_color</color>
     <color name="agenda_text_color">@android:color/black</color>
     <color name="agenda_day_grid_line_color">@color/calendar_grid_line_color</color>
 
-    <!-- Color of the separator between the past and the present/future in agenda view  -->
-    <color name="agenda_past_present_separator_color">@color/primary_color</color>
     <!-- Color of text in the calendar view selection menu -->
     <color name="calendar_view_switch_menu_text_color">#FFFFFFFF</color>
     <!-- Text color of the "new event" hint in day and week views -->
@@ -104,7 +113,6 @@
     <color name="event_info_headline_link_color">#FFFFFFFF</color>
     <color name="event_info_organizer_color">#FF666666</color>
     <color name="event_info_description_color">#FF666666</color>
-    <color name="event_info_body_color">#FF666666</color>
 
     <!-- Create event colors -->
     <color name="create_event_date_color">#FF000000</color>
@@ -117,8 +125,6 @@
     <color name="alert_event_other">#FF999999</color>
     <color name="alert_past_event">#8F999999</color>
 
-    <color name="appwidget_row_in_progress">#6633b5e5</color>
-
     <color name="appwidget_header">@android:color/white</color>
 
     <!-- Text color of declined events in widget view -->
@@ -127,13 +133,11 @@
     <color name="appwidget_item_standard_color">@android:color/black</color>
     <color name="appwidget_no_events">@android:color/black</color>
 
-    <color name="recurrence_picker_background">#fff2f2f2</color>
-    <color name="recurrence_bubble_text_normal">#ff737373</color>
+    <color name="recurrence_bubble_color_disabled">#FFCCCCCC</color>
 
     <color name="accent">#F44336</color>
     <color name="primary_color">#3F51B5</color>
     <color name="primary_dark_color">#303F9F</color>
-    <color name="primary_color_light">#BBDEFB</color>
     <color name="month_focus_month_bgcolor">#FFFFFFFF</color>
     <color name="floating_action_button_icon_color">#ffffff</color>
 
@@ -143,7 +147,30 @@
     <color name="pressed">#33999999</color>
     <color name="day_event_clicked_background_color">#33999999</color>
     <color name="day_clicked_background_color">#33999999</color>
-    <color name="current_time_line_color">@color/primary_color</color>
+    <color name="current_time_line_color">@color/accent</color>
 
     <color name="ic_launcher_background">#ffffff</color>
+    
+    <color name="noresponse_attendee_overlay">#00000000</color>
+    <color name="declined_attendee_overlay">#d93025</color>
+    <color name="accepted_attendee_overlay">#1e8e3e</color>
+    <color name="maybe_attendee_overlay">#80868b</color>
+
+    <array name="letter_tile_colors">
+        <item>#DB4437</item>
+        <item>#E91E63</item>
+        <item>#9C27B0</item>
+        <item>#673AB7</item>
+        <item>#3F51B5</item>
+        <item>#4285F4</item>
+        <item>#039BE5</item>
+        <item>#0097A7</item>
+        <item>#009688</item>
+        <item>#0F9D58</item>
+        <item>#689F38</item>
+        <item>#EF6C00</item>
+        <item>#FF5722</item>
+        <item>#757575</item>
+    </array>
+    <color name="letter_tile_font_color">#ffffff</color>
 </resources>

@@ -16,11 +16,11 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/preferences_general_title">
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="preferences_hide_declined"
             android:defaultValue="false"
             android:title="@string/preferences_hide_declined_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="preferences_show_week_num"
             android:defaultValue="false"
             android:title="@string/preferences_show_week_num_title" />
@@ -37,7 +37,7 @@
         <Preference
             android:key="preferences_hours_filter_end"
             android:title="@string/preferences_hours_filter_end_title" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="preferences_home_tz_enabled"
             android:defaultValue="false"
             android:title="@string/preferences_use_home_tz_title"
@@ -63,7 +63,7 @@
     <PreferenceCategory
         android:key="preferences_alerts_category"
         android:title="@string/preferences_reminder_title">
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="preferences_alerts"
             android:defaultValue="true"
             android:title="@string/preferences_alerts_title" />
@@ -76,7 +76,7 @@
             android:defaultValue="content://settings/system/notification_sound"
             android:dependency="preferences_alerts" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:layout="?android:attr/preferenceLayoutChild"
             android:key="preferences_alerts_vibrate"
             android:title="@string/preferences_alerts_vibrateWhen_title"

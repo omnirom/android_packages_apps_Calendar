@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <color name="omni_color5">@*android:color/accent_device_default_light</color>
+    <color name="omni_color4">@*android:color/accent_device_default_dark</color>
+    <color name="omni_color3">#80eeeeee</color>
+    <color name="omni_color2">@*android:color/primary_dark_device_default_settings</color>
+    <color name="omni_color1">@*android:color/primary_device_default_settings</color>
+    <color name="omni_color7">@*android:color/background_floating_device_default_dark</color>
+    <color name="omni_text1">#ffffffff</color>
+    <color name="omni_text2">#ffeeeeee</color>
+    <color name="omni_text3">#eeeeeeee</color>
+    <color name="primary_dark_color">@color/omni_color2</color>
+    <color name="primary_color">@color/omni_color1</color>
+    <color name="accent">@color/omni_color5</color>
+    <color name="background_color">@color/omni_color1</color>
+    <color name="event_background">@color/omni_color2</color>
+    <color name="calendar_grid_line_color">#20ffffff</color>
+    <color name="calendar_grid_scroll_line_color">#60ffffff</color>
+    
+    <color name="calendar_visible">@color/omni_text1</color>
+    <color name="calendar_hidden">@color/omni_text3</color>
+    <color name="calendar_secondary_visible">@color/omni_text2</color>
+    <color name="calendar_secondary_hidden">@color/omni_text3</color>
+    <color name="calendar_future_bg_color">@color/omni_color2</color>
+    <color name="calendar_hour_label">@color/omni_text1</color>
+    <color name="calendar_border_background">@color/omni_color1</color>
+    <color name="calendar_past_bg_color">@color/omni_color1</color>
+    <color name="calendar_past_text_color">@color/omni_text3</color>
+    <color name="week_today">@android:color/white</color>
+    <color name="week_today_bg">@color/accent</color>
+    <color name="week_normal">@color/omni_text1</color>
+
+    <color name="month_day_number">@color/omni_text2</color>
+    <color name="month_mini_day_number">@color/omni_text1</color>
+    <color name="month_day_number_other">@color/calendar_past_text_color</color>
+    <color name="month_day_names_color">@color/omni_text1</color>
+    <color name="month_today_axes">@color/accent</color>
+    <color name="month_today_number">@android:color/white</color>
+    <color name="month_event_color">@color/omni_text2</color>
+    <color name="month_event_extra_color">@color/omni_text3</color>
+    <color name="month_event_other_color">@color/omni_text3</color>
+    <color name="month_event_extra_other_color">#4C999999</color>
+    <color name="month_saturday">@color/omni_text1</color>
+    <color name="month_sunday">@color/omni_text1</color>
+    <color name="month_other_month_day_number">#ff939497</color>
+    <color name="month_focus_bgcolor">@color/omni_color1</color>
+    <color name="month_selected_week_bgcolor">@color/omni_color2</color>
+    <color name="month_today_bgcolor">@color/accent</color>
+    <color name="month_bgcolor">@color/omni_color2</color>
+
+    <color name="agenda_text_color">@color/omni_text1</color>
+    <color name="agenda_item_not_selected">#00000000</color>
+    <color name="agenda_item_declined_color">#60ffffff</color>
+    <color name="agenda_item_standard_color">@color/omni_text1</color>
+    <color name="agenda_day_bar_background_color">@color/omni_color2</color>
+    <color name="agenda_day_bar_text_color">@color/omni_text1</color>
+    <color name="agenda_today_text_color">@android:color/white</color>
+    <color name="agenda_today_bg_color">@color/accent</color>
+
+    <color name="recurrence_bubble_color_disabled">#60ffffff</color>
+
+    <color name="appwidget_header">@android:color/white</color>
+    <color name="appwidget_item_declined_color">#66333333</color>
+    <color name="appwidget_item_standard_color">@color/omni_color1</color>
+    <color name="appwidget_no_events">@color/omni_text1</color>
+
+    <array name="letter_tile_colors">
+        <item>#8c2b23</item>
+        <item>#af164a</item>
+        <item>#51d847</item>
+        <item>#4e2b8c</item>
+        <item>#2e3b84</item>
+        <item>#2d5dad</item>
+        <item>#0071a8</item>
+        <item>#0f5d66</item>
+        <item>#02665c</item>
+        <item>#0b7743</item>
+        <item>#507a2c</item>
+        <item>#af4f00</item>
+        <item>#cc451a</item>
+        <item>#595959</item>
+    </array>
+
+</resources>

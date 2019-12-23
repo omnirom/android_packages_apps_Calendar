@@ -353,8 +353,8 @@ public class AgendaWindowAdapter extends BaseAdapter
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mHeaderView = (TextView)inflater.inflate(R.layout.agenda_header_footer, null);
-        mFooterView = (TextView)inflater.inflate(R.layout.agenda_header_footer, null);
+        mHeaderView = (TextView)inflater.inflate(R.layout.agenda_header, null);
+        mFooterView = (TextView)inflater.inflate(R.layout.agenda_footer, null);
         mHeaderView.setText(R.string.loading);
         mAgendaListView.addHeaderView(mHeaderView);
     }

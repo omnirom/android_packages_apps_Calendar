@@ -30,7 +30,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.Attendees;
@@ -59,6 +61,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.RadioButton;
@@ -89,7 +92,10 @@ import com.android.common.Rfc822Validator;
 import com.android.ex.chips.AccountSpecifier;
 import com.android.ex.chips.BaseRecipientAdapter;
 import com.android.ex.chips.ChipsUtil;
+import com.android.ex.chips.DefaultPhotoManager;
+import com.android.ex.chips.DropdownChipLayouter;
 import com.android.ex.chips.RecipientEditTextView;
+import com.android.ex.chips.RecipientEntry;
 import com.android.timezonepicker.TimeZoneInfo;
 import com.android.timezonepicker.TimeZonePickerDialog;
 import com.android.timezonepicker.TimeZonePickerUtils;
@@ -1478,8 +1484,62 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
     private MultiAutoCompleteTextView initMultiAutoCompleteTextView(RecipientEditTextView list) {
         if (ChipsUtil.supportsChipsUi()) {
             mAddressAdapter = new RecipientAdapter(mActivity);
-            list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
             list.setOnFocusListShrinkRecipients(false);
+            list.setDropdownChipLayouter(new DropdownChipLayouter(mActivity.getLayoutInflater(), mActivity) {
+                @Override
+                protected int getItemLayoutResId(AdapterType type) {
+                    return R.layout.contact_list_item_view;
+                }
+                @Override
+                protected int getDefaultPhotoResId() {
+                    return R.drawable.ic_contact_picture;
+                }
+                // for the popup window contact list
+                @Override
+                protected void bindIconToView(boolean showImage, RecipientEntry entry, ImageView view, AdapterType type) {
+                    if (view == null) {
+                        return;
+                    }
+                    if (showImage) {
+                        byte[] photoBytes = entry.getPhotoBytes();
+                        if (photoBytes != null && photoBytes.length > 0) {
+                            super.bindIconToView(showImage, entry, view, type);
+                            return;
+                        } else {
+                            final Bitmap b = Utils.renderLetterTile(mActivity, entry.getDisplayName(), entry.getLookupKey());
+                            view.setImageBitmap(b);
+                        }
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        view.setVisibility(View.GONE);
+                    }
+                }
+            });
+            // for the text view chips images
+            ((BaseRecipientAdapter) mAddressAdapter).setPhotoManager(new DefaultPhotoManager(mActivity.getContentResolver()) {
+                @Override
+                public void populatePhotoBytesAsync(RecipientEntry entry, PhotoManagerCallback callback) {
+                    final Uri photoThumbnailUri = entry.getPhotoThumbnailUri();
+                    if (photoThumbnailUri != null) {
+                        super.populatePhotoBytesAsync(entry, callback);
+                    } else {
+                        final Bitmap b = Utils.renderLetterTile(mActivity, entry.getDisplayName(), entry.getLookupKey());
+                        byte[] photoBytes = Utils.bitmapToBytes(b);
+                        if (photoBytes != null) {
+                            entry.setPhotoBytes(photoBytes);
+                            if (callback != null) {
+                                callback.onPhotoBytesPopulated();
+                            }
+                        } else {
+                            if (callback != null) {
+                                callback.onPhotoBytesAsyncLoadFailed();
+                            }
+                        }
+                    }
+                }
+            });
+
+            list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
         } else {
             mAddressAdapter = new EmailAddressAdapter(mActivity);
             list.setAdapter((EmailAddressAdapter)mAddressAdapter);

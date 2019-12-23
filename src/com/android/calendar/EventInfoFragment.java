@@ -360,6 +360,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private View mErrorMsgView;
     private ObjectAnimator mAnimateAlpha;
     private long mLoadingMsgStartTime;
+    private View mAttendeesContainer;
 
     private EventColorPickerDialog mColorPickerDialog;
     private SparseIntArray mDisplayColorKeyMap = new SparseIntArray();
@@ -832,6 +833,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mDesc = (ExpandableTextView) mView.findViewById(R.id.description);
         mHeadlines = mView.findViewById(R.id.event_info_headline);
         mLongAttendees = (AttendeesView) mView.findViewById(R.id.long_attendee_list);
+        mAttendeesContainer = mView.findViewById(R.id.attendee_container);
 
         mResponseRadioGroup = (RadioGroup) mView.findViewById(R.id.response_value);
 
@@ -1765,10 +1767,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             (mLongAttendees).addAttendees(mDeclinedAttendees);
             (mLongAttendees).addAttendees(mTentativeAttendees);
             (mLongAttendees).addAttendees(mNoResponseAttendees);
-            mLongAttendees.setEnabled(false);
-            mLongAttendees.setVisibility(View.VISIBLE);
+            mAttendeesContainer.setVisibility(View.VISIBLE);
         } else {
-            mLongAttendees.setVisibility(View.GONE);
+            mAttendeesContainer.setVisibility(View.GONE);
         }
 
         if (hasEmailableAttendees()) {
@@ -2181,7 +2182,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }
         Window window = getActivity().getWindow();
-        window.setStatusBarColor(Utils.shiftColorDown(color));
+        window.setStatusBarColor(color);
     }
 
     public void doSave() {
