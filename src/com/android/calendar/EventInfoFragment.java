@@ -2181,7 +2181,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }
         Window window = getActivity().getWindow();
-        window.setStatusBarColor(Utils.shiftColorDown(color));
+        window.setStatusBarColor(color);
     }
 
     public void doSave() {

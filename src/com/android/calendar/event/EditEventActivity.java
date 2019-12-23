@@ -74,7 +74,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
 
         getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
         getActionBar().setElevation(0);
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel);
+        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel_white);
 
         if (mEditFragment == null) {
             Intent intent = null;
