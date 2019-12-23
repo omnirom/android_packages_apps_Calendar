@@ -33,7 +33,7 @@
 
     <View
         android:background="@color/calendar_grid_scroll_line_color"
-        android:layout_height="3px"
+        android:layout_height="2px"
         android:layout_width="match_parent" />
 
     <com.android.calendar.month.MonthListView

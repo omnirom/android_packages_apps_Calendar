@@ -144,6 +144,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
     protected int mMonthNumColor;
     protected int mMonthNumOtherColor;
     protected int mMonthNumTodayColor;
+    protected int mMonthAxesTodayColor;
     protected int mMonthNameColor;
     protected int mMonthNameOtherColor;
     protected int mMonthEventColor;
@@ -311,6 +312,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
         mMonthNumColor = res.getColor(R.color.month_day_number);
         mMonthNumOtherColor = res.getColor(R.color.month_day_number_other);
         mMonthNumTodayColor = res.getColor(R.color.month_today_number);
+        mMonthAxesTodayColor = res.getColor(R.color.month_today_axes);
         mMonthNameColor = mMonthNumColor;
         mMonthNameOtherColor = mMonthNumOtherColor;
         mMonthEventColor = res.getColor(R.color.month_event_color);
@@ -675,7 +677,7 @@ public class MonthWeekEventsView extends SimpleWeekView {
             y = mWeekNumAscentHeight + TOP_PADDING_MONTH_NUMBER;
 
             if (Integer.valueOf(mDayNumbers[0]) == week) {
-                mWeekNumPaint.setColor(mMonthNumTodayColor);
+                mWeekNumPaint.setColor(mMonthAxesTodayColor);
                 mWeekNumPaint.setFakeBoldText(true);
             } else {
                 mWeekNumPaint.setColor(mWeekNumColor);
