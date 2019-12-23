@@ -336,7 +336,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     // TODO Clean up paint usage
     private final Paint mPaint = new Paint();
     private final Paint mEventTextPaint = new Paint();
-    private final Paint mSelectionPaint = new Paint();
     private float[] mLines;
 
     private int mFirstDayOfWeek; // First day of the week
@@ -446,8 +445,9 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private static int mCalendarGridLineColor;
     private static int mCalendarGridScrollLineColor;
     private static int mFutureBgColor;
+    private static int mPastBgColor;
+    private static int mTodayBgColor;
     private static int mBorderBgColor;
-    private static int mFilterBgColor;
     private static int mNewEventHintColor;
     private static int mCalendarHourLabelColor;
     private static int mMoreAlldayEventsTextAlpha = MORE_EVENTS_MAX_ALPHA;
@@ -787,8 +787,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mWeek_past = mResources.getColor(R.color.calendar_past_text_color);
         mWeek_normal = mResources.getColor(R.color.week_normal);
         mFutureBgColor = mResources.getColor(R.color.calendar_future_bg_color);
+        mPastBgColor = mResources.getColor(R.color.calendar_past_bg_color);
         mBorderBgColor = mResources.getColor(R.color.calendar_border_background);
-        mFilterBgColor = mResources.getColor(R.color.calendar_filter_bg_color);
         mCalendarGridAreaSelected= mResources.getColor(R.color.calendar_grid_area_selected);
         mCalendarGridScrollLineColor = mResources.getColor(R.color.calendar_grid_scroll_line_color);
         mCalendarGridLineColor = mResources
@@ -798,18 +798,13 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mClickedColor = mResources.getColor(R.color.day_event_clicked_background_color);
         mEventTextColor = mResources.getColor(R.color.calendar_event_text_color);
         mMoreEventsTextColor = mResources.getColor(R.color.month_event_other_color);
+        mTodayBgColor = mResources.getColor(R.color.week_today_bg);
 
         mEventTextPaint.setTextSize(EVENT_TEXT_FONT_SIZE);
         mEventTextPaint.setTextAlign(Paint.Align.LEFT);
         mEventTextPaint.setAntiAlias(true);
 
-        int gridLineColor = mResources.getColor(R.color.calendar_grid_line_highlight_color);
-        Paint p = mSelectionPaint;
-        p.setColor(gridLineColor);
-        p.setStyle(Style.FILL);
-        p.setAntiAlias(false);
-
-        p = mPaint;
+        Paint p = mPaint;
         p.setAntiAlias(true);
 
         // Allocate space for 2 weeks worth of weekday names so that we can
@@ -2330,6 +2325,23 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 // future starts right from today
                 startIndex = todayIndex + 1;
             }
+            // today header bg
+            r.top = 0;
+            r.bottom = DAY_HEADER_HEIGHT;
+            r.left = computeDayLeftPosition(todayIndex);
+            r.right = computeDayLeftPosition(todayIndex + 1);
+            p.setColor(mTodayBgColor);
+            p.setStyle(Style.FILL);
+            canvas.drawRect(r, p);
+
+            // event line bg
+            r.top = DAY_HEADER_HEIGHT;
+            r.bottom = mFirstCell - 1;
+            r.left = mHoursWidth;
+            r.right = mViewWidth;
+            p.setColor(mPastBgColor);
+            p.setStyle(Style.FILL);
+            canvas.drawRect(r, p);
 
             if (startIndex >= 0) {
                 // Draw the future highlight
@@ -2625,6 +2637,14 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         p.setColor(mBorderBgColor);
         p.setStyle(Style.FILL);
         p.setAntiAlias(false);
+        canvas.drawRect(r, p);
+
+        // past
+        r.left = computeDayLeftPosition(0) + 1;
+        r.right = computeDayLeftPosition(mNumDays);
+        r.top = mDestRect.top;
+        r.bottom = mDestRect.bottom;
+        p.setColor(mPastBgColor);
         canvas.drawRect(r, p);
 
         // Draw background for grid area
@@ -4335,32 +4355,27 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             if (numSelectedEvents >= 1) {
                 item = menu.add(0, MENU_EVENT_VIEW, 0, R.string.event_view);
                 item.setOnMenuItemClickListener(mContextMenuHandler);
-                item.setIcon(android.R.drawable.ic_menu_info_details);
 
                 int accessLevel = getEventAccessLevel(mContext, mSelectedEvent);
                 if (accessLevel == ACCESS_LEVEL_EDIT) {
                     item = menu.add(0, MENU_EVENT_EDIT, 0, R.string.event_edit);
                     item.setOnMenuItemClickListener(mContextMenuHandler);
-                    item.setIcon(android.R.drawable.ic_menu_edit);
                     item.setAlphabeticShortcut('e');
                 }
 
                 if (accessLevel >= ACCESS_LEVEL_DELETE) {
                     item = menu.add(0, MENU_EVENT_DELETE, 0, R.string.event_delete);
                     item.setOnMenuItemClickListener(mContextMenuHandler);
-                    item.setIcon(android.R.drawable.ic_menu_delete);
                 }
 
                 item = menu.add(0, MENU_EVENT_CREATE, 0, R.string.event_create);
                 item.setOnMenuItemClickListener(mContextMenuHandler);
-                item.setIcon(android.R.drawable.ic_menu_add);
                 item.setAlphabeticShortcut('n');
             } else {
                 // Otherwise, if the user long-pressed on a blank hour, allow
                 // them to create an event. They can also do this by tapping.
                 item = menu.add(0, MENU_EVENT_CREATE, 0, R.string.event_create);
                 item.setOnMenuItemClickListener(mContextMenuHandler);
-                item.setIcon(android.R.drawable.ic_menu_add);
                 item.setAlphabeticShortcut('n');
             }
         } else {
@@ -4371,31 +4386,26 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             if (numSelectedEvents >= 1) {
                 item = menu.add(0, MENU_EVENT_VIEW, 0, R.string.event_view);
                 item.setOnMenuItemClickListener(mContextMenuHandler);
-                item.setIcon(android.R.drawable.ic_menu_info_details);
 
                 int accessLevel = getEventAccessLevel(mContext, mSelectedEvent);
                 if (accessLevel == ACCESS_LEVEL_EDIT) {
                     item = menu.add(0, MENU_EVENT_EDIT, 0, R.string.event_edit);
                     item.setOnMenuItemClickListener(mContextMenuHandler);
-                    item.setIcon(android.R.drawable.ic_menu_edit);
                     item.setAlphabeticShortcut('e');
                 }
 
                 if (accessLevel >= ACCESS_LEVEL_DELETE) {
                     item = menu.add(0, MENU_EVENT_DELETE, 0, R.string.event_delete);
                     item.setOnMenuItemClickListener(mContextMenuHandler);
-                    item.setIcon(android.R.drawable.ic_menu_delete);
                 }
             }
 
             item = menu.add(0, MENU_EVENT_CREATE, 0, R.string.event_create);
             item.setOnMenuItemClickListener(mContextMenuHandler);
-            item.setIcon(android.R.drawable.ic_menu_add);
             item.setAlphabeticShortcut('n');
 
             item = menu.add(0, MENU_DAY, 0, R.string.show_day_view);
             item.setOnMenuItemClickListener(mContextMenuHandler);
-            item.setIcon(android.R.drawable.ic_menu_day);
             item.setAlphabeticShortcut('d');
         }
 

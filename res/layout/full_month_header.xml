@@ -18,7 +18,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="32dip"
-    android:gravity="bottom"
+    android:gravity="center_vertical"
     android:background="@color/calendar_border_background">
 
     <TextView android:id="@+id/wk_label"
