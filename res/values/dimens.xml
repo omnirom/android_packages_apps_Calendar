@@ -49,6 +49,7 @@
 
     <dimen name="recurrence_picker_height">340dp</dimen>
     <dimen name="recurrence_picker_width">300dp</dimen>
+    <dimen name="recurrence_bubble_size">48dp</dimen>
 
     <!-- Floating action button -->
     <dimen name="floating_action_button_height">56dp</dimen>

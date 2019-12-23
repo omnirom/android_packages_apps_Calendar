@@ -21,7 +21,7 @@
 
     <style name="MinusButton">
         <item name="android:background">?android:attr/selectableItemBackground</item>
-        <item name="android:src">@drawable/ic_menu_cancel_black</item>
+        <item name="android:src">@drawable/ic_menu_cancel</item>
     </style>
 
     <style name="MonthView_MiniMonthLabel">
@@ -109,7 +109,7 @@
         <item name="android:textColor">@color/calendar_date_range_color</item>
     </style>
 
-    <style name="Settings" parent="@android:style/Theme.Material.Light.DarkActionBar">
+    <style name="Settings" parent="@android:style/Theme.DeviceDefault.Light.DarkActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:colorPrimary">@color/primary_color</item>
         <item name="android:colorPrimaryDark">@color/primary_color</item>
@@ -117,7 +117,7 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material.Light.DarkActionBar">
+    <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.DeviceDefault.Light.DarkActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:colorPrimary">@color/primary_color</item>
         <item name="android:colorPrimaryDark">@color/primary_color</item>

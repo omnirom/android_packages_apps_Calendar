@@ -52,4 +52,11 @@
         <item>"15"</item>
         <item>"30"</item>
     </string-array>
+
+    <string-array name="recurrence_freq_new">
+        <item >@string/recurrence_freq_daily</item>
+        <item >@string/recurrence_freq_weekly</item>
+        <item >@string/recurrence_freq_monthly</item>
+        <item >@string/recurrence_freq_yearly</item>
+    </string-array>
 </resources>
