@@ -938,7 +938,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }
         Window window = getActivity().getWindow();
-        window.setStatusBarColor(Utils.shiftColorDown(color));
+        window.setStatusBarColor(color);
     }
 
     public void revert() {

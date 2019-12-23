@@ -677,7 +677,7 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
         mFreqSpinner = (Spinner) mView.findViewById(R.id.freqSpinner);
         mFreqSpinner.setOnItemSelectedListener(this);
         ArrayAdapter<CharSequence> freqAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.recurrence_freq, R.layout.recurrencepicker_freq_item);
+                R.array.recurrence_freq_new, R.layout.recurrencepicker_freq_item);
         freqAdapter.setDropDownViewResource(R.layout.recurrencepicker_freq_item);
         mFreqSpinner.setAdapter(freqAdapter);
 
@@ -824,6 +824,13 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
 
         mDone = (Button) mView.findViewById(R.id.done);
         mDone.setOnClickListener(this);
+        Button cancel = (Button) mView.findViewById(R.id.cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
 
         togglePickerOptions();
         updateDialog();

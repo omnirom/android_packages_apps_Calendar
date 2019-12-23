@@ -21,8 +21,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:paddingTop="1dip">
+    android:fillViewport="true">
 
     <TextView android:id="@+id/month_name"
         android:layout_width="match_parent"
@@ -35,7 +34,7 @@
 
      <View
         android:background="@color/calendar_grid_scroll_line_color"
-        android:layout_height="3px"
+        android:layout_height="1px"
         android:layout_width="match_parent" />
 
     <com.android.calendar.month.MonthListView
