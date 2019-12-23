@@ -22,6 +22,7 @@ import com.android.calendar.R;
 import com.android.calendar.Utils;
 import com.android.calendar.event.EditEventHelper.AttendeeItem;
 import com.android.common.Rfc822Validator;
+import com.android.ex.chips.CircularImageView;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
@@ -29,17 +30,24 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.CalendarContract.Attendees;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Identity;
+import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.TextUtils;
 import android.text.util.Rfc822Token;
 import android.util.AttributeSet;
@@ -50,6 +58,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,12 +74,22 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     private static final int EMAIL_PROJECTION_CONTACT_ID_INDEX = 0;
     private static final int EMAIL_PROJECTION_CONTACT_LOOKUP_INDEX = 1;
     private static final int EMAIL_PROJECTION_PHOTO_ID_INDEX = 2;
+    private static final int EMAIL_PROJECTION_PHOTO_THUMBNAIL_URI = 3; // String
 
     private static final String[] PROJECTION = new String[] {
         RawContacts.CONTACT_ID,     // 0
         Contacts.LOOKUP_KEY,        // 1
         Contacts.PHOTO_ID,          // 2
+        Contacts.PHOTO_THUMBNAIL_URI, // 3
     };
+
+    private static class PhotoQuery {
+        public static final String[] PROJECTION = {
+            Photo.PHOTO
+        };
+        public static final int BUFFER_SIZE = 1024*16;
+        public static final int PHOTO = 0;
+    }
 
     private final Context mContext;
     private final LayoutInflater mInflater;
@@ -194,16 +216,17 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
         button.setVisibility(isEnabled() ? View.VISIBLE : View.GONE);
         button.setTag(item);
         if (item.mRemoved) {
-            button.setImageResource(R.drawable.ic_menu_add_black);
+            button.setImageResource(R.drawable.ic_menu_add);
             button.setContentDescription(mContext.getString(R.string.accessibility_add_attendee));
         } else {
-            button.setImageResource(R.drawable.ic_menu_cancel_black);
+            button.setImageResource(R.drawable.ic_menu_cancel);
             button.setContentDescription(mContext.
                     getString(R.string.accessibility_remove_attendee));
         }
         button.setOnClickListener(this);
 
         final QuickContactBadge badgeView = (QuickContactBadge) view.findViewById(R.id.badge);
+        badgeView.setOverlay(null);
 
         Drawable badge = null;
         // Search for photo in recycled photos
@@ -336,16 +359,6 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
         final View view = constructAttendeeView(item);
         view.setTag(item);
         addView(view, index);
-        // Show separator between Attendees
-        if (!firstAttendeeInCategory) {
-            View prevItem = getChildAt(index - 1);
-            if (prevItem != null) {
-                View Separator = prevItem.findViewById(R.id.contact_separator);
-                if (Separator != null) {
-                    Separator.setVisibility(View.VISIBLE);
-                }
-            }
-        }
 
         Uri uri;
         String selection = null;
@@ -437,8 +450,17 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         item.mContactLookupUri = Contacts.getLookupUri(contactId, lookupKey);
 
                         final long photoId = cursor.getLong(EMAIL_PROJECTION_PHOTO_ID_INDEX);
-                        // If we found a picture, start the async loading
-                        if (photoId > 0) {
+                        final String photoThumbnailUriStr = cursor.getString(EMAIL_PROJECTION_PHOTO_THUMBNAIL_URI);
+                        if (photoThumbnailUriStr != null) {
+                            fetchPhotoAsync(Uri.parse(photoThumbnailUriStr), item,
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateAttendeeView(item);
+                                        }
+                                    });
+                        } else if (photoId > 0) {
+                            // If we found a picture, start the async loading
                             // Query for this contacts picture
                             ContactsAsyncHelper.retrieveContactPhotoAsync(
                                     mContext, item, new Runnable() {
@@ -482,5 +504,71 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
         final AttendeeItem item = (AttendeeItem) view.getTag();
         item.mRemoved = !item.mRemoved;
         updateAttendeeView(item);
+    }
+
+    private void fetchPhotoAsync(final Uri photoThumbnailUri, final AttendeeItem item,
+            final Runnable callback) {
+        final AsyncTask<Void, Void, byte[]> photoLoadTask = new AsyncTask<Void, Void, byte[]>() {
+            @Override
+            protected byte[] doInBackground(Void... params) {
+                // First try running a query. Images for local contacts are
+                // loaded by sending a query to the ContactsProvider.
+                final Cursor photoCursor = mContext.getContentResolver().query(
+                        photoThumbnailUri, PhotoQuery.PROJECTION, null, null, null);
+                if (photoCursor != null) {
+                    try {
+                        if (photoCursor.moveToFirst()) {
+                            return photoCursor.getBlob(PhotoQuery.PHOTO);
+                        }
+                    } finally {
+                        photoCursor.close();
+                    }
+                } else {
+                    // If the query fails, try streaming the URI directly.
+                    // For remote directory images, this URI resolves to the
+                    // directory provider and the images are loaded by sending
+                    // an openFile call to the provider.
+                    try {
+                        InputStream is = mContext.getContentResolver().openInputStream(
+                                photoThumbnailUri);
+                        if (is != null) {
+                            byte[] buffer = new byte[PhotoQuery.BUFFER_SIZE];
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            try {
+                                int size;
+                                while ((size = is.read(buffer)) != -1) {
+                                    baos.write(buffer, 0, size);
+                                }
+                            } finally {
+                                is.close();
+                            }
+                            return baos.toByteArray();
+                        }
+                    } catch (IOException ex) {
+                        // ignore
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(final byte[] photoBytes) {
+                if (photoBytes != null && photoBytes.length > 0) {
+                    final Bitmap photo = BitmapFactory.decodeByteArray(photoBytes, 0,
+                            photoBytes.length);
+                    item.mBadge = getRoundDrawable(mContext.getResources(), photo);
+                    callback.run();
+                }
+            }
+
+            private Drawable getRoundDrawable(Resources resources, Bitmap bitmap) {
+                final RoundedBitmapDrawable drawable =
+                        RoundedBitmapDrawableFactory.create(resources, bitmap);
+                drawable.setAntiAlias(true);
+                drawable.setCornerRadius(bitmap.getHeight() / 2);
+                return drawable;
+            }
+        };
+        photoLoadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 }

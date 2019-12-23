@@ -15,15 +15,19 @@
 -->
 
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginRight="8dip" >
+        android:minHeight="@dimen/chip_dropdown_height"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <QuickContactBadge
+            android:id="@+id/badge"
+            android:src="@drawable/ic_contact_picture"
+            style="@style/ChipStartIconStyle" />
+
         <TextView
             android:id="@+id/name"
             android:layout_height="wrap_content"
@@ -43,23 +47,5 @@
             android:visibility="gone"
             android:contentDescription="@string/accessibility_remove_attendee"
             style="@style/MinusButton" />
-
-        <QuickContactBadge
-            android:id="@+id/badge"
-            android:layout_gravity="center_vertical"
-            android:layout_width="48dip"
-            android:layout_height="48dip"
-            android:src="@drawable/ic_contact_picture"
-            style="?android:attr/quickContactBadgeStyleWindowMedium" />
-    </LinearLayout>
-
-    <View
-        android:id="@+id/contact_separator"
-        android:background="?android:attr/listDivider"
-        android:visibility="gone"
-        android:layout_marginLeft="8dip"
-        android:layout_marginRight="8dip"
-        android:layout_height="1px"
-        android:layout_width="match_parent" />
 
 </LinearLayout>

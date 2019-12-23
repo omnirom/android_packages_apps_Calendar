@@ -15,7 +15,7 @@
     <!-- max number of lines in the description without showing More/Less button  -->
     <integer name="event_info_desc_line_num">8</integer>
     <!-- The alpha level of photos of attendees that didn't respond -->
-    <integer name="noresponse_attendee_photo_alpha_level">64</integer>
+    <integer name="noresponse_attendee_photo_alpha_level">200</integer>
     <!-- The default alpha level of photos of attendees -->
     <integer name="default_attendee_photo_alpha_level">255</integer>
     <!-- The time of day in minutes usually considered the start of the work day, eg. 6am in the US -->

@@ -19,6 +19,12 @@ package com.android.calendar;
 import com.android.calendar.event.EditEventHelper.AttendeeItem;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -26,6 +32,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.ContactsContract.Contacts;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -98,8 +106,9 @@ public class ContactsAsyncHelper extends Handler {
                     }
 
                     if (inputStream != null) {
-                        args.result = Drawable.createFromStream(inputStream, args.uri.toString());
-
+                        Drawable d = Drawable.createFromStream(inputStream, args.uri.toString());
+                        args.result = getRoundDrawable(args.context.getResources(),
+                                getBitmap(args.context.getResources(), d));
                         if (DBG) Log.d(LOG_TAG, "Loading image: " + msg.arg1 +
                                 " token: " + msg.what + " image URI: " + args.uri);
                     } else {
@@ -249,5 +258,29 @@ public class ContactsAsyncHelper extends Handler {
                 break;
             default:
         }
+    }
+
+    private Bitmap getBitmap(Resources resources, Drawable image) {
+        if (image instanceof BitmapDrawable) {
+            return ((BitmapDrawable) image).getBitmap();
+        }
+        final Canvas canvas = new Canvas();
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG,
+                Paint.FILTER_BITMAP_FLAG));
+
+        Bitmap bmResult = Bitmap.createBitmap(image.getIntrinsicWidth(), image.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bmResult);
+        image.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        image.draw(canvas);
+        return bmResult;
+    }
+
+    private Drawable getRoundDrawable(Resources resources, Bitmap bitmap) {
+        final RoundedBitmapDrawable drawable =
+                RoundedBitmapDrawableFactory.create(resources, bitmap);
+        drawable.setAntiAlias(true);
+        drawable.setCornerRadius(bitmap.getHeight() / 2);
+        return drawable;
     }
 }

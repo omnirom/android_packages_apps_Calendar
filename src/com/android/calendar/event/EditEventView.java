@@ -88,6 +88,7 @@ import com.android.common.Rfc822InputFilter;
 import com.android.common.Rfc822Validator;
 import com.android.ex.chips.AccountSpecifier;
 import com.android.ex.chips.BaseRecipientAdapter;
+import com.android.ex.chips.DropdownChipLayouter;
 import com.android.ex.chips.ChipsUtil;
 import com.android.ex.chips.RecipientEditTextView;
 import com.android.timezonepicker.TimeZoneInfo;
@@ -1478,8 +1479,14 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
     private MultiAutoCompleteTextView initMultiAutoCompleteTextView(RecipientEditTextView list) {
         if (ChipsUtil.supportsChipsUi()) {
             mAddressAdapter = new RecipientAdapter(mActivity);
-            list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
             list.setOnFocusListShrinkRecipients(false);
+            list.setDropdownChipLayouter(new DropdownChipLayouter(mActivity.getLayoutInflater(), mActivity) {
+                @Override
+                protected int getItemLayoutResId(AdapterType type) {
+                    return R.layout.contact_list_item_view;
+                }
+            });
+            list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
         } else {
             mAddressAdapter = new EmailAddressAdapter(mActivity);
             list.setAdapter((EmailAddressAdapter)mAddressAdapter);

@@ -41,7 +41,8 @@ public class CalendarColorSquare extends QuickContactBadge {
     @Override
     public void setBackgroundColor(int color) {
         Drawable[] colorDrawable = new Drawable[] {
-                getContext().getResources().getDrawable(R.drawable.calendar_color_square) };
+                getContext().getResources().getDrawable(R.drawable.calendar_color_oval) };
         setImageDrawable(new ColorStateDrawable(colorDrawable, color));
+        setOverlay(null);
     }
 }
