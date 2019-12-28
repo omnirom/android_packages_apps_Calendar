@@ -19,7 +19,8 @@
     android:layout_height="48dip"
     android:gravity="center_vertical"
     android:paddingRight="8dip"
-    android:paddingLeft="12dip">
+    android:paddingLeft="12dip"
+    android:background="@color/primary_color" >
 
     <TextView android:id="@+id/top_button_weekday"
         android:layout_width="wrap_content"
