@@ -32,17 +32,17 @@
         android:paddingLeft="8dip"
         android:paddingRight="2dip"
         android:orientation="vertical"
-        android:background="@color/primary_color"
+        android:background="@color/appwidget_header_bg_color"
         android:foreground="?android:attr/selectableItemBackground" >
         <TextView
             android:id="@+id/day_of_week"
             android:layout_marginTop="4dip"
             android:layout_marginBottom="-8dip"
-            android:textColor="@color/appwidget_header"
+            android:textColor="@color/appwidget_header_font_color"
             style="@style/WidgetDayOfWeekStyle" />
         <TextView
             android:id="@+id/date"
-            android:textColor="@color/appwidget_header"
+            android:textColor="@color/appwidget_header_font_color"
             style="@style/WidgetDateStyle" />
     </LinearLayout>
 

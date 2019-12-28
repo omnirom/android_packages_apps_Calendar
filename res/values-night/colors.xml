@@ -31,7 +31,8 @@
     <color name="event_background">@color/omni_color2</color>
     <color name="calendar_grid_line_color">#20ffffff</color>
     <color name="calendar_grid_scroll_line_color">#60ffffff</color>
-    
+    <color name="calendar_view_switch_menu_text_color">@android:color/white</color>
+
     <color name="calendar_visible">@color/omni_text1</color>
     <color name="calendar_hidden">@color/omni_text3</color>
     <color name="calendar_secondary_visible">@color/omni_text2</color>
@@ -74,7 +75,8 @@
 
     <color name="recurrence_bubble_color_disabled">#60ffffff</color>
 
-    <color name="appwidget_header">@android:color/white</color>
+    <color name="appwidget_header_font_color">@android:color/white</color>
+    <color name="appwidget_header_bg_color">@color/accent</color>
     <color name="appwidget_item_declined_color">#66333333</color>
     <color name="appwidget_item_standard_color">@color/omni_color1</color>
     <color name="appwidget_no_events">@color/omni_text1</color>

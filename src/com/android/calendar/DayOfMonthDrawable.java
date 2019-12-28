@@ -40,7 +40,7 @@ public class DayOfMonthDrawable extends Drawable {
         mTextSize = c.getResources().getDimension(R.dimen.today_icon_text_size);
         mPaint = new Paint();
         mPaint.setAlpha(255);
-        mPaint.setColor(0xFFFFFFFF);
+        mPaint.setColor(c.getResources().getColor(R.color.calendar_view_switch_menu_text_color));
         mPaint.setTypeface(Typeface.DEFAULT_BOLD);
         mPaint.setTextSize(mTextSize);
         mPaint.setTextAlign(Paint.Align.CENTER);

@@ -2366,19 +2366,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     }
 
     private void drawDayHeaderLoop(Rect r, Canvas canvas, Paint p) {
-        // Draw the horizontal day background banner
-        // p.setColor(mCalendarDateBannerBackground);
-        // r.top = 0;
-        // r.bottom = DAY_HEADER_HEIGHT;
-        // r.left = 0;
-        // r.right = mHoursWidth + mNumDays * (mCellWidth + DAY_GAP);
-        // canvas.drawRect(r, p);
-        //
-        // Fill the extra space on the right side with the default background
-        // r.left = r.right;
-        // r.right = mViewWidth;
-        // p.setColor(mCalendarGridAreaBackground);
-        // canvas.drawRect(r, p);
         if (mNumDays == 1) {
             return;
         }
@@ -2547,7 +2534,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             // Draw day of the month
             p.setTextAlign(Align.LEFT);
             p.setTextSize(DATE_HEADER_FONT_SIZE);
-            p.setTypeface(day == todayIndex ? mBold : Typeface.DEFAULT);
+            p.setTypeface(Typeface.DEFAULT);
             float textWidth = p.measureText(dateNumStr);
             x = computeDayLeftPosition(day + 1) - mCellWidth + (mCellWidth - (int) textWidth) / 2;
             canvas.drawText(dateNumStr, x, y, p);

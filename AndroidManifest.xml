@@ -78,7 +78,8 @@
 
         <activity android:name="EventInfoActivity"
             android:parentActivityName="com.android.calendar.AllInOneActivity"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/CalendarTheme.WithDarkActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -93,7 +94,8 @@
         </activity>
 
         <activity android:name=".event.EditEventActivity"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/CalendarTheme.WithDarkActionBar" >
         </activity>
 
         <activity-alias android:name="EditEventActivity"

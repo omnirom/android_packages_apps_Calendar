@@ -1488,7 +1488,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             list.setDropdownChipLayouter(new DropdownChipLayouter(mActivity.getLayoutInflater(), mActivity) {
                 @Override
                 protected int getItemLayoutResId(AdapterType type) {
-                    return R.layout.contact_list_item_view;
+                    return R.layout.contact_list_item_margin_view;
                 }
                 @Override
                 protected int getDefaultPhotoResId() {

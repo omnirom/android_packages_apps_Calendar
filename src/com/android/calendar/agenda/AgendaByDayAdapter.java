@@ -263,8 +263,8 @@ public class AgendaByDayAdapter extends BaseAdapter {
             if (row.mDay == mTodayJulianDay) {
                 holder.dateView.setTextColor(mTodayTextColor);
                 holder.dayView.setTextColor(mTodayTextColor);
-                holder.dateView.setTypeface(Typeface.DEFAULT_BOLD);
-                holder.dayView.setTypeface(Typeface.DEFAULT_BOLD);
+                holder.dateView.setTypeface(Typeface.DEFAULT);
+                holder.dayView.setTypeface(Typeface.DEFAULT);
                 agendaDayView.setBackgroundResource(R.color.agenda_today_bg_color);
             } else if (row.mDay < mTodayJulianDay) {
                 holder.dateView.setTextColor(mPastTextColor);

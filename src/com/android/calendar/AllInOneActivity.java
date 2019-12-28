@@ -27,6 +27,7 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -319,6 +320,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        setTaskDescription(new ActivityManager.TaskDescription(
+                (String) getTitle(), null, getResources().getColor(R.color.accent)));
         mBundle = icicle;
         mPermsDone = false;
         mTimeZone = Utils.getTimeZone(this, mHomeTimeUpdater);

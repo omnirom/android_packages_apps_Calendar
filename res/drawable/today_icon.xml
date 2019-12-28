@@ -17,10 +17,19 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/today_icon_background"
-        android:drawable="@drawable/ic_menu_today_holo_light"
-        android:gravity="center" />
+        android:drawable="@drawable/today_icon_bg"
+        android:gravity="center"
+        android:width="@dimen/today_icon_size"
+        android:height="@dimen/today_icon_size" />
     <item
         android:id="@+id/today_icon_day"
-        android:drawable="@drawable/ic_menu_today_holo_light"
-        android:gravity="center"/>
+        android:top="20dp"
+        android:width="@dimen/today_icon_number_size"
+        android:height="@dimen/today_icon_number_size"
+        android:gravity="center">
+        <shape
+            android:shape="rectangle" >
+            <solid android:color="#00000000"/>
+        </shape>
+    </item>
 </layer-list>

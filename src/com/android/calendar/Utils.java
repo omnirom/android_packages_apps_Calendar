@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -2186,5 +2187,16 @@ public class Utils {
             imageBytes = null;
         }
         return imageBytes;
+    }
+
+    public static ColorStateList getColorAttr(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        ColorStateList stateList = null;
+        try {
+            stateList = ta.getColorStateList(0);
+        } finally {
+            ta.recycle();
+        }
+        return stateList;
     }
 }
