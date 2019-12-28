@@ -26,6 +26,9 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
     </style>
 
     <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material">
@@ -39,6 +42,9 @@
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
     </style>
 
     <style name="CalendarTheme.WithDarkActionBar" parent="@android:style/Theme.Material">
@@ -52,5 +58,25 @@
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
+    </style>
+
+    <style name="TimePicker" parent="@android:style/Widget.Material.TimePicker">
+        <item name="android:headerBackground">@color/accent</item>
+        <item name="android:numbersBackgroundColor">@color/omni_color1</item>
+        <item name="android:background">@color/omni_color2</item>
+    </style>
+
+    <style name="DatePicker" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:headerBackground">@color/accent</item>
+        <item name="android:background">@color/omni_color2</item>
+    </style>
+
+    <style name="DatePickerDialog" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:colorBackground">@color/omni_color2</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
     </style>
 </resources>
