@@ -26,7 +26,7 @@
     <color name="omni_text3">#eeeeeeee</color>
     <color name="primary_dark_color">@color/omni_color2</color>
     <color name="primary_color">@color/omni_color1</color>
-    <color name="accent">@color/omni_color5</color>
+    <!--<color name="accent">@color/omni_color5</color>-->
     <color name="background_color">@color/omni_color1</color>
     <color name="event_background">@color/omni_color2</color>
     <color name="calendar_grid_line_color">#20ffffff</color>
