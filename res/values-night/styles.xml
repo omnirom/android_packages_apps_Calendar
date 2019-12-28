@@ -38,6 +38,7 @@
         <item name="android:textAppearanceSearchResultTitle">@style/SearchResultTitle</item>
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
+        <item name="android:windowBackground">@color/omni_color1</item>
     </style>
 
     <style name="CalendarTheme.WithDarkActionBar" parent="@android:style/Theme.Material">
@@ -50,5 +51,6 @@
         <item name="android:textAppearanceSearchResultTitle">@style/SearchResultTitle</item>
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
+        <item name="android:windowBackground">@color/omni_color1</item>
     </style>
 </resources>
