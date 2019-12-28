@@ -21,7 +21,7 @@
     android:layout_marginLeft="10dip"
     android:gravity="top"
     android:textColor="@color/agenda_text_color"
-    android:background="@color/agenda_day_bar_background_color"
+    android:background="@color/calendar_past_bg_color"
     android:minHeight="@dimen/agenda_list_footer_height"
     android:paddingTop="18dip"
     android:paddingLeft="10dip"

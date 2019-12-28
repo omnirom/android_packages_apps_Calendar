@@ -149,11 +149,9 @@
     
     <style name="SearchResultTitle" parent="@android:style/TextAppearance.Material.SearchResult.Title">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="SearchResultSubtitle" parent="@android:style/TextAppearance.Material.SearchResult.Subtitle">
-        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="MultiStateButton">
@@ -229,5 +227,5 @@
         <item name="android:paddingRight">4dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
-        </style>
+    </style>
 </resources>
