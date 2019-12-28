@@ -26,6 +26,11 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
+        <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
+        <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
     </style>
 
     <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material">
@@ -39,6 +44,12 @@
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
+        <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
+        <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
+        <item name="android:actionBarPopupTheme">@style/CalendarTheme.PopupMenu</item>
     </style>
 
     <style name="CalendarTheme.WithDarkActionBar" parent="@android:style/Theme.Material">
@@ -52,5 +63,59 @@
         <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
         <item name="android:windowBackground">@color/omni_color1</item>
+        <item name="android:timePickerStyle">@style/TimePicker</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
+        <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
+        <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
+    </style>
+
+    <style name="TimePicker" parent="@android:style/Widget.Material.TimePicker">
+        <item name="android:headerBackground">@color/accent</item>
+        <item name="android:numbersBackgroundColor">@color/omni_color1</item>
+        <item name="android:background">@color/omni_color2</item>
+        <item name="android:numbersTextColor">?android:attr/textColorPrimary</item>
+        <item name="android:numbersInnerTextColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="DatePicker" parent="@android:style/Widget.Material.DatePicker">
+        <item name="android:headerBackground">@color/accent</item>
+        <item name="android:background">@color/omni_color1</item>
+    </style>
+
+    <style name="DatePickerDialog" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:colorBackground">@color/omni_color1</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:datePickerStyle">@style/DatePicker</item>
+        <item name="android:calendarViewStyle">@style/CalendarViewStyle</item>
+    </style>
+
+    <style name="CalendarViewStyle" parent="@android:style/Widget.Material.CalendarView">
+        <item name="android:dateTextAppearance">@style/TextAppearance.CalendarViewStyle.Day</item>
+    </style>
+
+    <style name="TextAppearance.CalendarViewStyle.Day" parent="@android:style/TextAppearance.Material.Caption">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="CalendarTheme.Dialog" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:colorBackground">@color/omni_color1</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorPrimary">@color/primary_color</item>
+        <item name="android:colorPrimaryDark">@color/primary_color</item>
+    </style>
+
+    <style name="CalendarTheme.AlertDialog" parent="@android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorBackground">@color/omni_color1</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorPrimary">@color/primary_color</item>
+        <item name="android:colorPrimaryDark">@color/primary_color</item>
+    </style>
+
+    <style name="CalendarTheme.PopupMenu" parent="@android:style/Theme.Material.Dialog" >
+        <item name="android:colorBackground">@color/omni_color1</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorPrimary">@color/primary_color</item>
+        <item name="android:colorPrimaryDark">@color/primary_color</item>
     </style>
 </resources>
