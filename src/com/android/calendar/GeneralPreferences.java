@@ -50,19 +50,13 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.calendar.alerts.AlertReceiver;
-import com.android.timezonepicker.TimeZoneInfo;
-import com.android.timezonepicker.TimeZonePickerDialog;
-import com.android.timezonepicker.TimeZonePickerDialog.OnTimeZoneSetListener;
-import com.android.timezonepicker.TimeZonePickerUtils;
 
 public class GeneralPreferences extends PreferenceFragment implements
-        OnSharedPreferenceChangeListener, OnPreferenceChangeListener, OnTimeZoneSetListener {
+        OnSharedPreferenceChangeListener, OnPreferenceChangeListener {
     // The name of the shared preferences file. This name must be maintained for historical
     // reasons, as it's what PreferenceManager assigned the first time the file was created.
     static final String SHARED_PREFS_NAME = "com.android.calendar_preferences";
     static final String SHARED_PREFS_NAME_NO_BACKUP = "com.android.calendar_preferences_no_backup";
-
-    private static final String FRAG_TAG_TIME_ZONE_PICKER = "TimeZonePicker";
 
     // Preference keys
     public static final String KEY_HIDE_DECLINED = "preferences_hide_declined";
@@ -139,15 +133,12 @@ public class GeneralPreferences extends PreferenceFragment implements
     RingtonePreference mRingtone;
     SwitchPreference mUseHomeTZ;
     SwitchPreference mHideDeclined;
-    Preference mHomeTZ;
-    TimeZonePickerUtils mTzPickerUtils;
     ListPreference mWeekStart;
     ListPreference mDefaultReminder;
     private Preference mStartHour;
     private TimeSetListener mTimePickerListenerStartTime;
     private Preference mEndHour;
     private TimeSetListener mTimePickerListenerEndTime;
-    private String mTimeZoneId;
     private ListPreference mWidgetDays;
     private ListPreference mSnoozeTime;
 
@@ -202,7 +193,6 @@ public class GeneralPreferences extends PreferenceFragment implements
         mHideDeclined = (SwitchPreference) preferenceScreen.findPreference(KEY_HIDE_DECLINED);
         mWeekStart = (ListPreference) preferenceScreen.findPreference(KEY_WEEK_START_DAY);
         mDefaultReminder = (ListPreference) preferenceScreen.findPreference(KEY_DEFAULT_REMINDER);
-        mHomeTZ = preferenceScreen.findPreference(KEY_HOME_TZ);
         mWeekStart.setSummary(mWeekStart.getEntry());
         mDefaultReminder.setSummary(mDefaultReminder.getEntry());
         mWidgetDays = (ListPreference) preferenceScreen.findPreference(KEY_WIDGET_DAYS);
@@ -210,40 +200,8 @@ public class GeneralPreferences extends PreferenceFragment implements
         mSnoozeTime= (ListPreference) preferenceScreen.findPreference(KEY_SNOOZE_TIME);
         mSnoozeTime.setSummary(mSnoozeTime.getEntry());
 
-        // This triggers an asynchronous call to the provider to refresh the data in shared pref
-        mTimeZoneId = Utils.getTimeZone(activity, null);
-
         SharedPreferences prefs = CalendarUtils.getSharedPreferences(activity,
                 Utils.SHARED_PREFS_NAME);
-
-        // Utils.getTimeZone will return the currentTimeZone instead of the one
-        // in the shared_pref if home time zone is disabled. So if home tz is
-        // off, we will explicitly read it.
-        if (!prefs.getBoolean(KEY_HOME_TZ_ENABLED, false)) {
-            mTimeZoneId = prefs.getString(KEY_HOME_TZ, Time.getCurrentTimezone());
-        }
-
-        mHomeTZ.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                showTimezoneDialog();
-                return true;
-            }
-        });
-
-        if (mTzPickerUtils == null) {
-            mTzPickerUtils = new TimeZonePickerUtils(getActivity());
-        }
-        CharSequence timezoneName = mTzPickerUtils.getGmtDisplayName(getActivity(), mTimeZoneId,
-                System.currentTimeMillis(), false);
-        mHomeTZ.setSummary(timezoneName != null ? timezoneName : mTimeZoneId);
-
-        TimeZonePickerDialog tzpd = (TimeZonePickerDialog) activity.getFragmentManager()
-                .findFragmentByTag(FRAG_TAG_TIME_ZONE_PICKER);
-        if (tzpd != null) {
-            tzpd.setOnTimeZoneSetListener(this);
-        }
-
         int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
                 KEY_HOURS_FILTER_START_DEFAULT);
         mStartHour = findPreference(KEY_HOURS_FILTER_START);
@@ -255,28 +213,6 @@ public class GeneralPreferences extends PreferenceFragment implements
         mEndHour = findPreference(KEY_HOURS_FILTER_END);
         mTimePickerListenerEndTime = new TimeSetListener(END_LISTENER);
         mEndHour.setSummary(formatTime(endHour, 0));
-    }
-
-    private void showTimezoneDialog() {
-        final Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-
-        Bundle b = new Bundle();
-        b.putLong(TimeZonePickerDialog.BUNDLE_START_TIME_MILLIS, System.currentTimeMillis());
-        b.putString(TimeZonePickerDialog.BUNDLE_TIME_ZONE, Utils.getTimeZone(activity, null));
-
-        FragmentManager fm = getActivity().getFragmentManager();
-        TimeZonePickerDialog tzpd = (TimeZonePickerDialog) fm
-                .findFragmentByTag(FRAG_TAG_TIME_ZONE_PICKER);
-        if (tzpd != null) {
-            tzpd.dismiss();
-        }
-        tzpd = new TimeZonePickerDialog();
-        tzpd.setArguments(b);
-        tzpd.setOnTimeZoneSetListener(this);
-        tzpd.show(fm, FRAG_TAG_TIME_ZONE_PICKER);
     }
 
     @Override
@@ -293,7 +229,6 @@ public class GeneralPreferences extends PreferenceFragment implements
      */
     private void setPreferenceListeners(OnPreferenceChangeListener listener) {
         mUseHomeTZ.setOnPreferenceChangeListener(listener);
-        mHomeTZ.setOnPreferenceChangeListener(listener);
         mWeekStart.setOnPreferenceChangeListener(listener);
         mDefaultReminder.setOnPreferenceChangeListener(listener);
         mRingtone.setOnPreferenceChangeListener(listener);
@@ -338,15 +273,7 @@ public class GeneralPreferences extends PreferenceFragment implements
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         String tz;
         final Activity activity = getActivity();
-        if (preference == mUseHomeTZ) {
-            if ((Boolean)newValue) {
-                tz = mTimeZoneId;
-            } else {
-                tz = CalendarCache.TIMEZONE_TYPE_AUTO;
-            }
-            Utils.setTimeZone(activity, tz);
-            return true;
-        } else if (preference == mHideDeclined) {
+        if (preference == mHideDeclined) {
             mHideDeclined.setChecked((Boolean) newValue);
             Intent intent = new Intent(Utils.getWidgetScheduledUpdateAction(activity));
             intent.setDataAndType(CalendarContract.CONTENT_URI, Utils.APPWIDGET_DATA_TYPE);
@@ -430,18 +357,6 @@ public class GeneralPreferences extends PreferenceFragment implements
         } else {
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
-    }
-
-    @Override
-    public void onTimeZoneSet(TimeZoneInfo tzi) {
-        if (mTzPickerUtils == null) {
-            mTzPickerUtils = new TimeZonePickerUtils(getActivity());
-        }
-
-        final CharSequence timezoneName = mTzPickerUtils.getGmtDisplayName(
-                getActivity(), tzi.mTzId, System.currentTimeMillis(), false);
-        mHomeTZ.setSummary(timezoneName);
-        Utils.setTimeZone(getActivity(), tzi.mTzId);
     }
 
     private class TimeSetListener implements TimePickerDialog.OnTimeSetListener {
