@@ -226,44 +226,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- TIME ZONE - Read-only textview version -->
-    <LinearLayout
-        android:id="@+id/timezone_textview_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="10dp"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/timezone_textView"
-            style="@style/TextAppearance.EditEvent_Value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_event_tz"
-            android:drawablePadding="8dp" />
-    </LinearLayout>
-
-    <!-- TIME ZONE - Read/write version with button to launch picker -->
-    <LinearLayout
-        android:id="@+id/timezone_button_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:id="@+id/timezone_button"
-            style="@style/TextAppearance.EditEvent_Value"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/accessibility_pick_time_zone"
-            android:drawableLeft="@drawable/ic_event_tz"
-            android:drawablePadding="8dp"
-            android:gravity="center_vertical" />
-    </LinearLayout>
-
     <!-- REPEATS -->
     <LinearLayout
         android:layout_width="match_parent"

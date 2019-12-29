@@ -109,14 +109,12 @@ import java.util.TimeZone;
 
 public class EditEventView implements View.OnClickListener, DialogInterface.OnCancelListener,
         DialogInterface.OnClickListener, OnItemSelectedListener,
-        RecurrencePickerDialog.OnRecurrenceSetListener,
-        TimeZonePickerDialog.OnTimeZoneSetListener {
+        RecurrencePickerDialog.OnRecurrenceSetListener {
 
     private static final String TAG = "EditEvent";
     private static final String GOOGLE_SECONDARY_CALENDAR = "calendar.google.com";
     private static final String PERIOD_SPACE = ". ";
 
-    private static final String FRAG_TAG_TIME_ZONE_PICKER = "timeZonePickerDialogFragment";
     private static final String FRAG_TAG_RECUR_PICKER = "recurrencePickerDialogFragment";
 
     ArrayList<View> mEditOnlyList = new ArrayList<View>();
@@ -128,11 +126,9 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
     TextView mEndDateButton;
     TextView mStartTimeButton;
     TextView mEndTimeButton;
-    TextView mTimezoneButton;
     View mColorPickerNewEvent;
     View mColorPickerExistingEvent;
     OnClickListener mChangeColorOnClickListener;
-    View mTimezoneRow;
     TextView mStartTimeHome;
     TextView mStartDateHome;
     TextView mEndTimeHome;
@@ -148,7 +144,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
     EventLocationAdapter mLocationAdapter;
     TextView mDescriptionTextView;
     TextView mWhenView;
-    TextView mTimezoneTextView;
     LinearLayout mRemindersContainer;
     MultiAutoCompleteTextView mAttendeesList;
     View mCalendarSelectorGroup;
@@ -165,7 +160,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
     private ProgressDialog mLoadingCalendarsDialog;
     private AlertDialog mNoCalendarsDialog;
-    private DialogFragment mTimezoneDialog;
     private Activity mActivity;
     private EditDoneRunnable mDone;
     private View mView;
@@ -257,9 +251,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 // Also update the end time to keep the duration constant.
                 endTime.hour = hourOfDay + hourDuration;
                 endTime.minute = minute + minuteDuration;
-
-                // Update tz in case the start time switched from/to DLS
-                populateTimezone(startMillis);
             } else {
                 // The end time was changed.
                 startMillis = startTime.toMillis(true);
@@ -271,7 +262,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 if (endTime.before(startTime)) {
                     endTime.monthDay = startTime.monthDay + 1;
                 }
-                // Call populateTimezone if we support end time zone as well
             }
 
             endMillis = endTime.normalize(true);
@@ -354,9 +344,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
                 // If the start date has changed then update the repeats.
                 populateRepeats();
-
-                // Update tz in case the start time switched from/to DLS
-                populateTimezone(startMillis);
             } else {
                 // The end date was changed.
                 startMillis = startTime.toMillis(true);
@@ -371,7 +358,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                     endTime.set(startTime);
                     endMillis = startMillis;
                 }
-                // Call populateTimezone if we support end time zone as well
             }
 
             setDate(mStartDateButton, startMillis);
@@ -399,49 +385,12 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mEndTimeButton.setOnClickListener(new TimeClickListener(mEndTime));
     }
 
-    // Implements OnTimeZoneSetListener
-    @Override
-    public void onTimeZoneSet(TimeZoneInfo tzi) {
-        setTimezone(tzi.mTzId);
-        updateHomeTime();
-    }
-
     private void setTimezone(String timeZone) {
         mTimezone = timeZone;
         mStartTime.timezone = mTimezone;
         long timeMillis = mStartTime.normalize(true);
         mEndTime.timezone = mTimezone;
         mEndTime.normalize(true);
-
-        populateTimezone(timeMillis);
-    }
-
-    private void populateTimezone(long eventStartTime) {
-        if (mTzPickerUtils == null) {
-            mTzPickerUtils = new TimeZonePickerUtils(mActivity);
-        }
-        CharSequence displayName =
-                mTzPickerUtils.getGmtDisplayName(mActivity, mTimezone, eventStartTime, true);
-
-        mTimezoneTextView.setText(displayName);
-        mTimezoneButton.setText(displayName);
-    }
-
-    private void showTimezoneDialog() {
-        Bundle b = new Bundle();
-        b.putLong(TimeZonePickerDialog.BUNDLE_START_TIME_MILLIS, mStartTime.toMillis(false));
-        b.putString(TimeZonePickerDialog.BUNDLE_TIME_ZONE, mTimezone);
-
-        FragmentManager fm = mActivity.getFragmentManager();
-        TimeZonePickerDialog tzpd = (TimeZonePickerDialog) fm
-                .findFragmentByTag(FRAG_TAG_TIME_ZONE_PICKER);
-        if (tzpd != null) {
-            tzpd.dismiss();
-        }
-        tzpd = new TimeZonePickerDialog();
-        tzpd.setArguments(b);
-        tzpd.setOnTimeZoneSetListener(EditEventView.this);
-        tzpd.show(fm, FRAG_TAG_TIME_ZONE_PICKER);
     }
 
     private void populateRepeats() {
@@ -758,17 +707,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mStartDateButton = (TextView)view.findViewById(R.id.start_date);
         mEndDateButton = (TextView)view.findViewById(R.id.end_date);
         mWhenView = (TextView) mView.findViewById(R.id.when);
-        mTimezoneTextView = (TextView) mView.findViewById(R.id.timezone_textView);
         mStartTimeButton = (TextView)view.findViewById(R.id.start_time);
         mEndTimeButton = (TextView)view.findViewById(R.id.end_time);
-        mTimezoneButton = (TextView)view.findViewById(R.id.timezone_button);
-        mTimezoneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimezoneDialog();
-            }
-        });
-        mTimezoneRow = view.findViewById(R.id.timezone_button_row);
         mStartTimeHome = (TextView) view.findViewById(R.id.start_time_home_tz);
         mStartDateHome = (TextView) view.findViewById(R.id.start_date_home_tz);
         mEndTimeHome = (TextView) view.findViewById(R.id.end_time_home_tz);
@@ -850,14 +790,12 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mEditViewList.add(mAttendeesList);
 
         mViewOnlyList.add(view.findViewById(R.id.when_row));
-        mViewOnlyList.add(view.findViewById(R.id.timezone_textview_row));
 
         mEditOnlyList.add(view.findViewById(R.id.all_day_row));
         mEditOnlyList.add(view.findViewById(R.id.availability_row));
         mEditOnlyList.add(view.findViewById(R.id.visibility_row));
         mEditOnlyList.add(view.findViewById(R.id.from_row));
         mEditOnlyList.add(view.findViewById(R.id.to_row));
-        mEditOnlyList.add(mTimezoneRow);
         mEditOnlyList.add(mStartHomeGroup);
         mEditOnlyList.add(mEndHomeGroup);
 
@@ -878,11 +816,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 .findFragmentByTag(FRAG_TAG_RECUR_PICKER);
         if (rpd != null) {
             rpd.setOnRecurrenceSetListener(this);
-        }
-        TimeZonePickerDialog tzpd = (TimeZonePickerDialog) fm
-                .findFragmentByTag(FRAG_TAG_TIME_ZONE_PICKER);
-        if (tzpd != null) {
-            tzpd.setOnTimeZoneSetListener(this);
         }
     }
 
@@ -1073,8 +1006,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         if (prevAllDay == mAllDayCheckBox.isChecked()) {
             setAllDayViewsVisibility(prevAllDay);
         }
-
-        populateTimezone(mStartTime.normalize(true));
 
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(mActivity);
         String defaultReminderString = prefs.getString(
@@ -1631,7 +1562,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
             mStartTimeButton.setVisibility(View.GONE);
             mEndTimeButton.setVisibility(View.GONE);
-            mTimezoneRow.setVisibility(View.GONE);
         } else {
             if (mEndTime.hour == 0 && mEndTime.minute == 0) {
                 if (mAllDay != isChecked) {
@@ -1644,7 +1574,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             }
             mStartTimeButton.setVisibility(View.VISIBLE);
             mEndTimeButton.setVisibility(View.VISIBLE);
-            mTimezoneRow.setVisibility(View.VISIBLE);
         }
 
         // If this is a new event, and if availability has not yet been
