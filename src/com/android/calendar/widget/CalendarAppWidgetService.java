@@ -130,9 +130,6 @@ public class CalendarAppWidgetService extends RemoteViewsService {
         private static final AtomicInteger currentVersion = new AtomicInteger(0);
         private final ExecutorService executor = Executors.newSingleThreadExecutor();
         private int mAppWidgetId;
-        private int mDeclinedColor;
-        private int mStandardColor;
-        private int mTextColor;
 
         private final Runnable mTimezoneChanged = new Runnable() {
             @Override
@@ -168,10 +165,6 @@ public class CalendarAppWidgetService extends RemoteViewsService {
             mResources = context.getResources();
             mAppWidgetId = intent.getIntExtra(
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-
-            mDeclinedColor = mResources.getColor(R.color.appwidget_item_declined_color);
-            mStandardColor = mResources.getColor(R.color.appwidget_item_standard_color);
-            mTextColor = mResources.getColor(R.color.agenda_text_color);
         }
 
         public CalendarFactory() {
@@ -238,6 +231,8 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                         R.layout.appwidget_day);
                 DayInfo dayInfo = mModel.mDayInfos.get(rowInfo.mIndex);
                 updateTextView(views, R.id.date, View.VISIBLE, dayInfo.mDayLabel);
+                int textColor = mResources.getColor(R.color.agenda_text_color);
+                views.setInt(R.id.title, "setTextColor", textColor);
                 long start = dayInfo.mMillis;
                 long end = start;
                 final Intent fillInIntent = CalendarAppWidgetProvider.getLaunchFillInIntent(
@@ -248,6 +243,8 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                 final EventInfo eventInfo = mModel.mEventInfos.get(rowInfo.mIndex);
                 RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
                 int displayColor = Utils.getDisplayColorFromColor(eventInfo.color);
+                int textColor = mResources.getColor(R.color.agenda_text_color);
+                int standardColor = mResources.getColor(R.color.appwidget_item_standard_color);
 
                 final long now = System.currentTimeMillis();
                 if ((!eventInfo.allDay && eventInfo.start <= now && now <= eventInfo.end) ||
@@ -270,32 +267,15 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                 views.setViewVisibility(R.id.agenda_item_color, View.VISIBLE);
 
                 int selfAttendeeStatus = eventInfo.selfAttendeeStatus;
-                /*if (eventInfo.allDay) {
-                    if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_INVITED) {
-                        views.setInt(R.id.agenda_item_color, "setImageResource",
-                                R.drawable.widget_chip_not_responded_bg);
-                        views.setInt(R.id.title, "setTextColor", displayColor);
-                    } else {
-                        views.setInt(R.id.agenda_item_color, "setImageResource",
-                                R.drawable.widget_chip_responded_bg);
-                        views.setInt(R.id.title, "setTextColor", mStandardColor);
-                    }
-                    if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
-                        // 40% opacity
-                        views.setInt(R.id.agenda_item_color, "setColorFilter",
-                                Utils.getDeclinedColorFromColor(displayColor));
-                    } else {
-                        views.setInt(R.id.agenda_item_color, "setColorFilter", displayColor);
-                    }
-                } else*/ if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
+                if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
                     views.setInt(R.id.agenda_item_color, "setImageResource",
                             R.drawable.widget_chip_responded_bg);
                     // 40% opacity
                     int declinedColor = Utils.getDeclinedColorFromColor(displayColor);
                     views.setInt(R.id.agenda_item_color, "setColorFilter", declinedColor);
-                    views.setInt(R.id.title, "setTextColor", mTextColor);
-                    views.setInt(R.id.when, "setTextColor", mTextColor);
-                    views.setInt(R.id.where, "setTextColor", mTextColor);
+                    views.setInt(R.id.title, "setTextColor", textColor);
+                    views.setInt(R.id.when, "setTextColor", textColor);
+                    views.setInt(R.id.where, "setTextColor", textColor);
                 } else {
                     if (selfAttendeeStatus == Attendees.ATTENDEE_STATUS_INVITED) {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
@@ -306,9 +286,9 @@ public class CalendarAppWidgetService extends RemoteViewsService {
                     } else {
                         views.setInt(R.id.agenda_item_color, "setImageResource",
                                 R.drawable.widget_chip_responded_bg);
-                        views.setInt(R.id.title, "setTextColor", mTextColor);
-                        views.setInt(R.id.when, "setTextColor", mTextColor);
-                        views.setInt(R.id.where, "setTextColor", mTextColor);
+                        views.setInt(R.id.title, "setTextColor", textColor);
+                        views.setInt(R.id.when, "setTextColor", textColor);
+                        views.setInt(R.id.where, "setTextColor", textColor);
                     }
                     views.setInt(R.id.agenda_item_color, "setColorFilter", displayColor);
                 }
