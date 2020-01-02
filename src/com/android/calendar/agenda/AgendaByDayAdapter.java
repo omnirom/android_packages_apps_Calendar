@@ -22,6 +22,7 @@ import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,8 +37,13 @@ import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.Utils;
 import com.android.calendar.agenda.AgendaWindowAdapter.DayAdapterInfo;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.JulianFields;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Formatter;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -45,7 +51,8 @@ import java.util.Locale;
 public class AgendaByDayAdapter extends BaseAdapter {
     private static final int TYPE_DAY = 0;
     private static final int TYPE_MEETING = 1;
-    static final int TYPE_LAST = 2;
+    private static final int TYPE_MONTH = 2;
+    static final int TYPE_LAST = 3;
 
     private final Context mContext;
     private final AgendaAdapter mAgendaAdapter;
@@ -60,6 +67,8 @@ public class AgendaByDayAdapter extends BaseAdapter {
     private int mTodayTextColor;
     private int mTextColor;
     private int mPastTextColor;
+    private int mMonthTextColor;
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy:MM:dd kk:mm:ss");
 
     static class ViewHolder {
         TextView dayView;
@@ -88,6 +97,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
         mTextColor = mContext.getResources().getColor(R.color.agenda_text_color);
         mTodayTextColor = mContext.getResources().getColor(R.color.agenda_today_text_color);
         mPastTextColor = mContext.getResources().getColor(R.color.calendar_past_text_color);
+        mMonthTextColor = mContext.getResources().getColor(R.color.agenda_month_bar_text_color);
     }
 
     public long getInstanceId(int position) {
@@ -146,7 +156,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
     public Object getItem(int position) {
         if (mRowInfo != null) {
             RowInfo row = mRowInfo.get(position);
-            if (row.mType == TYPE_DAY) {
+            if (row.mType == TYPE_DAY || row.mType == TYPE_MONTH) {
                 return row;
             } else {
                 return mAgendaAdapter.getItem(row.mPosition);
@@ -159,7 +169,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
     public long getItemId(int position) {
         if (mRowInfo != null) {
             RowInfo row = mRowInfo.get(position);
-            if (row.mType == TYPE_DAY) {
+            if (row.mType == TYPE_DAY || row.mType == TYPE_MONTH) {
                 return -position;
             } else {
                 return mAgendaAdapter.getItemId(row.mPosition);
@@ -183,6 +193,10 @@ public class AgendaByDayAdapter extends BaseAdapter {
         return (getItemViewType(position) == TYPE_DAY);
     }
 
+    public boolean isMonthHeaderView(int position) {
+        return (getItemViewType(position) == TYPE_MONTH);
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if ((mRowInfo == null) || (position > mRowInfo.size())) {
@@ -191,7 +205,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
         }
 
         RowInfo row = mRowInfo.get(position);
-        if (row.mType == TYPE_DAY) {
+        if (row.mType == TYPE_DAY || row.mType == TYPE_MONTH) {
             ViewHolder holder = null;
             View agendaDayView = null;
             if ((convertView != null) && (convertView.getTag() != null)) {
@@ -242,7 +256,7 @@ public class AgendaByDayAdapter extends BaseAdapter {
             // Format should be month day
 
             mStringBuilder.setLength(0);
-            flags = DateUtils.FORMAT_SHOW_DATE;
+            flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
             String dateViewText = DateUtils.formatDateRange(mContext, mFormatter, millis, millis,
                     flags, mTimeZone).toString();
 
@@ -252,7 +266,6 @@ public class AgendaByDayAdapter extends BaseAdapter {
             }
             holder.dayView.setText(dayViewText);
             holder.dateView.setText(dateViewText);
-            agendaDayView.setBackgroundResource(R.color.agenda_day_bar_background_color);
 
             // Set the background of the view, it is grayed for day that are in the past and today
             if (row.mDay > mTodayJulianDay) {
@@ -260,23 +273,32 @@ public class AgendaByDayAdapter extends BaseAdapter {
             } else {
                 holder.grayed = true;
             }
-            if (row.mDay == mTodayJulianDay) {
-                holder.dateView.setTextColor(mTodayTextColor);
-                holder.dayView.setTextColor(mTodayTextColor);
+            if (row.mType == TYPE_MONTH) {
+                holder.dayView.setVisibility(View.GONE);
+                holder.dateView.setTextColor(mMonthTextColor);
                 holder.dateView.setTypeface(Typeface.DEFAULT);
-                holder.dayView.setTypeface(Typeface.DEFAULT);
-                agendaDayView.setBackgroundResource(R.color.agenda_today_bg_color);
-            } else if (row.mDay < mTodayJulianDay) {
-                holder.dateView.setTextColor(mPastTextColor);
-                holder.dayView.setTextColor(mPastTextColor);
-                holder.dateView.setTypeface(Typeface.DEFAULT);
-                holder.dayView.setTypeface(Typeface.DEFAULT);
-                agendaDayView.setBackgroundResource(R.color.calendar_past_bg_color);
+                agendaDayView.setBackgroundResource(R.color.agenda_month_bar_background_color);
             } else {
-                holder.dateView.setTextColor(mTextColor);
-                holder.dayView.setTextColor(mTextColor);
-                holder.dateView.setTypeface(Typeface.DEFAULT);
-                holder.dayView.setTypeface(Typeface.DEFAULT);
+                holder.dayView.setVisibility(View.VISIBLE);
+                if (row.mDay == mTodayJulianDay) {
+                    holder.dateView.setTextColor(mTodayTextColor);
+                    holder.dayView.setTextColor(mTodayTextColor);
+                    holder.dateView.setTypeface(Typeface.DEFAULT);
+                    holder.dayView.setTypeface(Typeface.DEFAULT);
+                    agendaDayView.setBackgroundResource(R.color.agenda_today_bg_color);
+                } else if (row.mDay < mTodayJulianDay) {
+                    holder.dateView.setTextColor(mPastTextColor);
+                    holder.dayView.setTextColor(mPastTextColor);
+                    holder.dateView.setTypeface(Typeface.DEFAULT);
+                    holder.dayView.setTypeface(Typeface.DEFAULT);
+                    agendaDayView.setBackgroundResource(R.color.calendar_past_bg_color);
+                } else {
+                    holder.dateView.setTextColor(mTextColor);
+                    holder.dayView.setTextColor(mTextColor);
+                    holder.dateView.setTypeface(Typeface.DEFAULT);
+                    holder.dayView.setTypeface(Typeface.DEFAULT);
+                    agendaDayView.setBackgroundResource(R.color.agenda_day_bar_background_color);
+                }
             }
             agendaDayView.setOnClickListener(new OnClickListener() {
                 @Override
@@ -287,7 +309,8 @@ public class AgendaByDayAdapter extends BaseAdapter {
                     selectedTime.normalize(true /* ignore isDst */);
                     CalendarController controller = CalendarController.getInstance(mContext);
                     controller.sendEvent(this, EventType.GO_TO, null, null, selectedTime, -1,
-                            ViewType.DAY, CalendarController.EXTRA_GOTO_DATE, null, null);
+                            row.mType == TYPE_DAY ? ViewType.DAY : ViewType.MONTH,
+                            CalendarController.EXTRA_GOTO_DATE, null, null);
                 }});
 
             return agendaDayView;
@@ -344,6 +367,12 @@ public class AgendaByDayAdapter extends BaseAdapter {
         tempTime.set(now);
         mTodayJulianDay = Time.getJulianDay(now, tempTime.gmtoff);
 
+        Time date = mTmpTime;
+        final long startMillis = date.setJulianDay(dayAdapterInfo.start);
+        final long endMillis = date.setJulianDay(dayAdapterInfo.end);
+
+        Log.d("Calendar", " calculateDays start = " + TIME_FORMAT.format(startMillis) + " emd = " + TIME_FORMAT.format(endMillis));
+        
         LinkedList<MultipleDayInfo> multipleDayList = new LinkedList<MultipleDayInfo>();
         for (int position = 0; cursor.moveToNext(); position++) {
             int startDay = cursor.getInt(AgendaWindowAdapter.INDEX_START_DAY);
@@ -471,10 +500,11 @@ public class AgendaByDayAdapter extends BaseAdapter {
         if (mTodayJulianDay >= dayAdapterInfo.start && mTodayJulianDay <=  dayAdapterInfo.end) {
             insertTodayRowIfNeeded();
         }
+        insertMonthHeaders(dayAdapterInfo);
     }
 
     private static class RowInfo {
-        // mType is either a day header (TYPE_DAY) or an event (TYPE_MEETING)
+        // mType is either a day header (TYPE_DAY) month header (TYPE_MONTH) or an event (TYPE_MEETING)
         final int mType;
 
         final int mDay;          // Julian day
@@ -756,5 +786,73 @@ public class AgendaByDayAdapter extends BaseAdapter {
         } else {
             mRowInfo.add(new RowInfo(TYPE_DAY, mTodayJulianDay));
         }
+    }
+    
+    public void insertMonthHeaders(DayAdapterInfo info) {
+        int startDate = info.start;
+        int endDate = info.end;
+
+        int len = mRowInfo.size();
+        ArrayList<RowInfo> rowInfo = new ArrayList<>(len);
+        Calendar lastMonth = null;
+
+        Time date = mTmpTime;
+        final long startMillis = date.setJulianDay(startDate);
+        Calendar startMonth = Calendar.getInstance();
+        startMonth.setTimeInMillis(startMillis);
+        startMonth.set(Calendar.DAY_OF_MONTH, 1);
+        startMonth.set(Calendar.HOUR_OF_DAY, 0);
+        lastMonth = startMonth;
+                
+        Log.d("Calendar", " startMonth = " + TIME_FORMAT.format(startMonth.getTimeInMillis()));
+        rowInfo.add(new RowInfo(TYPE_MONTH, Time.getJulianDay(startMonth.getTimeInMillis(), mTmpTime.gmtoff)));
+
+        for (int index = 0; index < len; index++) {
+            RowInfo row = mRowInfo.get(index);
+            if (row.mType == TYPE_DAY) {
+            date = mTmpTime;
+            final long rowMillis = date.setJulianDay(row.mDay);
+
+            Calendar rowMonth = Calendar.getInstance();
+            rowMonth.setTimeInMillis(rowMillis);
+            rowMonth.set(Calendar.DAY_OF_MONTH, 1);
+            rowMonth.set(Calendar.HOUR_OF_DAY, 0);
+
+            while(lastMonth.before(rowMonth)) {
+        lastMonth.add(Calendar.MONTH, 1);
+                Log.d("Calendar", "rowMonth = " + TIME_FORMAT.format(lastMonth.getTimeInMillis()));
+                rowInfo.add(new RowInfo(TYPE_MONTH, Time.getJulianDay(lastMonth.getTimeInMillis(), mTmpTime.gmtoff)));
+                }
+                lastMonth = rowMonth;
+            
+            
+            } else {
+            }
+            rowInfo.add(row);
+        }
+        Log.d("Calendar", "lastMonth = " + TIME_FORMAT.format(lastMonth.getTimeInMillis()));
+
+        final long endMillis = date.setJulianDay(endDate);
+        Calendar endMonth = Calendar.getInstance();
+        endMonth.setTimeInMillis(endMillis);
+        endMonth.set(Calendar.DAY_OF_MONTH, 1);
+        endMonth.set(Calendar.HOUR_OF_DAY, 0);
+
+        while(lastMonth.before(endMonth)) {
+        lastMonth.add(Calendar.MONTH, 1);
+                Log.d("Calendar", "endMonth = " + TIME_FORMAT.format(lastMonth.getTimeInMillis()));
+                rowInfo.add(new RowInfo(TYPE_MONTH, Time.getJulianDay(lastMonth.getTimeInMillis(), mTmpTime.gmtoff)));
+                }
+                
+        mRowInfo = rowInfo;
+    }
+    
+    private int getMonthStartDay(int dayOfMonth) {
+        Time date = mTmpTime;
+        final long rowMillis = date.setJulianDay(dayOfMonth);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(rowMillis);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        return Time.getJulianDay(cal.getTimeInMillis(), mTmpTime.gmtoff);
     }
 }
