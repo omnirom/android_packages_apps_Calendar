@@ -100,6 +100,8 @@
     <color name="agenda_today_bg_color">@color/accent</color>
     <color name="agenda_text_color">@android:color/black</color>
     <color name="agenda_day_grid_line_color">@color/calendar_grid_line_color</color>
+    <color name="agenda_month_bar_background_color">@color/material_grey_200</color>
+    <color name="agenda_month_bar_text_color">@android:color/black</color>
 
     <!-- Color of text in the calendar view selection menu -->
     <color name="calendar_view_switch_menu_text_color">@android:color/black</color>
