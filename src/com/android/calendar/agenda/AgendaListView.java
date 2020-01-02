@@ -41,7 +41,7 @@ import android.widget.TextView;
 public class AgendaListView extends ListView implements OnItemClickListener {
 
     private static final String TAG = "AgendaListView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final int EVENT_UPDATE_TIME = 300000;  // 5 minutes
 
     private AgendaWindowAdapter mWindowAdapter;
@@ -428,4 +428,11 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         Utils.resetMidnightUpdater(mHandler, mMidnightUpdater);
         resetPastEventsUpdater();
     }
+    
+    @Override
+    public void setSelectionFromTop (int position, int y) {
+        if (DEBUG) Log.v(TAG, "setSelectionFromTop position = " + position);
+        super.setSelectionFromTop(position, y);
+    }
+    
 }

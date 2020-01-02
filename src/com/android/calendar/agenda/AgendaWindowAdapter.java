@@ -48,6 +48,8 @@ import com.android.calendar.R;
 import com.android.calendar.StickyHeaderListView;
 import com.android.calendar.Utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -76,9 +78,10 @@ Check for leaks and excessive allocations
 public class AgendaWindowAdapter extends BaseAdapter
     implements StickyHeaderListView.HeaderIndexer, StickyHeaderListView.HeaderHeightListener{
 
-    static final boolean BASICLOG = false;
-    static final boolean DEBUGLOG = false;
+    static final boolean BASICLOG = true;
+    static final boolean DEBUGLOG = true;
     private static final String TAG = "AgendaWindowAdapter";
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy:MM:dd kk:mm:ss");
 
     private static final String AGENDA_SORT_ORDER =
             CalendarContract.Instances.START_DAY + " ASC, " +
@@ -135,8 +138,8 @@ public class AgendaWindowAdapter extends BaseAdapter
     private static final int OFF_BY_ONE_BUG = 1;
     private static final int MAX_NUM_OF_ADAPTERS = 5;
     private static final int IDEAL_NUM_OF_EVENTS = 50;
-    private static final int MIN_QUERY_DURATION = 7; // days
-    private static final int MAX_QUERY_DURATION = 60; // days
+    private static final int MIN_QUERY_DURATION = 31; // days
+    private static final int MAX_QUERY_DURATION = 31; // days
     private static final int PREFETCH_BOUNDARY = 1;
 
     /** Times to auto-expand/retry query after getting no data */
@@ -221,7 +224,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     private String mSearchQuery;
 
     private long mSelectedInstanceId = -1;
-    private int mSavedPosition = -1;
+    //private int mSavedPosition = -1;
 
     // Types of Query
     private static final int QUERY_TYPE_OLDER = 0; // Query for older events
@@ -308,7 +311,9 @@ public class AgendaWindowAdapter extends BaseAdapter
         int end; // end day of the cursor's coverage
         int offset; // offset in position in the list view
         int size; // dayAdapter.getCount()
-
+        public DayAdapterInfo mPrev;
+        public DayAdapterInfo mNext;
+    
         public DayAdapterInfo(Context context) {
             dayAdapter = new AgendaByDayAdapter(context);
         }
@@ -681,7 +686,7 @@ public class AgendaWindowAdapter extends BaseAdapter
             int endDay = startDay + MIN_QUERY_DURATION;
 
             mSelectedInstanceId = -1;
-            mSavedPosition = -1;
+            //mSavedPosition = -1;
             mCleanQueryInitiated = true;
             queueQuery(startDay, endDay, goToTime, searchQuery, QUERY_TYPE_CLEAN, id);
 
@@ -860,14 +865,22 @@ public class AgendaWindowAdapter extends BaseAdapter
             }
         }
 
-        if (BASICLOG) {
-            Time time = new Time(mTimeZone);
-            time.setJulianDay(queryData.start);
-            Time time2 = new Time(mTimeZone);
-            time2.setJulianDay(queryData.end);
-            Log.v(TAG, "startQuery: " + time.toString() + " to "
-                    + time2.toString() + " then go to " + queryData.goToTime);
-        }
+        // align to month start and end
+        Time time = new Time(mTimeZone);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time.setJulianDay(queryData.start));
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        queryData.start = Time.getJulianDay(cal.getTimeInMillis(), time.gmtoff);
+        
+        cal.setTimeInMillis(time.setJulianDay(queryData.end));
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        queryData.end = Time.getJulianDay(cal.getTimeInMillis(), time.gmtoff);
+
+        Log.v("Calendar", "start: " + TIME_FORMAT.format(time.setJulianDay(queryData.start)) + " end: " + TIME_FORMAT.format(time.setJulianDay(queryData.end)));
+        
 
         mQueryHandler.cancelOperation(0);
         if (BASICLOG) queryData.queryStartMillis = System.nanoTime();
@@ -942,16 +955,16 @@ public class AgendaWindowAdapter extends BaseAdapter
                     if (listPositionOffset != 0) {
                         mAgendaListView.shiftSelection(listPositionOffset);
                     }
-                    if (mSavedPosition != -1) {
+                    /*if (mSavedPosition != -1) {
                         mAgendaListView.setSelectionFromTop(mSavedPosition + OFF_BY_ONE_BUG,
                                 mStickyHeaderSize);
-                    }
+                    }*/
                 } else { // refresh() called. Go to the designated position
                     final Time goToTime = data.goToTime;
                     notifyDataSetChanged();
                     newPosition = findEventPositionNearestTime(goToTime, data.id);
                     if (newPosition >= 0) {
-                        mSavedPosition = newPosition;
+                        //mSavedPosition = newPosition;
                         if (mListViewScrollState == OnScrollListener.SCROLL_STATE_FLING) {
                             mAgendaListView.smoothScrollBy(0, 0);
                         }
@@ -1212,11 +1225,25 @@ public class AgendaWindowAdapter extends BaseAdapter
                     mAdapterInfos.addLast(info);
                 }
 
-                // Update offsets in adapterInfos
+                // Update offsets and chain in adapterInfos
                 mRowCount = 0;
+                DayAdapterInfo last = null;
                 for (DayAdapterInfo info3 : mAdapterInfos) {
                     info3.offset = mRowCount;
                     mRowCount += info3.size;
+                    
+                    info3.mPrev = last;
+                    if (last != null) {
+                        last.mNext = info3;
+                    }
+                    info3.mNext = null;
+                    last = info3;
+                }
+                if (DEBUGLOG) {
+                    for (DayAdapterInfo info3 : mAdapterInfos) {
+                        Log.d(TAG, "" + (info3.mPrev != null ? info3.mPrev.end : " null ") + " -> " + info3.start + ":" + info3.end + " -> " + (info3.mNext != null ? info3.mNext.start : " null"));
+                        last = info3;
+                    }
                 }
                 mLastUsedInfo = null;
 
