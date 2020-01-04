@@ -81,6 +81,7 @@ import android.widget.ViewSwitcher;
 import com.android.calendar.CalendarController.EventType;
 import com.android.calendar.CalendarController.ViewType;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -195,6 +196,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     protected static StringBuilder mStringBuilder = new StringBuilder(50);
     // TODO recreate formatter when locale changes
     protected static Formatter mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy:MM:dd kk:mm:ss");
 
     private final Runnable mTZUpdater = new Runnable() {
         @Override
@@ -1106,13 +1108,13 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
     public void updateTitle() {
         Time start = new Time(mBaseDate);
+        start.setJulianDay(mFirstJulianDay);
         start.normalize(true);
         Time end = new Time(start);
-        end.monthDay += mNumDays - 1;
-        // Move it forward one minute so the formatter doesn't lose a day
-        end.minute += 1;
+        end.setJulianDay(mLastJulianDay);
         end.normalize(true);
 
+        if (DEBUG) Log.d(TAG, "updateTitle start: " + TIME_FORMAT.format(start.toMillis(false)));
         long formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
         if (mNumDays != 1) {
             // Don't show day of the month if for multi-day view
@@ -1178,6 +1180,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     }
 
     private void recalc() {
+        if (DEBUG) Log.d(TAG, "recalc mBaseDate : " + TIME_FORMAT.format(mBaseDate.toMillis(false /* use isDst */)));
         // Set the base date to the beginning of the week if we are displaying
         // 7 days at a time.
         if (mNumDays == 7) {

@@ -486,25 +486,25 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     protected void setMonthDisplayed(Time time, boolean updateHighlight) {
         super.setMonthDisplayed(time, updateHighlight);
         if (!mIsMiniMonth) {
-            boolean useSelected = false;
             if (time.year == mDesiredDay.year && time.month == mDesiredDay.month) {
                 mSelectedDay.set(mDesiredDay);
                 mAdapter.setSelectedDay(mDesiredDay);
-                useSelected = true;
             } else {
-                mSelectedDay.set(time);
-                mAdapter.setSelectedDay(time);
+                // set to first day of month
+                Calendar startOfMonth = Calendar.getInstance();
+                startOfMonth.setTimeInMillis(time.toMillis(true));
+                startOfMonth.set(Calendar.DAY_OF_MONTH, 1);
+                startOfMonth.set(Calendar.HOUR_OF_DAY, 12);
+                startOfMonth.set(Calendar.MINUTE, 0);
+                startOfMonth.set(Calendar.SECOND, 0);
+                mFirstDayOfMonth.set(startOfMonth.getTimeInMillis());
+                mSelectedDay.set(mFirstDayOfMonth);
+                mAdapter.setSelectedDay(mSelectedDay);
             }
             CalendarController controller = CalendarController.getInstance(mContext);
-            if (mSelectedDay.minute >= 30) {
-                mSelectedDay.minute = 30;
-            } else {
-                mSelectedDay.minute = 0;
-            }
             long newTime = mSelectedDay.normalize(true);
             if (newTime != controller.getTime() && mUserScrolled) {
-                long offset = useSelected ? 0 : DateUtils.WEEK_IN_MILLIS * mNumWeeks / 3;
-                controller.setTime(newTime + offset);
+                controller.setTime(newTime);
             }
             Time monthEnd = Utils.changeMonth(mFirstDayOfMonth, 1);
             controller.sendEvent(this, EventType.UPDATE_TITLE, mFirstDayOfMonth, monthEnd, null, -1,

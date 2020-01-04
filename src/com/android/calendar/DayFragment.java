@@ -46,7 +46,6 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
      */
     private static final int VIEW_ID = 1;
 
-    protected static final String BUNDLE_KEY_RESTORE_TIME = "key_restore_time";
 
     protected ProgressBar mProgressBar;
     protected ViewSwitcher mViewSwitcher;
@@ -143,16 +142,6 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        long time = getSelectedTimeInMillis();
-        if (time != -1) {
-            outState.putLong(BUNDLE_KEY_RESTORE_TIME, time);
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         DayView view = (DayView) mViewSwitcher.getCurrentView();
@@ -216,24 +205,6 @@ public class DayFragment extends Fragment implements CalendarController.EventHan
             next.updateTitle();
             next.restartCurrentTimeUpdates();
         }
-    }
-
-    /**
-     * Returns the selected time in milliseconds. The milliseconds are measured
-     * in UTC milliseconds from the epoch and uniquely specifies any selectable
-     * time.
-     *
-     * @return the selected time in milliseconds
-     */
-    public long getSelectedTimeInMillis() {
-        if (mViewSwitcher == null) {
-            return -1;
-        }
-        DayView view = (DayView) mViewSwitcher.getCurrentView();
-        if (view == null) {
-            return -1;
-        }
-        return view.getSelectedTimeInMillis();
     }
 
     public void eventsChanged() {

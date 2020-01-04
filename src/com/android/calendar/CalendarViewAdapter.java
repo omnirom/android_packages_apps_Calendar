@@ -26,12 +26,14 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
@@ -46,7 +48,8 @@ import java.util.Locale;
 
 public class CalendarViewAdapter extends BaseAdapter {
 
-    private static final String TAG = "MenuSpinnerAdapter";
+    private static final String TAG = "CalendarViewAdapter";
+    private static final boolean DEBUG = false;
 
     private final String mButtonNames [];           // Text on buttons
 
@@ -82,6 +85,7 @@ public class CalendarViewAdapter extends BaseAdapter {
     private final boolean mShowDate;   // Spinner mode indicator (view name or view name with date)
 
     private LunarInfoLoader mLunarLoader = null;
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy:MM:dd kk:mm:ss");
 
     // Updates time specific variables (time-zone, today's Julian day).
     private final Runnable mTimeUpdater = new Runnable() {
@@ -366,6 +370,10 @@ public class CalendarViewAdapter extends BaseAdapter {
     // Used when the user selects a new day/week/month to watch
     public void setTime(long time) {
         mMilliTime = time;
+
+        if (DEBUG) {
+            Log.d(TAG, "setTime time = " + TIME_FORMAT.format(mMilliTime));
+        }
         if (LunarUtils.showLunar(mContext)) {
             buildLunarInfo();
         }
@@ -445,13 +453,16 @@ public class CalendarViewAdapter extends BaseAdapter {
         return date;
     }
     private String buildWeekDate() {
-
-
         // Calculate the start of the week, taking into account the "first day of the week"
         // setting.
+        Calendar current = Calendar.getInstance();
+        current.setTimeInMillis(mMilliTime);
+        current.set(Calendar.HOUR_OF_DAY, 12);
+        current.set(Calendar.MINUTE, 0);
+        current.set(Calendar.SECOND, 0);
 
         Time t = new Time(mTimeZone);
-        t.set(mMilliTime);
+        t.set(current.getTimeInMillis());
         int firstDayOfWeek = Utils.getFirstDayOfWeek(mContext);
         int dayOfWeek = t.weekDay;
         int diff = dayOfWeek - firstDayOfWeek;
@@ -467,18 +478,16 @@ public class CalendarViewAdapter extends BaseAdapter {
         // The end of the week is 6 days after the start of the week
         long weekEndTime = weekStartTime + DateUtils.WEEK_IN_MILLIS - DateUtils.DAY_IN_MILLIS;
 
-        // If week start and end is in 2 different months, use short months names
-        Time t1 = new Time(mTimeZone);
-        t1.set(weekEndTime);
-        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR;
-        if (t.month != t1.month) {
-            flags |= DateUtils.FORMAT_ABBREV_MONTH;
+        if (DEBUG) {
+            Log.d(TAG, "buildWeekDate start = " + TIME_FORMAT.format(weekStartTime) +
+                    " end = " + TIME_FORMAT.format(weekEndTime));
         }
+        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_MONTH;
 
         mStringBuilder.setLength(0);
         String date = DateUtils.formatDateRange(mContext, mFormatter, weekStartTime,
                 weekEndTime, flags, mTimeZone).toString();
-         return date;
+        return date;
     }
 
     private String buildWeekNum() {
@@ -512,24 +521,56 @@ public class CalendarViewAdapter extends BaseAdapter {
     }
 
     private String buildThreeDate() {
+        long milliTime = adjustToBeginningOfThree();
+        Calendar current = Calendar.getInstance();
+        current.setTimeInMillis(milliTime);
+        current.set(Calendar.HOUR_OF_DAY, 12);
+        current.set(Calendar.MINUTE, 0);
+        current.set(Calendar.SECOND, 0);
+
         Time t = new Time(mTimeZone);
-        t.set(mMilliTime);
+        t.set(current.getTimeInMillis());
 
         long weekStartTime = t.toMillis(true);
         long weekEndTime = weekStartTime + 2 * DateUtils.DAY_IN_MILLIS;
 
-        // If week start and end is in 2 different months, use short months names
-        Time t1 = new Time(mTimeZone);
-        t1.set(weekEndTime);
-        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR;
-        if (t.month != t1.month) {
-            flags |= DateUtils.FORMAT_ABBREV_MONTH;
+        if (DEBUG) {
+            Log.d(TAG, "buildThreeDate start = " + TIME_FORMAT.format(weekStartTime) +
+                    " end = " + TIME_FORMAT.format(weekEndTime));
         }
 
+        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_MONTH;
         mStringBuilder.setLength(0);
         String date = DateUtils.formatDateRange(mContext, mFormatter, weekStartTime,
                 weekEndTime, flags, mTimeZone).toString();
          return date;
+    }
+
+    private long adjustToBeginningOfThree() {
+        Time time = new Time(mTimeZone);
+        time.set(mMilliTime);
+        int dayOfWeek = Time.getJulianDay(mMilliTime, time.gmtoff);
+        long currentTime = System.currentTimeMillis();
+        int todayJulianDay = Time.getJulianDay(currentTime, time.gmtoff);
+
+        int startDay = todayJulianDay;
+        int diff = 0;
+        if (dayOfWeek >= startDay) {
+            diff = (dayOfWeek - startDay) % 3;
+        } else {
+            diff = (startDay - dayOfWeek) % 3;
+            if (diff == 1) {
+                diff = 2;
+            } else if (diff == 2) {
+                diff = 1;
+            }
+        }
+
+        if (diff != 0) {
+            time.monthDay -= diff;
+            time.normalize(true /* ignore isDst */);
+        }
+        return time.toMillis(true);
     }
 }
 
