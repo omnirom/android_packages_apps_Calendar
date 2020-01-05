@@ -635,6 +635,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private boolean mTouchExplorationEnabled = false;
     private final String mCreateNewEventString;
     private final String mNewEventHintString;
+    private final String mNewEventHintShortString;
+    private int mNewEventHintHeight;
 
     private int mFilterStartHour = -1;
     private int mFilterEndHour = -1;
@@ -653,6 +655,15 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mResources = context.getResources();
         mCreateNewEventString = mResources.getString(R.string.event_create);
         mNewEventHintString = mResources.getString(R.string.day_view_new_event_hint);
+        mNewEventHintShortString = mResources.getString(R.string.day_view_new_event_hint_short);
+
+        Paint p = new Paint();
+        p.setTextSize(NEW_EVENT_HINT_FONT_SIZE);
+        p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+        Rect bounds = new Rect();
+        p.getTextBounds(mNewEventHintString, 0, mNewEventHintString.length(), bounds);
+        mNewEventHintHeight = bounds.height();
+        
         mNumDays = numDays;
 
         DATE_HEADER_FONT_SIZE = (int) mResources.getDimension(R.dimen.date_header_text_size);
@@ -1315,7 +1326,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             }
             mFirstCell = DAY_HEADER_HEIGHT + allDayHeight + ALLDAY_TOP_MARGIN;
         } else {
-            mSelectionAllday = false;
+            allDayHeight = SINGLE_ALLDAY_HEIGHT;
+            mFirstCell = DAY_HEADER_HEIGHT + allDayHeight + ALLDAY_TOP_MARGIN;
         }
         mAlldayHeight = allDayHeight;
 
@@ -1479,227 +1491,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                         getSelectedTimeInMillis());
             }
         }
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        mScrolling = false;
-        long duration = event.getEventTime() - event.getDownTime();
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                if (mSelectionMode == SELECTION_HIDDEN) {
-                    // Don't do anything unless the selection is visible.
-                    break;
-                }
-
-                if (mSelectionMode == SELECTION_PRESSED) {
-                    // This was the first press when there was nothing selected.
-                    // Change the selection from the "pressed" state to the
-                    // the "selected" state.  We treat short-press and
-                    // long-press the same here because nothing was selected.
-                    mSelectionMode = SELECTION_SELECTED;
-                    invalidate();
-                    break;
-                }
-
-                // Check the duration to determine if this was a short press
-                if (duration < ViewConfiguration.getLongPressTimeout()) {
-                    switchViews(true /* trackball */);
-                } else {
-                    mSelectionMode = SELECTION_LONGPRESS;
-                    invalidate();
-                    performLongClick();
-                }
-                break;
-//            case KeyEvent.KEYCODE_BACK:
-//                if (event.isTracking() && !event.isCanceled()) {
-//                    mPopup.dismiss();
-//                    mContext.finish();
-//                    return true;
-//                }
-//                break;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mSelectionMode == SELECTION_HIDDEN) {
-            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                    || keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_UP
-                    || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                // Display the selection box but don't move or select it
-                // on this key press.
-                mSelectionMode = SELECTION_SELECTED;
-                invalidate();
-                return true;
-            } else if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-                // Display the selection box but don't select it
-                // on this key press.
-                mSelectionMode = SELECTION_PRESSED;
-                invalidate();
-                return true;
-            }
-        }
-
-        mSelectionMode = SELECTION_SELECTED;
-        mScrolling = false;
-        boolean redraw;
-        int selectionDay = mSelectionDay;
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DEL:
-                // Delete the selected event, if any
-                Event selectedEvent = mSelectedEvent;
-                if (selectedEvent == null) {
-                    return false;
-                }
-                mPopup.dismiss();
-                mLastPopupEventID = INVALID_EVENT_ID;
-
-                long begin = selectedEvent.startMillis;
-                long end = selectedEvent.endMillis;
-                long id = selectedEvent.id;
-                mDeleteEventHelper.delete(begin, end, id, -1);
-                return true;
-            case KeyEvent.KEYCODE_ENTER:
-                switchViews(true /* trackball or keyboard */);
-                return true;
-            case KeyEvent.KEYCODE_BACK:
-                if (event.getRepeatCount() == 0) {
-                    event.startTracking();
-                    return true;
-                }
-                return super.onKeyDown(keyCode, event);
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (mSelectedEvent != null) {
-                    setSelectedEvent(mSelectedEvent.nextLeft);
-                }
-                if (mSelectedEvent == null) {
-                    mLastPopupEventID = INVALID_EVENT_ID;
-                    selectionDay -= 1;
-                }
-                redraw = true;
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (mSelectedEvent != null) {
-                    setSelectedEvent(mSelectedEvent.nextRight);
-                }
-                if (mSelectedEvent == null) {
-                    mLastPopupEventID = INVALID_EVENT_ID;
-                    selectionDay += 1;
-                }
-                redraw = true;
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_UP:
-                if (mSelectedEvent != null) {
-                    setSelectedEvent(mSelectedEvent.nextUp);
-                }
-                if (mSelectedEvent == null) {
-                    mLastPopupEventID = INVALID_EVENT_ID;
-                    if (!mSelectionAllday) {
-                        setSelectedHour(mSelectionHour - 1);
-                        adjustHourSelection();
-                        mSelectedEvents.clear();
-                        mComputeSelectedEvents = true;
-                    }
-                }
-                redraw = true;
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (mSelectedEvent != null) {
-                    setSelectedEvent(mSelectedEvent.nextDown);
-                }
-                if (mSelectedEvent == null) {
-                    mLastPopupEventID = INVALID_EVENT_ID;
-                    if (mSelectionAllday) {
-                        mSelectionAllday = false;
-                    } else {
-                        setSelectedHour(mSelectionHour + 1);
-                        adjustHourSelection();
-                        mSelectedEvents.clear();
-                        mComputeSelectedEvents = true;
-                    }
-                }
-                redraw = true;
-                break;
-
-            default:
-                return super.onKeyDown(keyCode, event);
-        }
-
-        if ((selectionDay < mFirstJulianDay) || (selectionDay > mLastJulianDay)) {
-            DayView view = (DayView) mViewSwitcher.getNextView();
-            Time date = view.mBaseDate;
-            date.set(mBaseDate);
-            if (selectionDay < mFirstJulianDay) {
-                date.monthDay -= mNumDays;
-            } else {
-                date.monthDay += mNumDays;
-            }
-            date.normalize(true /* ignore isDst */);
-            view.setSelectedDay(selectionDay);
-
-            initView(view);
-
-            Time end = new Time(date);
-            end.monthDay += mNumDays - 1;
-            mController.sendEvent(this, EventType.GO_TO, date, end, -1, ViewType.CURRENT);
-            return true;
-        }
-        if (mSelectionDay != selectionDay) {
-            Time date = new Time(mBaseDate);
-            date.setJulianDay(selectionDay);
-            date.hour = mSelectionHour;
-            mController.sendEvent(this, EventType.GO_TO, date, date, -1, ViewType.CURRENT);
-        }
-        setSelectedDay(selectionDay);
-        mSelectedEvents.clear();
-        mComputeSelectedEvents = true;
-        mUpdateToast = true;
-
-        if (redraw) {
-            invalidate();
-            return true;
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }
-
-
-    @Override
-    public boolean onHoverEvent(MotionEvent event) {
-        if (DEBUG) {
-            int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_HOVER_ENTER:
-                    Log.e(TAG, "ACTION_HOVER_ENTER");
-                    break;
-                case MotionEvent.ACTION_HOVER_MOVE:
-                    Log.e(TAG, "ACTION_HOVER_MOVE");
-                    break;
-                case MotionEvent.ACTION_HOVER_EXIT:
-                    Log.e(TAG, "ACTION_HOVER_EXIT");
-                    break;
-                default:
-                    Log.e(TAG, "Unknown hover event action. " + event);
-            }
-        }
-
-        // Mouse also generates hover events
-        // Send accessibility events if accessibility and exploration are on.
-        if (!mTouchExplorationEnabled) {
-            return super.onHoverEvent(event);
-        }
-        if (event.getAction() != MotionEvent.ACTION_HOVER_EXIT) {
-            setSelectionFromPosition((int) event.getX(), (int) event.getY(), true);
-            invalidate();
-        }
-        return true;
     }
 
     private boolean isTouchExplorationEnabled() {
@@ -1878,6 +1669,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
         final Time end = new Time(start);
         end.monthDay += mNumDays - 1;
+        mSelectionMode = SELECTION_HIDDEN;
 
         // We have to allocate these animation objects each time we switch views
         // because that is the only way to set the animation parameters.
@@ -1932,64 +1724,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         // Compute the first full hour that is visible on screen
         mFirstHour = (mViewStartY + mCellHeight + HOUR_GAP - 1) / (mCellHeight + HOUR_GAP) + mFilterStartHour;
         mFirstHourOffset = (mFirstHour - mFilterStartHour) * (mCellHeight + HOUR_GAP) - mViewStartY;
-    }
-
-    private void adjustHourSelection() {
-        if (mSelectionHour < mFilterStartHour) {
-            setSelectedHour(mFilterStartHour);
-            if (mMaxAlldayEvents > 0) {
-                mPrevSelectedEvent = null;
-                mSelectionAllday = true;
-            }
-        }
-
-        if (mSelectionHour > mFilterEndHour) {
-            setSelectedHour(mFilterEndHour);
-        }
-
-        // If the selected hour is at least 2 time slots from the top and
-        // bottom of the screen, then don't scroll the view.
-        if (mSelectionHour < mFirstHour + 1) {
-            // If there are all-days events for the selected day but there
-            // are no more normal events earlier in the day, then jump to
-            // the all-day event area.
-            // Exception 1: allow the user to scroll to 8am with the trackball
-            // before jumping to the all-day event area.
-            // Exception 2: if 12am is on screen, then allow the user to select
-            // 12am before going up to the all-day event area.
-            int daynum = mSelectionDay - mFirstJulianDay;
-            if (daynum < mEarliestStartHour.length && daynum >= 0
-                    && mMaxAlldayEvents > 0
-                    && mEarliestStartHour[daynum] > mSelectionHour
-                    && mFirstHour > 0 && mFirstHour < 8) {
-                mPrevSelectedEvent = null;
-                mSelectionAllday = true;
-                setSelectedHour(mFirstHour + 1);
-                return;
-            }
-
-            if (mFirstHour > 0) {
-                mFirstHour -= 1;
-                mViewStartY -= (mCellHeight + HOUR_GAP);
-                if (mViewStartY < 0) {
-                    mViewStartY = 0;
-                }
-                return;
-            }
-        }
-
-        /*if (mSelectionHour > mFirstHour + mNumHours - 3) {
-            if (mFirstHour < (mFilterEndHour - mFilterStartHour) - mNumHours) {
-                mFirstHour += 1;
-                mViewStartY += (mCellHeight + HOUR_GAP);
-                if (mViewStartY > mMaxViewStartY) {
-                    mViewStartY = mMaxViewStartY;
-                }
-                return;
-            } else if (mFirstHour == (mFilterEndHour - mFilterStartHour) - mNumHours && mFirstHourOffset > 0) {
-                mViewStartY = mMaxViewStartY;
-            }
-        }*/
     }
 
     void clearCachedEvents() {
@@ -2253,11 +1987,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         Rect r = mRect;
 
         drawAllDayHighlights(r, canvas, p);
-        if (mMaxAlldayEvents != 0) {
-            drawAllDayEvents(mFirstJulianDay, mNumDays, canvas, p);
-            drawUpperLeftCorner(r, canvas, p);
-        }
-
+        drawAllDayEvents(mFirstJulianDay, mNumDays, canvas, p);
+        drawUpperLeftCorner(r, canvas, p);
         drawScrollLine(r, canvas, p);
         drawDayHeaderLoop(r, canvas, p);
     }
@@ -2298,6 +2029,11 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         return day * effectiveWidth / mNumDays + mHoursWidth;
     }
 
+    private int computeDayRightPosition(int day) {
+        int effectiveWidth = mViewWidth - mHoursWidth;
+        return computeDayLeftPosition(day) + effectiveWidth / mNumDays;
+    }
+
     private void drawAllDayHighlights(Rect r, Canvas canvas, Paint p) {
         if (mFutureBgColor != 0) {
             // First, color the labels area light gray
@@ -2326,14 +2062,16 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 // future starts right from today
                 startIndex = todayIndex + 1;
             }
-            // today header bg
-            r.top = 0;
-            r.bottom = DAY_HEADER_HEIGHT;
-            r.left = computeDayLeftPosition(todayIndex);
-            r.right = computeDayLeftPosition(todayIndex + 1);
-            p.setColor(mTodayBgColor);
-            p.setStyle(Style.FILL);
-            canvas.drawRect(r, p);
+            if (todayIndex >= 0) {
+                // today header bg
+                r.top = 0;
+                r.bottom = DAY_HEADER_HEIGHT;
+                r.left = computeDayLeftPosition(todayIndex);
+                r.right = computeDayRightPosition(todayIndex);
+                p.setColor(mTodayBgColor);
+                p.setStyle(Style.FILL);
+                canvas.drawRect(r, p);
+            }
 
             // event line bg
             r.top = DAY_HEADER_HEIGHT;
@@ -2365,6 +2103,11 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             mRect.right = computeDayLeftPosition(daynum + 1);
             p.setColor(mCalendarGridAreaSelected);
             canvas.drawRect(mRect, p);
+            
+            // Draw a "new event hint" on top of the highlight
+            // For the week view, show a "+", for day view, show "+ New event"
+            p.setColor(mNewEventHintColor);
+            drawSelectedRectOverlay(mRect, p, canvas);
         }
     }
 
@@ -2471,26 +2214,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             // Draw a "new event hint" on top of the highlight
             // For the week view, show a "+", for day view, show "+ New event"
             p.setColor(mNewEventHintColor);
-            if (mNumDays > 1) {
-                p.setStrokeWidth(NEW_EVENT_WIDTH);
-                int width = r.right - r.left;
-                int midX = r.left + width / 2;
-                int midY = r.top + mCellHeight / 2;
-                int length = Math.min(mCellHeight, width) - NEW_EVENT_MARGIN * 2;
-                length = Math.min(length, NEW_EVENT_MAX_LENGTH);
-                int verticalPadding = (mCellHeight - length) / 2;
-                int horizontalPadding = (width - length) / 2;
-                canvas.drawLine(r.left + horizontalPadding, midY, r.right - horizontalPadding,
-                        midY, p);
-                canvas.drawLine(midX, r.top + verticalPadding, midX, r.bottom - verticalPadding, p);
-            } else {
-                p.setStyle(Paint.Style.FILL);
-                p.setTextSize(NEW_EVENT_HINT_FONT_SIZE);
-                p.setTextAlign(Paint.Align.LEFT);
-                p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                canvas.drawText(mNewEventHintString, r.left + EVENT_TEXT_LEFT_MARGIN,
-                        r.top + Math.abs(p.getFontMetrics().ascent) + EVENT_TEXT_TOP_MARGIN , p);
-            }
+            drawSelectedRectOverlay(r, p, canvas);
         }
     }
 
@@ -3682,6 +3406,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         Event oldSelectedEvent = mSelectedEvent;
         int oldSelectionDay = mSelectionDay;
         int oldSelectionHour = mSelectionHour;
+        boolean oldSelectionAllday = mSelectionAllday;
         if (setSelectionFromPosition(x, y, false)) {
             // If a time was selected (a blue selection box is visible) and the click location
             // is in the selected time, do not show a click on an event to prevent a situation
@@ -3699,7 +3424,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mSelectedEvent = oldSelectedEvent;
         mSelectionDay = oldSelectionDay;
         mSelectionHour = oldSelectionHour;
-        invalidate();
+        mSelectionAllday = oldSelectionAllday;
     }
 
     // Kicks off all the animations when the expand allday area is tapped
@@ -3854,6 +3579,7 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         int y = (int) ev.getY();
         int selectedDay = mSelectionDay;
         int selectedHour = mSelectionHour;
+        boolean selectedAllDay = mSelectionAllday;
 
         if (mMaxAlldayEvents > mMaxUnexpandedAlldayEventCount) {
             // check if the tap was in the allday expansion area
@@ -3881,7 +3607,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         boolean hasSelection = mSelectionMode != SELECTION_HIDDEN;
         boolean pressedSelected = (hasSelection || mTouchExplorationEnabled)
-                && selectedDay == mSelectionDay && selectedHour == mSelectionHour;
+                && selectedDay == mSelectionDay && selectedHour == mSelectionHour
+                && selectedAllDay == mSelectionAllday;
 
         if (pressedSelected && mSavedClickedEvent == null) {
             // If the tap is on an already selected hour slot, then create a new
@@ -4053,7 +3780,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         mScrolling = true;
 
-        mSelectionMode = SELECTION_HIDDEN;
         invalidate();
     }
 
@@ -4581,20 +4307,10 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
         findSelectedEvent(x, y);
 
-//        Log.i("Cal", "setSelectionFromPosition( " + x + ", " + y + " ) day: " + day + " hour: "
-//                + mSelectionHour + " mFirstCell: " + mFirstCell + " mFirstHourOffset: "
-//                + mFirstHourOffset);
-//        if (mSelectedEvent != null) {
-//            Log.i("Cal", "  num events: " + mSelectedEvents.size() + " event: "
-//                    + mSelectedEvent.title);
-//            for (Event ev : mSelectedEvents) {
-//                int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_ALL
-//                        | DateUtils.FORMAT_CAP_NOON_MIDNIGHT;
-//                String timeRange = formatDateRange(mContext, ev.startMillis, ev.endMillis, flags);
-//
-//                Log.i("Cal", "  " + timeRange + " " + ev.title);
-//            }
-//        }
+        if (DEBUG) Log.i(TAG, "setSelectionFromPosition( " + x + ", " + y + " ) day: " + day + " hour: "
+                + mSelectionHour + " mFirstCell: " + mFirstCell + " mFirstHourOffset: "
+                + mFirstHourOffset + " mSelectionAllday: " + mSelectionAllday);
+
         sendAccessibilityEventAsNeeded(true);
 
         // Restore old values
@@ -5052,6 +4768,24 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         if (mFirstCell + allCellHeight > mViewHeight - mFabBottomMargin) {
             int fabMargin = Math.min((mFirstCell + allCellHeight) - (mViewHeight - mFabBottomMargin), mFabBottomMargin);
             mMaxViewStartY += fabMargin;
+        }
+    }
+
+    private void drawSelectedRectOverlay(Rect r, Paint p, Canvas canvas) {
+        p.setStyle(Paint.Style.FILL);
+        p.setTextSize(NEW_EVENT_HINT_FONT_SIZE);
+        p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+
+        if (mNumDays > 1) {
+            p.setTextAlign(Paint.Align.CENTER);
+            String overlayText = mNewEventHintShortString;
+            canvas.drawText(overlayText, r.left + (r.right - r.left) / 2f,
+                r.top + (r.bottom - r.top) / 2f + mNewEventHintHeight / 2f, p);
+        } else {
+            p.setTextAlign(Paint.Align.LEFT);
+            String overlayText = mNewEventHintString;
+            canvas.drawText(overlayText, r.left + EVENT_TEXT_LEFT_MARGIN,
+                r.top + (r.bottom - r.top) / 2f + mNewEventHintHeight / 2f, p);
         }
     }
 }

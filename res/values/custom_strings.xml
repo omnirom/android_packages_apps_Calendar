@@ -46,4 +46,5 @@
     <string name="event_response_yes">yes</string>
     <string name="event_response_maybe">maybe</string>
     <string name="event_response_no">no</string>
+    <string name="day_view_new_event_hint_short" translatable="false">+</string>
 </resources>
