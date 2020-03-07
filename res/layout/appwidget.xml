@@ -32,8 +32,7 @@
         android:paddingLeft="8dip"
         android:paddingRight="2dip"
         android:orientation="vertical"
-        android:background="@color/appwidget_header_bg_color"
-        android:foreground="?android:attr/selectableItemBackground" >
+        android:background="@drawable/appwidget_header_bg">
         <TextView
             android:id="@+id/day_of_week"
             android:layout_marginTop="4dip"
@@ -53,7 +52,7 @@
         android:layout_height="0dip"
         android:layout_weight="1"
         android:dividerHeight="1dip"
-        android:background="@color/agenda_day_bar_background_color"
+        android:background="@drawable/appwidget_bg"
         android:scrollbarStyle="outsideOverlay"
         android:divider="@color/agenda_day_grid_line_color" />
 
