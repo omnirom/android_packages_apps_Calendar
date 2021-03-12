@@ -34,4 +34,12 @@
     <string name="ten_minutes">10 minutes</string>
     <string name="fifteen_minites">15 minutes</string>
     <string name="thirty_minutes">30 minutes</string>
+    <string name="recurrence_freq_daily">Répéter Quotidiennement</string>
+    <string name="recurrence_freq_weekly">Répéter toutes les semaines</string>
+    <string name="recurrence_freq_monthly">Répéter tous les mois</string>
+    <string name="recurrence_freq_yearly">Répéter tous les ans</string>
+    <string name="event_response_awaiting">en attente</string>
+    <string name="event_response_yes">oui</string>
+    <string name="event_response_maybe">peut-être</string>
+    <string name="event_response_no">non</string>
 </resources>
