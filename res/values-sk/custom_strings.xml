@@ -34,4 +34,12 @@
     <string name="ten_minutes">10 minút</string>
     <string name="fifteen_minites">15 minút</string>
     <string name="thirty_minutes">30 minút</string>
+    <string name="recurrence_freq_daily">Opakovať denne</string>
+    <string name="recurrence_freq_weekly">Opakovať týždenne</string>
+    <string name="recurrence_freq_monthly">Opakovať mesačne</string>
+    <string name="recurrence_freq_yearly">Opakovať ročne</string>
+    <string name="event_response_awaiting">čaká sa</string>
+    <string name="event_response_yes">áno</string>
+    <string name="event_response_maybe">možno</string>
+    <string name="event_response_no">nie</string>
 </resources>
