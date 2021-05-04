@@ -18,7 +18,7 @@
     <string name="preferences_hours_filter_start_title">開始時刻</string>
     <string name="preferences_hours_filter_end_title">終了時刻</string>
     <string name="hour_margin_invalid">無効な時間間隔</string>
-    <string name="cancel_confirmation_dialog_message">変更を破棄して編集を終了しますか？</string>
+    <string name="cancel_confirmation_dialog_message">変更を破棄して編集を終了しますか?</string>
     <string name="calendar_filter">時間フィルターを有効にする</string>
     <string name="calendar_type_mine">作成者</string>
     <string name="calendar_type_other">その他</string>
