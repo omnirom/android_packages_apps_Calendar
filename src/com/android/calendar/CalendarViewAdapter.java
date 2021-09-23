@@ -213,7 +213,11 @@ public class CalendarViewAdapter extends BaseAdapter {
             switch (mCurrentMainView) {
                 case ViewType.DAY:
                     weekDay.setVisibility(View.VISIBLE);
-                    weekDay.setText(buildDayOfWeek());
+                    if (Utils.getShowWeekNumber(mContext)) {
+                        weekDay.setText(buildDayOfWeek() + " / " + buildWeekNum());
+                    } else {
+                        weekDay.setText(buildDayOfWeek());
+                    }
                     if (LunarUtils.showLunar(mContext)) {
                         lunarInfo.setVisibility(View.VISIBLE);
                         Time time = new Time(mTimeZone);

@@ -62,7 +62,6 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
     // display event details to the side of the event list
    private boolean mShowEventDetailsWithAgenda;
-   private static boolean mIsMultipane;
 
     private CalendarController mController;
 
@@ -109,7 +108,6 @@ public class SearchActivity extends Activity implements CalendarController.Event
         mController = CalendarController.getInstance(this);
         mHandler = new Handler();
 
-        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
         mShowEventDetailsWithAgenda =
             Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
 
@@ -119,13 +117,8 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
         mContentResolver = getContentResolver();
 
-        if (mIsMultipane) {
-            getActionBar().setDisplayOptions(
-                    ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
-        } else {
-            getActionBar().setDisplayOptions(0,
+        getActionBar().setDisplayOptions(0,
                     ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
-        }
 
         // Must be the first to register because this activity can modify the
         // list of event handlers in it's handle method. This affects who the
@@ -230,15 +223,6 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
     private void deleteEvent(long eventId, long startMillis, long endMillis) {
         mDeleteEventHelper.delete(startMillis, endMillis, eventId, -1);
-        if (mIsMultipane && mEventInfoFragment != null
-                && eventId == mCurrentEventId) {
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-            ft.remove(mEventInfoFragment);
-            ft.commit();
-            mEventInfoFragment = null;
-            mCurrentEventId = -1;
-        }
     }
 
     @Override

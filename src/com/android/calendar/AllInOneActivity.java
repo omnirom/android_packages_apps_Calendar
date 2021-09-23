@@ -119,8 +119,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private static final int BUTTON_AGENDA_INDEX = 4;
 
     private CalendarController mController;
-    private static boolean mIsMultipane;
-    private static boolean mIsTabletConfig;
     private static boolean mShowAgendaWithMonth;
     private static boolean mShowEventDetailsWithAgenda;
     private boolean mOnSaveInstanceStateCalled = false;
@@ -131,17 +129,13 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private boolean mPaused = true;
     private boolean mHideControls = false;
     private boolean mShowSideViews = true;
-    private boolean mShowWeekNum = false;
     private TextView mHomeTime;
-    private TextView mDateRange;
-    private TextView mWeekTextView;
     private View mMiniMonth;
     private View mCalendarsList;
     private View mMiniMonthContainer;
     private View mSecondaryPane;
     private String mTimeZone;
     private boolean mShowCalendarControls;
-    private int mWeekNum;
     private int mCalendarControlsAnimationTime;
     private int mControlsAnimateWidth;
     private int mControlsAnimateHeight;
@@ -348,15 +342,13 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         mHideControls = !Utils.getSharedPreference(
                 this, GeneralPreferences.KEY_SHOW_CONTROLS, true);
-        mIsMultipane = Utils.getConfigBool(this, R.bool.multiple_pane_config);
-        mIsTabletConfig = Utils.getConfigBool(this, R.bool.tablet_config);
         mShowAgendaWithMonth = Utils.getConfigBool(this, R.bool.show_agenda_with_month);
         mShowCalendarControls =
                 Utils.getConfigBool(this, R.bool.show_calendar_controls);
         mShowEventDetailsWithAgenda =
             Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
         mCalendarControlsAnimationTime = res.getInteger(R.integer.calendar_controls_animation_time);
-        Utils.setAllowWeekForDetailView(mIsMultipane);
+        Utils.setAllowWeekForDetailView(false);
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED ||
@@ -414,19 +406,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         // setContentView must be called before configureActionBar
         setContentView(R.layout.all_in_one);
 
-        if (mIsTabletConfig) {
-            mDateRange = (TextView) findViewById(R.id.date_bar);
-            mWeekTextView = (TextView) findViewById(R.id.week_num);
-        } else {
-            mDateRange = (TextView) getLayoutInflater().inflate(R.layout.date_range_title, null);
-        }
-
         mHomeTime = (TextView) findViewById(R.id.home_time);
         mMiniMonth = findViewById(R.id.mini_month);
-        if (mIsTabletConfig && mOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            mMiniMonth.setLayoutParams(new RelativeLayout.LayoutParams(mControlsAnimateWidth,
-                    mControlsAnimateHeight));
-        }
         mCalendarsList = findViewById(R.id.calendar_list);
         mMiniMonthContainer = findViewById(R.id.mini_month_container);
         mSecondaryPane = findViewById(R.id.secondary_pane);
@@ -464,18 +445,12 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     }
 
     private void configureActionBar(int viewType) {
-        createButtonsSpinner(viewType, mIsTabletConfig);
-        if (mIsMultipane) {
-            mActionBar.setDisplayOptions(
-                    ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
-        } else {
-            mActionBar.setDisplayOptions(0);
-        }
+        createButtonsSpinner(viewType);
+        mActionBar.setDisplayOptions(0);
     }
 
-    private void createButtonsSpinner(int viewType, boolean tabletConfig) {
-        // If tablet configuration , show spinner with no dates
-        mActionBarMenuSpinnerAdapter = new CalendarViewAdapter (this, viewType, !tabletConfig);
+    private void createButtonsSpinner(int viewType) {
+        mActionBarMenuSpinnerAdapter = new CalendarViewAdapter (this, viewType, true);
         mActionBar = getActionBar();
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         mActionBar.setListNavigationCallbacks(mActionBarMenuSpinnerAdapter, this);
@@ -995,19 +970,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         // current view.
         if (mActionBarMenuSpinnerAdapter != null) {
             mActionBarMenuSpinnerAdapter.setMainView(viewType);
-            if (!mIsTabletConfig) {
-                mActionBarMenuSpinnerAdapter.setTime(timeMillis);
-            }
-        }
-
-
-        // Show date only on tablet configurations in views different than Agenda
-        if (!mIsTabletConfig) {
-            mDateRange.setVisibility(View.GONE);
-        } else if (viewType != ViewType.AGENDA) {
-            mDateRange.setVisibility(View.VISIBLE);
-        } else {
-            mDateRange.setVisibility(View.GONE);
+            mActionBarMenuSpinnerAdapter.setTime(timeMillis);
         }
 
         boolean doCommit = false;
@@ -1067,47 +1030,12 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             end = start;
         }
 
-        final String msg = Utils.formatDateRange(this, start, end, (int) event.extraLong);
-        CharSequence oldDate = mDateRange.getText();
-        mDateRange.setText(msg);
         updateSecondaryTitleFields(event.selectedTime != null ? event.selectedTime.toMillis(true)
                 : start);
-        if (!TextUtils.equals(oldDate, msg)) {
-            mDateRange.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-            if (mShowWeekNum && mWeekTextView != null) {
-                mWeekTextView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-            }
-        }
     }
 
     private void updateSecondaryTitleFields(long visibleMillisSinceEpoch) {
-        mShowWeekNum = Utils.getShowWeekNumber(this);
         mTimeZone = Utils.getTimeZone(this, mHomeTimeUpdater);
-        if (visibleMillisSinceEpoch != -1) {
-            int weekNum = Utils.getWeekNumberFromTime(visibleMillisSinceEpoch, this);
-            mWeekNum = weekNum;
-        }
-
-        if (mShowWeekNum && (mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE) && mIsTabletConfig
-                && mWeekTextView != null) {
-            String weekString = getResources().getQuantityString(R.plurals.weekN, mWeekNum,
-                    mWeekNum);
-            mWeekTextView.setText(weekString);
-            mWeekTextView.setVisibility(View.VISIBLE);
-        } else if (visibleMillisSinceEpoch != -1 && mWeekTextView != null
-                && mCurrentView == ViewType.DAY && mIsTabletConfig) {
-            Time time = new Time(mTimeZone);
-            time.set(visibleMillisSinceEpoch);
-            int julianDay = Time.getJulianDay(visibleMillisSinceEpoch, time.gmtoff);
-            time.setToNow();
-            int todayJulianDay = Time.getJulianDay(time.toMillis(false), time.gmtoff);
-            String dayString = Utils.getDayOfWeekString(julianDay, todayJulianDay,
-                    visibleMillisSinceEpoch, this);
-            mWeekTextView.setText(dayString);
-            mWeekTextView.setVisibility(View.VISIBLE);
-        } else if (mWeekTextView != null && (!mIsTabletConfig || mCurrentView != ViewType.DAY)) {
-            mWeekTextView.setVisibility(View.GONE);
-        }
 
         if (mHomeTime != null
                 && (mCurrentView == ViewType.DAY || mCurrentView == ViewType.WEEK || mCurrentView == ViewType.THREE
@@ -1202,9 +1130,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             }
             displayTime = event.selectedTime != null ? event.selectedTime.toMillis(true)
                     : event.startTime.toMillis(true);
-            if (!mIsTabletConfig) {
-                mActionBarMenuSpinnerAdapter.setTime(displayTime);
-            }
+            mActionBarMenuSpinnerAdapter.setTime(displayTime);
         } else if (event.eventType == EventType.VIEW_EVENT) {
 
             // If in Agenda view and "show_event_details_with_agenda" is "true",
@@ -1251,10 +1177,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             displayTime = event.startTime.toMillis(true);
         } else if (event.eventType == EventType.UPDATE_TITLE) {
             setTitleInActionBar(event);
-            if (!mIsTabletConfig) {
-                if (mActionBarMenuSpinnerAdapter != null) {
-                    mActionBarMenuSpinnerAdapter.setTime(mController.getTime());
-                }
+            if (mActionBarMenuSpinnerAdapter != null) {
+                mActionBarMenuSpinnerAdapter.setTime(mController.getTime());
             }
         }
         updateSecondaryTitleFields(displayTime);
