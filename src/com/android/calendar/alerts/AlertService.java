@@ -1072,7 +1072,7 @@ public class AlertService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (isPermissionEnabled(this)) {
             if (intent != null) {
-                Notification notification = (new Notification.Builder(this)).
+                Notification notification = (new Notification.Builder(this, com.android.calendar.CalendarApplication.REFRESH_CHANNEL_ID)).
                     setContentTitle(getString(R.string.calendar_refresh)).
                     setSmallIcon(R.drawable.stat_notify_calendar).
                     setShowWhen(false).
@@ -1103,6 +1103,8 @@ public class AlertService extends Service {
 
     private static boolean isPermissionEnabled(Context context) {
         if (context.checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED ||
+            context.checkSelfPermission(Manifest.permission.READ_CALENDAR)
                     != PackageManager.PERMISSION_GRANTED ||
             context.checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
                     != PackageManager.PERMISSION_GRANTED) {

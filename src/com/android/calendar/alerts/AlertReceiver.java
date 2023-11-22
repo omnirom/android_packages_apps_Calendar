@@ -257,7 +257,7 @@ public class AlertReceiver extends BroadcastReceiver {
     public static NotificationWrapper makeBasicNotification(Context context, String title,
             String summaryText, long startMillis, long endMillis, long eventId,
             int notificationId, int priority) {
-        Notification n = buildBasicNotification(new Notification.Builder(context),
+        Notification n = buildBasicNotification(new Notification.Builder(context,com.android.calendar.CalendarApplication.REMINDER_CHANNEL_ID),
                 context, title, summaryText, startMillis, endMillis, eventId, notificationId,
                 priority, false);
         return new NotificationWrapper(n, notificationId, eventId, startMillis, endMillis);
@@ -406,7 +406,7 @@ public class AlertReceiver extends BroadcastReceiver {
     public static NotificationWrapper makeExpandingNotification(Context context, String title,
             String summaryText, String description, long startMillis, long endMillis, long eventId,
             int notificationId, int priority) {
-        Notification.Builder basicBuilder = new Notification.Builder(context);
+        Notification.Builder basicBuilder = new Notification.Builder(context,com.android.calendar.CalendarApplication.REMINDER_CHANNEL_ID);
         Notification notification = buildBasicNotification(basicBuilder, context, title,
                 summaryText, startMillis, endMillis, eventId, notificationId,
                 priority, true);
@@ -473,7 +473,7 @@ public class AlertReceiver extends BroadcastReceiver {
             digestTitle = res.getString(R.string.no_title_label);
         }
 
-        Notification.Builder notificationBuilder = new Notification.Builder(context);
+        Notification.Builder notificationBuilder = new Notification.Builder(context, com.android.calendar.CalendarApplication.REMINDER_CHANNEL_ID);
         notificationBuilder.setContentText(digestTitle);
         notificationBuilder.setSmallIcon(R.drawable.stat_notify_calendar_multiple);
         notificationBuilder.setContentIntent(pendingClickIntent);

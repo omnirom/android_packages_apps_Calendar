@@ -17,8 +17,14 @@
 package com.android.calendar;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 
 public class CalendarApplication extends Application {
+    public static final String REFRESH_CHANNEL_ID = "refresh";
+    public static final String REMINDER_CHANNEL_ID = "reminder";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,5 +42,25 @@ public class CalendarApplication extends Application {
 
         // Initialize the registry mapping some custom behavior.
         ExtensionsFactory.init(getAssets());
+        
+        // create notificatioon channels
+        makeNotificationChannels(this);
+    }
+    
+    private void makeNotificationChannels(Context context) {
+        final NotificationManager nm = context.getSystemService(NotificationManager.class);
+        final NotificationChannel channelRefresh =
+                new NotificationChannel(
+                        REFRESH_CHANNEL_ID,
+                        context.getString(R.string.notification_channel_refresh),
+                        NotificationManager.IMPORTANCE_LOW);
+        nm.createNotificationChannel(channelRefresh);
+        
+        final NotificationChannel channelReminder =
+                new NotificationChannel(
+                        REMINDER_CHANNEL_ID,
+                        context.getString(R.string.notification_channel_reminder),
+                        NotificationManager.IMPORTANCE_DEFAULT);
+        nm.createNotificationChannel(channelReminder);
     }
 }
