@@ -42,11 +42,11 @@ public class CalendarApplication extends Application {
 
         // Initialize the registry mapping some custom behavior.
         ExtensionsFactory.init(getAssets());
-        
+
         // create notificatioon channels
         makeNotificationChannels(this);
     }
-    
+
     private void makeNotificationChannels(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         final NotificationChannel channelRefresh =
@@ -55,7 +55,7 @@ public class CalendarApplication extends Application {
                         context.getString(R.string.notification_channel_refresh),
                         NotificationManager.IMPORTANCE_LOW);
         nm.createNotificationChannel(channelRefresh);
-        
+
         final NotificationChannel channelReminder =
                 new NotificationChannel(
                         REMINDER_CHANNEL_ID,

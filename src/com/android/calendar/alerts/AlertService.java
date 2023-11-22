@@ -58,7 +58,7 @@ import java.util.TimeZone;
  * This service is used to handle calendar event reminders.
  */
 public class AlertService extends Service {
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
     private static final String TAG = "AlertService";
 
     private volatile Looper mServiceLooper;

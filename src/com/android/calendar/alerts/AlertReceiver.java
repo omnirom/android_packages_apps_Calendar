@@ -178,7 +178,7 @@ public class AlertReceiver extends BroadcastReceiver {
                 mStartingService.setReferenceCounted(false);
             }
             mStartingService.acquire();
-            context.startService(intent);
+            context.startForegroundService(intent);
         }
     }
 
