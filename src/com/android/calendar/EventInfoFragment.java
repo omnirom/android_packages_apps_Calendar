@@ -1501,7 +1501,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             if (mAllDay) {
                 date.timezone = Time.TIMEZONE_UTC;
             }
-            eventRecurrence.setStartDate(date);
+            com.android.calendarcommon2.Time dateCommon = new com.android.calendarcommon2.Time(date.timezone);
+            dateCommon.copyAndWriteInstance(date);
+            eventRecurrence.setStartDate(dateCommon);
             repeatString = EventRecurrenceFormatter.getRepeatString(mContext, resources,
                     eventRecurrence, true);
         }

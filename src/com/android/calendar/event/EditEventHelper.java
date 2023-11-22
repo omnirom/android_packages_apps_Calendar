@@ -731,7 +731,9 @@ public class EditEventHelper {
             RecurrenceProcessor recurProc = new RecurrenceProcessor();
             long[] recurrences;
             try {
-                recurrences = recurProc.expand(dtstart, recurSet, startTimeMillis, endTimeMillis);
+                com.android.calendarcommon2.Time dtstartCommon = new com.android.calendarcommon2.Time(dtstart.timezone);
+                dtstartCommon.copyAndWriteInstance(dtstart);
+                recurrences = recurProc.expand(dtstartCommon, recurSet, startTimeMillis, endTimeMillis);
             } catch (DateException de) {
                 throw new RuntimeException(de);
             }

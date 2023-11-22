@@ -352,11 +352,14 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED ||
             checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED) {
             doCreate(mBundle);
             requestPermissions(new String[] {
                 Manifest.permission.READ_CONTACTS,
+                Manifest.permission.READ_CALENDAR,
                 Manifest.permission.WRITE_CALENDAR}, PERMISSIONS_REQUEST_CALENDAR);
         } else {
             mPermsDone = true;
@@ -482,6 +485,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED ||
             checkSelfPermission(Manifest.permission.WRITE_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED) {
             mPermsDone = false;
@@ -493,10 +498,10 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         mController.registerFirstEventHandler(HANDLER_KEY, this);
 
         mOnSaveInstanceStateCalled = false;
-        mContentResolver.registerContentObserver(CalendarContract.Events.CONTENT_URI,
-                    true, mObserver);
 
         if (mPermsDone) {
+            mContentResolver.registerContentObserver(CalendarContract.Events.CONTENT_URI,
+                    true, mObserver);
             initFragments(mController.getTime(), mController.getViewType(), null);
         }
 
@@ -547,13 +552,17 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (mActionBarMenuSpinnerAdapter != null) {
             mActionBarMenuSpinnerAdapter.onPause();
         }
-        mContentResolver.unregisterContentObserver(mObserver);
+        try {
+            mContentResolver.unregisterContentObserver(mObserver);
+        } catch (Exception e){}
         // FRAG_TODO save highlighted days of the week;
         if (mController.getViewType() != ViewType.EDIT) {
             Utils.setDefaultView(this, mController.getViewType());
         }
         Utils.resetMidnightUpdater(mHandler, mTimeChangesUpdater);
-        Utils.clearTimeChangesReceiver(this, mCalIntentReceiver);
+        try {
+            Utils.clearTimeChangesReceiver(this, mCalIntentReceiver);
+        } catch (Exception e){}
     }
 
     @Override
@@ -1355,9 +1364,10 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CALENDAR: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 2
+                if (grantResults.length == 3
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                     mPermsDone = true;
                     doRunWithPermissions(mController.getTime(), mController.getViewType());
                 } else {

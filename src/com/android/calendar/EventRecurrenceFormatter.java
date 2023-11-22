@@ -94,7 +94,8 @@ public class EventRecurrenceFormatter
                             return null;
                         }
 
-                        int day = EventRecurrence.timeDay2Day(recurrence.startDate.weekDay);
+                        Time startDate = recurrence.startDate.generateInstance();
+                        int day = EventRecurrence.timeDay2Day(startDate.weekDay);
                         string = dayToString(day, DateUtils.LENGTH_LONG);
                     }
                     return r.getQuantityString(R.plurals.weekly, interval, interval, string)
@@ -103,10 +104,11 @@ public class EventRecurrenceFormatter
             }
             case EventRecurrence.MONTHLY: {
                 if (recurrence.bydayCount == 1) {
-                    int weekday = recurrence.startDate.weekDay;
+                    Time startDate = recurrence.startDate.generateInstance();
+                    int weekday = startDate.weekDay;
                     // Cache this stuff so we won't have to redo work again later.
                     cacheMonthRepeatStrings(r, weekday);
-                    int dayNumber = (recurrence.startDate.monthDay - 1) / 7;
+                    int dayNumber = (startDate.monthDay - 1) / 7;
                     StringBuilder sb = new StringBuilder();
                     sb.append(r.getString(R.string.monthly));
                     sb.append(" (");

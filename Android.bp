@@ -1,0 +1,30 @@
+android_app {
+    name: "Calendar",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    resource_dirs: [
+        "res",
+    ],
+    
+    static_libs: [
+        "android-common",
+        "libchips",
+        "colorpicker",
+        "android-opt-timezonepicker",
+        "androidx.legacy_legacy-support-v4",
+        "calendar-common",
+    ],
+
+    sdk_version: "current",
+    target_sdk_version: "30",
+    product_specific: true,
+
+    optimize: {
+        enabled: false,
+    },
+
+    aaptflags: ["--auto-add-overlay"],
+}
