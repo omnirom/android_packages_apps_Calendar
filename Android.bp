@@ -20,6 +20,7 @@ android_app {
 
     sdk_version: "current",
     target_sdk_version: "30",
+    min_sdk_version: "30",
     product_specific: true,
 
     optimize: {

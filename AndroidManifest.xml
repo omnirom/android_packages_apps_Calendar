@@ -18,10 +18,11 @@
 */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
         package="com.android.calendar"
         android:sharedUserLabel="@string/app_label"
-        android:versionCode="7"
-        android:versionName="1.0.6" >
+        android:versionCode="8"
+        android:versionName="1.0.7" >
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
@@ -36,6 +37,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.mail" />
+
+    <uses-sdk tools:overrideLibrary="com.android.ex.chips"/>
 
     <application android:name="CalendarApplication"
             android:label="@string/app_label"
