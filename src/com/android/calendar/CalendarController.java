@@ -738,7 +738,7 @@ public class CalendarController {
 
     private void launchSettings() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setClass(mContext, CalendarSettingsActivity.class);
+        intent.setClass(mContext, CalendarSettingsActivityNew.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         mContext.startActivity(intent);
     }

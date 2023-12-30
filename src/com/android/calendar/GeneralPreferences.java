@@ -309,9 +309,6 @@ public class GeneralPreferences extends PreferenceFragment implements OnPreferen
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, getContext().getPackageName());
             startActivity(intent);
             return true;
-        /*} else if (KEY_QUICK_RESPONSE.equals(key)) {
-            getFragmentManager().beginTransaction().replace(android.R.id.content, new QuickResponseSettings()).commit();
-            return true;*/
         } else {
             return super.onPreferenceTreeClick(preference);
         }

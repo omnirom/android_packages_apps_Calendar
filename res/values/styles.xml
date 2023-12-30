@@ -109,7 +109,7 @@
         <item name="android:textColor">@color/calendar_date_range_color</item>
     </style>
 
-    <style name="Settings" parent="@android:style/Theme.Material.Light">
+    <style name="Settings" parent="@style/Theme.AppCompat.Light">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:colorPrimary">@color/primary_color</item>
         <item name="android:colorPrimaryDark">@color/primary_color</item>
@@ -120,6 +120,12 @@
         <item name="preferenceTheme">@style/Omni.PreferenceTheme</item>
         <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
         <item name="android:textAppearanceListItem">@style/Omni.PreferenceTitle</item>
+        <item name="toolbarStyle">@style/CalendarTheme.Toolbar</item>
+        <item name="actionBarStyle">@style/CalendarTheme.Toolbar</item>
+    </style>
+
+    <style name="CalendarTheme.Toolbar" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="background">@color/primary_color</item>
     </style>
 
     <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material.Light">
