@@ -15,6 +15,7 @@
 -->
 
 <resources>
+    <color name="material_blue_grey_800">#ff37474f</color>
     <color name="material_blue_grey_900">#ff263238</color>
     <color name="material_blue_grey_950">#ff21272b</color>
     <color name="omni_color3">#80eeeeee</color>

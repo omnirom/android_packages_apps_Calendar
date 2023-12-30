@@ -16,6 +16,7 @@ android_app {
         "android-opt-timezonepicker",
         "androidx.legacy_legacy-support-v4",
         "calendar-common",
+        "androidx.preference_preference",
     ],
 
     sdk_version: "current",

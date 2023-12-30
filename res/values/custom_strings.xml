@@ -49,4 +49,5 @@
     <string name="day_view_new_event_hint_short" translatable="false">+</string>
     <string name="notification_channel_refresh">Refresh</string>
     <string name="notification_channel_reminder">Reminders</string>
+    <string name="preferences_notifications_title">Notifications</string>
 </resources>

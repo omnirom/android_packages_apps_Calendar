@@ -23,17 +23,18 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.SwitchPreference;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.text.format.DateFormat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.TimePicker;
+
+import androidx.preference.SwitchPreference;
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
+import androidx.preference.Preference.OnPreferenceChangeListener;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 public class OtherPreferences extends PreferenceFragment  implements OnPreferenceChangeListener{
     private static final String TAG = "CalendarOtherPreferences";
@@ -88,8 +89,7 @@ public class OtherPreferences extends PreferenceFragment  implements OnPreferenc
     }
 
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         PreferenceManager manager = getPreferenceManager();
         manager.setSharedPreferencesName(SHARED_PREFS_NAME);
         SharedPreferences prefs = manager.getSharedPreferences();
@@ -149,7 +149,7 @@ public class OtherPreferences extends PreferenceFragment  implements OnPreferenc
     }
 
     @Override
-    public boolean onPreferenceTreeClick(PreferenceScreen screen, Preference preference) {
+    public boolean onPreferenceTreeClick(Preference preference) {
         if (preference == mCopyDb) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setComponent(new ComponentName("com.android.providers.calendar",
@@ -170,7 +170,7 @@ public class OtherPreferences extends PreferenceFragment  implements OnPreferenc
                 Log.v(TAG, "not null");
             }
         } else {
-            return super.onPreferenceTreeClick(screen, preference);
+            return super.onPreferenceTreeClick(preference);
         }
         return true;
     }

@@ -136,6 +136,7 @@
     <color name="recurrence_bubble_color_disabled">#FFCCCCCC</color>
 
     <color name="accent">#3F51B5</color>
+    <color name="accent_light">#9ca1be</color>
     <color name="primary_color">@color/material_grey_50</color>
     <color name="primary_dark_color">@color/material_grey_50</color>
     <color name="month_focus_month_bgcolor">#FFFFFFFF</color>

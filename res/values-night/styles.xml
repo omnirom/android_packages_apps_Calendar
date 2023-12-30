@@ -31,6 +31,9 @@
         <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
         <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
         <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
+        <item name="preferenceTheme">@style/Omni.PreferenceTheme</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
+        <item name="android:textAppearanceListItem">@style/Omni.PreferenceTitle</item>
     </style>
 
     <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material">
@@ -50,6 +53,7 @@
         <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
         <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
         <item name="android:actionBarPopupTheme">@style/CalendarTheme.PopupMenu</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
     </style>
 
     <style name="CalendarTheme.WithDarkActionBar" parent="@android:style/Theme.Material">
@@ -68,6 +72,7 @@
         <item name="android:datePickerDialogTheme">@style/DatePickerDialog</item>
         <item name="android:dialogTheme">@style/CalendarTheme.Dialog</item>
         <item name="android:alertDialogTheme">@style/CalendarTheme.AlertDialog</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
     </style>
 
     <style name="TimePicker" parent="@android:style/Widget.Material.TimePicker">

@@ -117,6 +117,9 @@
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
+        <item name="preferenceTheme">@style/Omni.PreferenceTheme</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
+        <item name="android:textAppearanceListItem">@style/Omni.PreferenceTitle</item>
     </style>
 
     <style name="CalendarTheme.WithActionBar" parent="@android:style/Theme.Material.Light">
@@ -131,6 +134,7 @@
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
     </style>
 
     <style name="CalendarTheme.WithDarkActionBar" parent="@android:style/Theme.Material.Light.DarkActionBar">
@@ -145,6 +149,7 @@
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:navigationBarColor">@color/primary_color</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
     </style>
     
     <style name="SearchResultTitle" parent="@android:style/TextAppearance.Material.SearchResult.Title">

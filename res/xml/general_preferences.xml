@@ -58,25 +58,11 @@
     <PreferenceCategory
         android:key="preferences_alerts_category"
         android:title="@string/preferences_reminder_title">
-        <SwitchPreference
-            android:key="preferences_alerts"
-            android:defaultValue="true"
-            android:title="@string/preferences_alerts_title" />
 
-        <RingtonePreference
-            android:layout="?android:attr/preferenceLayoutChild"
-            android:key="preferences_alerts_ringtone"
-            android:title="@string/preferences_alerts_ringtone_title"
-            android:ringtoneType="notification"
-            android:defaultValue="content://settings/system/notification_sound"
-            android:dependency="preferences_alerts" />
-
-        <SwitchPreference
-            android:layout="?android:attr/preferenceLayoutChild"
-            android:key="preferences_alerts_vibrate"
-            android:title="@string/preferences_alerts_vibrateWhen_title"
-            android:defaultValue="false"
-            android:dependency="preferences_alerts" />
+        <Preference
+            android:key="preferences_notifications"
+            android:title="@string/preferences_notifications_title"
+            android:persistent="false" />
 
         <ListPreference
             android:key="preferences_snooze_time"
@@ -84,8 +70,7 @@
             android:title="@string/preferences_snooze_time_title"
             android:entries="@array/preferences_snooze_time_labels"
             android:entryValues="@array/preferences_snooze_time_values"
-            android:dialogTitle="@string/preferences_snooze_time_title"
-            android:dependency="preferences_alerts" />
+            android:dialogTitle="@string/preferences_snooze_time_title" />
 
         <ListPreference
             android:key="preferences_default_reminder"
@@ -95,11 +80,10 @@
             android:entryValues="@array/preferences_default_reminder_values"
             android:dialogTitle="@string/preferences_default_reminder_dialog" />
 
-        <PreferenceScreen
-            android:key="preferences_quick_responses"
-            android:fragment="com.android.calendar.QuickResponseSettings"
-            android:title="@string/quick_response_settings"
-            android:summary="@string/quick_response_settings_summary" />
      </PreferenceCategory>
-
+     
+    <PreferenceCategory
+        android:key="preferences_quick_responses"
+        android:title="@string/quick_response_settings">
+     </PreferenceCategory>
 </PreferenceScreen>

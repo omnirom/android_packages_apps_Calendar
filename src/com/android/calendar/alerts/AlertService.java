@@ -275,17 +275,6 @@ public class AlertService extends Service {
             Log.d(TAG, "Beginning updateAlertNotification");
         }
 
-        if (!prefs.getBoolean(GeneralPreferences.KEY_ALERTS, true)) {
-            if (DEBUG) {
-                Log.d(TAG, "alert preference is OFF");
-            }
-
-            // If we shouldn't be showing notifications cancel any existing ones
-            // and return.
-            nm.cancelAll();
-            return true;
-        }
-
         // Sync CalendarAlerts with global dismiss cache before query it
         GlobalDismissManager.syncReceiverDismissCache(context);
         Cursor alertCursor = cr.query(CalendarAlerts.CONTENT_URI, ALERT_PROJECTION,
@@ -328,7 +317,6 @@ public class AlertService extends Service {
 
         long nextRefreshTime = Long.MAX_VALUE;
         int currentNotificationId = 1;
-        NotificationPrefs notificationPrefs = new NotificationPrefs(context, prefs);
 
         // If there are more high/medium priority events than we can show, bump some to
         // the low priority digest.
@@ -342,7 +330,7 @@ public class AlertService extends Service {
             NotificationInfo info = highPriorityEvents.get(i);
             String summaryText = AlertUtils.formatTimeLocation(context, info.startMillis,
                     info.allDay, info.location);
-            postNotification(info, summaryText, context, true, notificationPrefs, nm,
+            postNotification(info, summaryText, context, true, nm,
                     currentNotificationId++);
 
             // Keep concurrent events high priority (to appear higher in the notification list)
@@ -361,7 +349,7 @@ public class AlertService extends Service {
             // This requires constant refreshing to the message as time goes.
             String summaryText = AlertUtils.formatTimeLocation(context, info.startMillis,
                     info.allDay, info.location);
-            postNotification(info, summaryText, context, false, notificationPrefs, nm,
+            postNotification(info, summaryText, context, false, nm,
                     currentNotificationId++);
 
             // Refresh when concurrent event ends so it will drop into the expired digest.
@@ -387,12 +375,6 @@ public class AlertService extends Service {
                 notification = AlertReceiver.makeDigestNotification(context,
                     lowPriorityEvents, expiredDigestTitle, false);
             }
-
-            // Add options for a quiet update.
-            addNotificationOptions(notification, true, expiredDigestTitle,
-                    notificationPrefs.getDefaultVibrate(),
-                    notificationPrefs.getRingtoneAndSilence(),
-                    false); /* Do not show the LED for the expired events. */
 
             if (DEBUG) {
               Log.d(TAG, "Quietly posting digest alarm notification, numEvents:" + numLowPriority
@@ -861,7 +843,7 @@ public class AlertService extends Service {
     }
 
     private static void postNotification(NotificationInfo info, String summaryText,
-            Context context, boolean highPriority, NotificationPrefs prefs,
+            Context context, boolean highPriority,
             NotificationMgr notificationMgr, int notificationId) {
         int priorityVal = Notification.PRIORITY_DEFAULT;
         if (highPriority) {
@@ -872,10 +854,6 @@ public class AlertService extends Service {
         NotificationWrapper notification = AlertReceiver.makeExpandingNotification(context,
                 info.eventName, summaryText, info.description, info.startMillis,
                 info.endMillis, info.eventId, notificationId, priorityVal);
-
-        addNotificationOptions(notification, false, tickerText,
-                prefs.getDefaultVibrate(), prefs.getRingtoneAndSilence(),
-                true); /* Show the LED for these non-expired events */
 
         // Post the notification.
         notificationMgr.notify(notificationId, notification);
@@ -915,55 +893,6 @@ public class AlertService extends Service {
             this.eventId = eventId;
             this.newAlert = newAlert;
             this.allDay = allDay;
-        }
-    }
-
-    private static void addNotificationOptions(NotificationWrapper nw, boolean quietUpdate,
-            String tickerText, boolean defaultVibrate, String reminderRingtone,
-            boolean showLights) {
-        Notification notification = nw.mNotification;
-        if (showLights) {
-            notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-            notification.defaults |= Notification.DEFAULT_LIGHTS;
-        }
-
-        // Quietly update notification bar. Nothing new. Maybe something just got deleted.
-        if (!quietUpdate) {
-            // Flash ticker in status bar
-            if (!TextUtils.isEmpty(tickerText)) {
-                notification.tickerText = tickerText;
-            }
-
-            // Generate either a pop-up dialog, status bar notification, or
-            // neither. Pop-up dialog and status bar notification may include a
-            // sound, an alert, or both. A status bar notification also includes
-            // a toast.
-            if (defaultVibrate) {
-                notification.defaults |= Notification.DEFAULT_VIBRATE;
-            }
-
-            // Possibly generate a sound. If 'Silent' is chosen, the ringtone
-            // string will be empty.
-            notification.sound = TextUtils.isEmpty(reminderRingtone) ? null : Uri
-                    .parse(reminderRingtone);
-        }
-    }
-
-    /* package */ static class NotificationPrefs {
-        private Context context;
-        private SharedPreferences prefs;
-
-        NotificationPrefs(Context context, SharedPreferences prefs) {
-            this.context = context;
-            this.prefs = prefs;
-        }
-
-        private boolean getDefaultVibrate() {
-            return Utils.getDefaultVibrate(context, prefs);
-        }
-
-        private String getRingtoneAndSilence() {
-            return Utils.getRingTonePreference(context);
         }
     }
 
