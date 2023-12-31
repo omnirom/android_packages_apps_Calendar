@@ -16,13 +16,9 @@
 
 package com.android.calendar.event;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
+
 import android.content.AsyncQueryHandler;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -56,6 +52,13 @@ import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.DialogFragment;
 
 import com.android.calendar.AsyncQueryService;
 import com.android.calendar.CalendarController;
@@ -131,7 +134,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     private EventColorPickerDialog mColorPickerDialog;
 
-    private Activity mActivity;
     private final Done mOnDone = new Done();
 
     private boolean mSaveOnDetach = true;
@@ -443,7 +445,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mColorPickerDialog = (EventColorPickerDialog) getActivity().getFragmentManager()
+        mColorPickerDialog = (EventColorPickerDialog) getActivity().getSupportFragmentManager()
                 .findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
         if (mColorPickerDialog != null) {
             mColorPickerDialog.setOnColorSelectedListener(this);
@@ -540,7 +542,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity = activity;
 
         mHelper = new EditEventHelper(activity, null);
         mHandler = new QueryHandler(activity.getContentResolver());
@@ -553,7 +554,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.edit_event, null);
-        mView = new EditEventView(mActivity, view, mOnDone);
+        mView = new EditEventView(getActivity(), view, mOnDone);
         startQuery();
 
         return view;
@@ -648,7 +649,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             service.startUpdate(0, null, uri, values, null, null, 0);
         }
 
-        Toast.makeText(mActivity, R.string.saving_event, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), R.string.saving_event, Toast.LENGTH_SHORT).show();
     }
 
     protected void displayEditWhichDialog() {
@@ -674,13 +675,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 } else {
                     items = new CharSequence[3];
                 }
-                items[itemIndex++] = mActivity.getText(R.string.modify_event);
+                items[itemIndex++] = getActivity().getText(R.string.modify_event);
             }
-            items[itemIndex++] = mActivity.getText(R.string.modify_all);
+            items[itemIndex++] = getActivity().getText(R.string.modify_all);
 
             // Do one more check to make sure this remains at the end of the list
             if (!isFirstEventInSeries) {
-                items[itemIndex++] = mActivity.getText(R.string.modify_all_following);
+                items[itemIndex++] = getActivity().getText(R.string.modify_all_following);
             }
 
             // Display the modification dialog.
@@ -688,7 +689,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 mModifyDialog.dismiss();
                 mModifyDialog = null;
             }
-            mModifyDialog = new AlertDialog.Builder(mActivity).setTitle(R.string.edit_event_label)
+            mModifyDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.edit_event_label)
                     .setItems(items, new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -764,9 +765,9 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                         stringResource = R.string.creating_event;
                     }
                 }
-                Toast.makeText(mActivity, stringResource, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), stringResource, Toast.LENGTH_SHORT).show();
             } else if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null && isEmptyNewEvent()) {
-                Toast.makeText(mActivity, R.string.empty_event, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.empty_event, Toast.LENGTH_SHORT).show();
             }
 
             if ((mCode & Utils.DONE_DELETE) != 0 && mOriginalModel != null
@@ -786,7 +787,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                         break;
                 }
                 DeleteEventHelper deleteHelper = new DeleteEventHelper(
-                        mActivity, mActivity, !mIsReadOnly /* exitWhenDone */);
+                        getActivity(), getActivity(), !mIsReadOnly /* exitWhenDone */);
                 deleteHelper.delete(begin, end, mOriginalModel, which);
             }
 
@@ -794,13 +795,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 // This will exit the edit event screen, should be called
                 // when we want to return to the main calendar views
                 if ((mCode & Utils.DONE_SAVE) != 0) {
-                    if (mActivity != null) {
+                    if (getActivity() != null) {
                         long start = mModel.mStart;
                         long end = mModel.mEnd;
                         if (mModel.mAllDay) {
                             // For allday events we want to go to the day in the
                             // user's current tz
-                            String tz = Utils.getTimeZone(mActivity, null);
+                            String tz = Utils.getTimeZone(getActivity(), null);
                             Time t = new Time(Time.TIMEZONE_UTC);
                             t.set(start);
                             t.timezone = tz;
@@ -811,7 +812,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                             t.timezone = tz;
                             end = t.toMillis(true);
                         }
-                        CalendarController.getInstance(mActivity).launchViewEvent(-1, start, end,
+                        CalendarController.getInstance(getActivity()).launchViewEvent(-1, start, end,
                                 Attendees.ATTENDEE_STATUS_NONE);
                     }
                 }
@@ -823,7 +824,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
             // Hide a software keyboard so that user won't see it even after this Fragment's
             // disappearing.
-            final View focusedView = mActivity.getCurrentFocus();
+            final View focusedView = getActivity().getCurrentFocus();
             if (focusedView != null) {
                 mInputMethodManager.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
                 focusedView.clearFocus();
@@ -933,7 +934,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     }
 
     public void colorActivity(int color) {
-        ActionBar bar = getActivity().getActionBar();
+        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (bar != null) {
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }

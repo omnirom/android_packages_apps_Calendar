@@ -18,9 +18,6 @@ package com.android.calendar.agenda;
 
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.CalendarContract.Attendees;
@@ -33,6 +30,10 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.Adapter;
 import android.widget.HeaderViewListAdapter;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.calendar.CalendarController;
 import com.android.calendar.CalendarController.EventInfo;
@@ -79,14 +80,6 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     // bar.
     int  mJulianDayOnTop = -1;
 
-    private final Runnable mTZUpdater = new Runnable() {
-        @Override
-        public void run() {
-            mTimeZone = Utils.getTimeZone(getActivity(), this);
-            mTime.switchTimezone(mTimeZone);
-        }
-    };
-
     public AgendaFragment() {
         this(0, false);
     }
@@ -111,7 +104,7 @@ public class AgendaFragment extends Fragment implements CalendarController.Event
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mTimeZone = Utils.getTimeZone(activity, mTZUpdater);
+        mTimeZone = Utils.getTimeZone(activity, null);
         mTime.switchTimezone(mTimeZone);
         mActivity = activity;
         if (mOnAttachedInfo != null) {

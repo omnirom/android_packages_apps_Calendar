@@ -24,11 +24,8 @@ import static com.android.calendar.CalendarController.EVENT_EDIT_ON_LAUNCH;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.app.Service;
 import android.content.ActivityNotFoundException;
 import android.content.ContentProviderOperation;
@@ -94,6 +91,12 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.android.calendar.CalendarController.EventInfo;
 import com.android.calendar.CalendarController.EventType;
@@ -681,9 +684,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
         };
 
-        final Activity activity = getActivity();
-        mContext = activity;
-        mColorPickerDialog = (EventColorPickerDialog) activity.getFragmentManager()
+        mContext = getContext();
+        mColorPickerDialog = (EventColorPickerDialog) getActivity().getSupportFragmentManager()
                 .findFragmentByTag(COLOR_PICKER_DIALOG_TAG);
         if (mColorPickerDialog != null) {
             mColorPickerDialog.setOnColorSelectedListener(this);
@@ -2179,7 +2181,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     }
 
     private void colorActivity(int color) {
-        ActionBar bar = getActivity().getActionBar();
+        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (bar != null) {
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }

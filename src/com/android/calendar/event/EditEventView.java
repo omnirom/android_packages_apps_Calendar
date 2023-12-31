@@ -17,10 +17,7 @@
 package com.android.calendar.event;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.app.Service;
 import android.app.TimePickerDialog;
@@ -73,6 +70,10 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.TimePicker;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentActivity;
 
 import com.android.calendar.CalendarEventModel;
 import com.android.calendar.CalendarEventModel.Attendee;
@@ -160,7 +161,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
     private ProgressDialog mLoadingCalendarsDialog;
     private AlertDialog mNoCalendarsDialog;
-    private Activity mActivity;
+    private FragmentActivity mActivity;
     private EditDoneRunnable mDone;
     private View mView;
     private CalendarEventModel mModel;
@@ -528,7 +529,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             // TODO may be more efficient to serialize and pass in EventRecurrence
             b.putString(RecurrencePickerDialog.BUNDLE_RRULE, mRrule);
 
-            FragmentManager fm = mActivity.getFragmentManager();
+            FragmentManager fm = mActivity.getSupportFragmentManager();
             RecurrencePickerDialog rpd = (RecurrencePickerDialog) fm
                     .findFragmentByTag(FRAG_TAG_RECUR_PICKER);
             if (rpd != null) {
@@ -689,7 +690,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         return true;
     }
 
-    public EditEventView(Activity activity, View view, EditDoneRunnable done) {
+    public EditEventView(FragmentActivity activity, View view, EditDoneRunnable done) {
 
         mActivity = activity;
         mView = view;
@@ -811,7 +812,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         // Display loading screen
         setModel(null);
 
-        FragmentManager fm = activity.getFragmentManager();
+        FragmentManager fm = activity.getSupportFragmentManager();
         RecurrencePickerDialog rpd = (RecurrencePickerDialog) fm
                 .findFragmentByTag(FRAG_TAG_RECUR_PICKER);
         if (rpd != null) {

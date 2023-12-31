@@ -47,7 +47,7 @@
             android:hardwareAccelerated="true"
             android:requiredAccountType="*"
             android:usesCleartextTraffic="false"
-            android:theme="@style/CalendarTheme.WithActionBar" >
+            android:theme="@style/CalendarTheme.WithActionBarNew" >
 
         <meta-data android:name="com.google.android.backup.api_key"
                 android:value="AEdPqrEAAAAIM256oVOGnuSel5QKDpL8je_T65ZI8rFnDinssA" />
@@ -81,7 +81,6 @@
         <activity android:name="EventInfoActivity"
             android:parentActivityName="com.android.calendar.AllInOneActivity"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/CalendarTheme.WithDarkActionBar"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -98,7 +97,6 @@
 
         <activity android:name=".event.EditEventActivity"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/CalendarTheme.WithDarkActionBar"
             android:exported="false">
         </activity>
 
@@ -165,22 +163,11 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
 
-        <activity android:name="DeleteEventsActivity"
-            android:parentActivityName="com.android.calendar.AllInOneActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.android.calendar.AllInOneActivity" />
-        </activity>
-
         <provider android:name=".CalendarRecentSuggestionsProvider"
             android:exported="false"
             android:authorities="com.android.calendar.CalendarRecentSuggestionsProvider" />
 
         <!-- Declarations for alerts/reminders -->
-        <activity android:name=".alerts.AlertActivity" android:launchMode="singleInstance"
-             android:theme="@android:style/Theme.Material.Dialog" android:excludeFromRecents="true"
-            android:exported="false"/>
 
         <activity android:name=".alerts.QuickResponseActivity" android:launchMode="singleInstance"
              android:theme="@android:style/Theme.Material.Dialog" android:excludeFromRecents="true"

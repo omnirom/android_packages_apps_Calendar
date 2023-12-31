@@ -15,40 +15,39 @@
 -->
 
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
     <item
         android:id="@+id/action_today"
         android:title="@string/goto_today"
         android:icon="@drawable/today_icon"
-        android:showAsAction="always" />
-    <item
-        android:id="@+id/action_search"
+        app:showAsAction="always" />
+    <item android:id="@+id/action_search"
         android:title="@string/search"
         android:icon="@drawable/ic_menu_search"
-        android:showAsAction="never|collapseActionView"
-        android:actionViewClass="android.widget.SearchView"
-        android:imeOptions="actionSearch" />
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
         android:id="@+id/action_refresh"
         android:title="@string/calendar_refresh"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_goto"
         android:title="@string/go_to"
-        android:showAsAction="never"/>
+        app:showAsAction="never"/>
     <item
         android:id="@+id/action_select_visible_calendars"
         android:title="@string/menu_select_visible_calendars"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_filter"
         android:title="@string/calendar_filter"
-        android:showAsAction="never"
+        app:showAsAction="never"
         android:checkable="true" />
     <item
         android:id="@+id/action_settings"
         android:title="@string/menu_preferences"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_hide_controls"

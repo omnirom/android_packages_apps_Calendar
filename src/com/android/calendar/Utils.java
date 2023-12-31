@@ -57,7 +57,6 @@ import android.text.format.Time;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
-import android.widget.SearchView;
 
 import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.CalendarEventModel.ReminderEntry;
@@ -1228,19 +1227,6 @@ public class Utils {
     }
 
     /**
-     * This sets up a search view to use Calendar's search suggestions provider
-     * and to allow refining the search.
-     *
-     * @param view The {@link SearchView} to set up
-     * @param act The activity using the view
-     */
-    public static void setUpSearchView(SearchView view, Activity act) {
-        SearchManager searchManager = (SearchManager) act.getSystemService(Context.SEARCH_SERVICE);
-        view.setSearchableInfo(searchManager.getSearchableInfo(act.getComponentName()));
-        view.setQueryRefinementEnabled(true);
-    }
-
-    /**
      * Given a context and a time in millis since unix epoch figures out the
      * correct week of the year for that time.
      *
@@ -2134,14 +2120,10 @@ public class Utils {
         return imageBytes;
     }
 
-    public static ColorStateList getColorAttr(Context context, int attr) {
+    public static int getAttrColor(Context context, Integer attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        ColorStateList stateList = null;
-        try {
-            stateList = ta.getColorStateList(0);
-        } finally {
-            ta.recycle();
-        }
-        return stateList;
+        int color = ta.getColor(0, 0);
+        ta.recycle();
+        return color;
     }
 }

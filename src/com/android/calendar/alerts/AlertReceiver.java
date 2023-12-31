@@ -246,14 +246,6 @@ public class AlertReceiver extends BroadcastReceiver {
         return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private static PendingIntent createAlertActivityIntent(Context context) {
-        Intent clickIntent = new Intent();
-        clickIntent.setClass(context, AlertActivity.class);
-        clickIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return PendingIntent.getActivity(context, 0, clickIntent,
-                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
     public static NotificationWrapper makeBasicNotification(Context context, String title,
             String summaryText, long startMillis, long endMillis, long eventId,
             int notificationId, int priority) {
@@ -456,9 +448,6 @@ public class AlertReceiver extends BroadcastReceiver {
             startMillis[i] = notificationInfos.get(i).startMillis;
         }
 
-        // Create an intent triggered by clicking on the status icon that shows the alerts list.
-        PendingIntent pendingClickIntent = createAlertActivityIntent(context);
-
         // Create an intent triggered by dismissing the digest notification that clears all
         // expired events.
         Intent deleteIntent = new Intent();
@@ -476,7 +465,6 @@ public class AlertReceiver extends BroadcastReceiver {
         Notification.Builder notificationBuilder = new Notification.Builder(context, com.android.calendar.CalendarApplication.REMINDER_CHANNEL_ID);
         notificationBuilder.setContentText(digestTitle);
         notificationBuilder.setSmallIcon(R.drawable.stat_notify_calendar_multiple);
-        notificationBuilder.setContentIntent(pendingClickIntent);
         notificationBuilder.setDeleteIntent(pendingDeleteIntent);
         String nEventsStr = res.getQuantityString(R.plurals.Nevents, numEvents, numEvents);
         notificationBuilder.setContentTitle(nEventsStr);

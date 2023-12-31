@@ -31,7 +31,6 @@
     <color name="today_highlight_color">@color/accent</color>
 
     <!-- The app wide background color -->
-    <color name="background_color">@color/material_grey_300</color>
     <color name="event_background">#ffc3d9ff</color>
     <color name="panel_text_foreground">#ffffffff</color>
     <color name="calendar_event_text_color">#ffFFFFFF</color>
@@ -45,7 +44,6 @@
     
     <color name="calendar_future_bg_color">@color/material_grey_200</color>
     <color name="calendar_hour_label">#FF000000</color>
-    <color name="calendar_border_background">@color/material_grey_50</color>
     <color name="calendar_past_bg_color">@color/material_grey_50</color>
     <color name="calendar_past_text_color">#FF808080</color>
     
@@ -72,10 +70,9 @@
     <color name="month_sunday">#FF000000</color>
     <color name="month_other_month_day_number">#ff939497</color>
 
-    <color name="month_focus_bgcolor">@color/material_grey_50</color>
+    <color name="month_focus_bgcolor">@color/material_grey_200</color>
     <color name="month_selected_week_bgcolor">#FFDDDDDD</color>
     <color name="month_today_bgcolor">@color/accent</color>
-    <color name="month_bgcolor">@color/material_grey_300</color>
 
     <color name="month_dna_conflict_time_color">#FF333333</color>
 
@@ -138,7 +135,6 @@
     <color name="accent">#3F51B5</color>
     <color name="accent_light">#9ca1be</color>
     <color name="primary_color">@color/material_grey_50</color>
-    <color name="primary_dark_color">@color/material_grey_50</color>
     <color name="month_focus_month_bgcolor">#FFFFFFFF</color>
     <color name="floating_action_button_icon_color">#ffffff</color>
 

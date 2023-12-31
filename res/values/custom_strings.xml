@@ -50,4 +50,5 @@
     <string name="notification_channel_refresh">Refresh</string>
     <string name="notification_channel_reminder">Reminders</string>
     <string name="preferences_notifications_title">Notifications</string>
+    <string name="preferences_show_week_num_summary">In month view</string>
 </resources>

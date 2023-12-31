@@ -23,7 +23,8 @@
         <SwitchPreference
             android:key="preferences_show_week_num"
             android:defaultValue="false"
-            android:title="@string/preferences_show_week_num_title" />
+            android:title="@string/preferences_show_week_num_title"
+            android:summary="@string/preferences_show_week_num_summary"/>
         <ListPreference
             android:key="preferences_week_start_day"
             android:defaultValue="@string/preferences_week_start_day_default"

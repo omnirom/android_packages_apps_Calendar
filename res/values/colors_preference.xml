@@ -12,5 +12,5 @@
     <color name="omni_settings_track_on_color">@color/accent_light</color>
 
     <!-- Material next track off color-->
-    <color name="omni_settings_track_off_color">@color/text_shadow_color</color>
+    <color name="omni_settings_track_off_color">?android:attr/textColorSecondaryInverse</color>
 </resources>
