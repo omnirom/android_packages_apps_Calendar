@@ -25,16 +25,9 @@ import android.accounts.OperationCanceledException;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.LoaderManager;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -71,9 +64,18 @@ import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import android.widget.SearchView;
-import android.widget.SearchView.OnSuggestionListener;
 import android.widget.TextView;
+import android.widget.EditText;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBar.Tab;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.core.view.MenuItemCompat;
+import androidx.appcompat.widget.SearchView;
 
 import com.android.calendar.CalendarController.EventHandler;
 import com.android.calendar.CalendarController.EventInfo;
@@ -97,7 +99,7 @@ import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
 public class AllInOneActivity extends AbstractCalendarActivity implements EventHandler,
         SearchView.OnQueryTextListener, ActionBar.TabListener,
-        ActionBar.OnNavigationListener, OnSuggestionListener {
+        ActionBar.OnNavigationListener, SearchView.OnSuggestionListener {
     private static final String TAG = "AllInOneActivity";
     private static final boolean DEBUG = true;
     private static final String EVENT_INFO_FRAGMENT_TAG = "EventInfoFragment";
@@ -154,7 +156,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private ActionBar.Tab mAgendaTab;
     private ActionBar.Tab mThreeTab;
 
-    private SearchView mSearchView;
     private MenuItem mSearchMenu;
     private MenuItem mControlsMenu;
     private Menu mOptionsMenu;
@@ -454,7 +455,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
     private void createButtonsSpinner(int viewType) {
         mActionBarMenuSpinnerAdapter = new CalendarViewAdapter (this, viewType, true);
-        mActionBar = getActionBar();
+        mActionBar = getSupportActionBar();
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         mActionBar.setListNavigationCallbacks(mActionBarMenuSpinnerAdapter, this);
         switch (viewType) {
@@ -585,7 +586,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (mCurrentView == ViewType.EDIT) {
             outState.putLong(BUNDLE_KEY_EVENT_ID, mController.getEventId());
         } else if (mCurrentView == ViewType.AGENDA) {
-            FragmentManager fm = getFragmentManager();
+            FragmentManager fm = getSupportFragmentManager();
             Fragment f = fm.findFragmentById(R.id.main_pane);
             if (f instanceof AgendaFragment) {
                 outState.putLong(BUNDLE_KEY_EVENT_ID, ((AgendaFragment)f).getLastShowEventId());
@@ -638,7 +639,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         if (DEBUG) {
             Log.d(TAG, "Initializing to " + timeMillis + " for view " + viewType);
         }
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
         if (mShowCalendarControls) {
             Fragment miniMonthFrag = new MonthByWeekFragment(timeMillis, true);
@@ -731,12 +732,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         }
 
         mSearchMenu = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) mSearchMenu.getActionView();
-        if (mSearchView != null) {
-            Utils.setUpSearchView(mSearchView, this);
-            mSearchView.setOnQueryTextListener(this);
-            mSearchView.setOnSuggestionListener(this);
-        }
 
         // Hide the "show/hide controls" button if this is a phone
         // or the view type is "Month" or "Agenda".
@@ -842,12 +837,17 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             slideAnimation.start();
             return true;
         } else if (itemId == R.id.action_search) {
-            return false;
+            SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+            EditText searchPlate = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+            searchPlate.setHint(R.string.search);
+            searchView.setOnQueryTextListener(this);
+            searchView.setOnSuggestionListener(this);
+            return true;
         } else if (itemId == R.id.action_goto) {
             // Get the current time to display in Dialog.
             String timeZone = mTimeZone;
             GoToDialogFragment goToFrg = GoToDialogFragment.newInstance(timeZone);
-            goToFrg.show(getFragmentManager(), "goto");
+            goToFrg.show(getSupportFragmentManager(), "goto");
             return true;
         } else if (itemId == R.id.action_filter) {
             item.setChecked(!item.isChecked());
@@ -895,7 +895,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
         // Remove this when transition to and from month view looks fine.
         boolean doTransition = viewType != ViewType.MONTH && mCurrentView != ViewType.MONTH;
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         // Check if our previous view was an Agenda view
         // TODO remove this if framework ever supports nested fragments
         if (mCurrentView == ViewType.AGENDA) {
@@ -1094,9 +1094,7 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
 
             setMainPane(
                     null, R.id.main_pane, event.viewType, event.startTime.toMillis(false), false);
-            if (mSearchView != null) {
-                mSearchView.clearFocus();
-            }
+
             if (mShowCalendarControls) {
                 int animationSize = (mOrientation == Configuration.ORIENTATION_LANDSCAPE) ?
                         mControlsAnimateWidth : mControlsAnimateHeight;
@@ -1191,14 +1189,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             }
         }
         updateSecondaryTitleFields(displayTime);
-    }
-
-    // Needs to be in proguard whitelist
-    // Specified as listener via android:onClick in a layout xml
-    public void handleSelectSyncedCalendarsClicked(View v) {
-        mController.sendEvent(this, EventType.LAUNCH_SETTINGS, null, null, null, 0, 0,
-                CalendarController.EXTRA_GOTO_TIME, null,
-                null);
     }
 
     @Override

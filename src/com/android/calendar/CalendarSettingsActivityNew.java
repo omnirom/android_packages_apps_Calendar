@@ -40,7 +40,7 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.Preference.OnPreferenceClickListener;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
@@ -74,8 +74,8 @@ public class CalendarSettingsActivityNew extends AppCompatActivity {
     public boolean onOptionsItemSelected (MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (getFragmentManager().getBackStackEntryCount() > 0) {
-                    getFragmentManager().popBackStack();
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStack();
                 } else {
                     finish();
                 }
@@ -96,11 +96,11 @@ public class CalendarSettingsActivityNew extends AppCompatActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, new SettingsFragment()).commit();
     }
 
 
-    public static class SettingsFragment extends PreferenceFragment implements OnPreferenceChangeListener {
+    public static class SettingsFragment extends PreferenceFragmentCompat implements OnPreferenceChangeListener {
         public static final String KEY_GENERAL_PREFERENCES = "menu_general_preferences";
 
         private Account[] mAccounts;
@@ -129,7 +129,7 @@ public class CalendarSettingsActivityNew extends AppCompatActivity {
                                 Bundle args = new Bundle();
                                 args.putString(Calendars.ACCOUNT_NAME, acct.name);
                                 args.putString(Calendars.ACCOUNT_TYPE, acct.type);
-                                getActivity().getFragmentManager().beginTransaction().replace(R.id.content, new SelectCalendarsSyncFragment(args)).addToBackStack(null).commit();
+                                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content, new SelectCalendarsSyncFragment(args)).addToBackStack(null).commit();
                                 return true;
                             }
                         });
@@ -148,7 +148,7 @@ public class CalendarSettingsActivityNew extends AppCompatActivity {
         public boolean onPreferenceTreeClick(Preference preference) {
             final String key = preference.getKey();
             if (KEY_GENERAL_PREFERENCES.equals(key)) {
-                getActivity().getFragmentManager().beginTransaction().replace(R.id.content, new GeneralPreferences()).addToBackStack(null).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content, new GeneralPreferences()).addToBackStack(null).commit();
                 return true;
             } else {
                 return super.onPreferenceTreeClick(preference);

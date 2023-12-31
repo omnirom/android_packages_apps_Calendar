@@ -270,7 +270,7 @@ public class CalendarUtils {
          * @return The string value representing the time zone Calendar should display
          */
         public String getTimeZone(Context context, Runnable callback) {
-            if (!isPermissionEnabled(context)) {
+            if (context == null || !isPermissionEnabled(context)) {
                 return mUseHomeTZ ? mHomeTZ : Time.getCurrentTimezone();
             }
             synchronized (mTZCallbacks){

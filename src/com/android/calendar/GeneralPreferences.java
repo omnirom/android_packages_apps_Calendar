@@ -46,7 +46,7 @@ import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class GeneralPreferences extends PreferenceFragment implements OnPreferenceChangeListener {
+public class GeneralPreferences extends PreferenceFragmentCompat implements OnPreferenceChangeListener {
     // The name of the shared preferences file. This name must be maintained for historical
     // reasons, as it's what PreferenceManager assigned the first time the file was created.
     static final String SHARED_PREFS_NAME = "com.android.calendar_preferences";

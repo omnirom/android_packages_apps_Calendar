@@ -16,8 +16,6 @@
 
 package com.android.calendar.selectcalendars;
 
-import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.os.Bundle;
@@ -26,6 +24,10 @@ import android.provider.CalendarContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.calendar.AbstractCalendarActivity;
 import com.android.calendar.CalendarController;
@@ -59,13 +61,13 @@ public class SelectVisibleCalendarsActivity extends AbstractCalendarActivity {
         setContentView(R.layout.simple_frame_layout);
 
         mController = CalendarController.getInstance(this);
-        mFragment = (SelectVisibleCalendarsFragment) getFragmentManager().findFragmentById(
+        mFragment = (SelectVisibleCalendarsFragment) getSupportFragmentManager().findFragmentById(
                 R.id.main_frame);
 
         if (mFragment == null) {
             mFragment = new SelectVisibleCalendarsFragment(R.layout.calendar_sync_item);
 
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.main_frame, mFragment);
             ft.show(mFragment);
             ft.commit();
@@ -85,18 +87,9 @@ public class SelectVisibleCalendarsActivity extends AbstractCalendarActivity {
         getContentResolver().unregisterContentObserver(mObserver);
     }
 
-    // Needs to be in proguard whitelist
-    // Specified as listener via android:onClick in a layout xml
-    public void handleSelectSyncedCalendarsClicked(View v) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setClass(this, SelectSyncedCalendarsMultiAccountActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getActionBar()
+        getSupportActionBar()
                 .setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
         return true;
     }

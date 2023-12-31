@@ -18,14 +18,10 @@ package com.android.calendar.selectcalendars;
 
 import android.accounts.Account;
 import android.app.Activity;
-import android.app.ListFragment;
-import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -40,6 +36,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import androidx.fragment.app.ListFragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.loader.content.CursorLoader;
 
 import com.android.calendar.AsyncQueryService;
 import com.android.calendar.R;
@@ -111,9 +112,6 @@ public class SelectCalendarsSyncFragment extends ListFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Give some text to display if there is no data. In a real
-        // application this would come from a resource.
-        setEmptyText(getActivity().getText(R.string.no_syncable_calendars));
         // Prepare the loader. Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);

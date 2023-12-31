@@ -17,13 +17,8 @@
 package com.android.calendar.month;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.FragmentManager;
-import android.app.LoaderManager;
 import android.content.ContentUris;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.StateListDrawable;
@@ -46,6 +41,12 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentManager;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.loader.content.CursorLoader;
 
 import com.android.calendar.CalendarController;
 import com.android.calendar.CalendarController.EventInfo;
@@ -331,10 +332,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         super.onActivityCreated(savedInstanceState);
         mListView.setSelector(new StateListDrawable());
         mListView.setOnTouchListener(this);
-
-        if (!mIsMiniMonth) {
-            mListView.setBackgroundColor(getResources().getColor(R.color.month_bgcolor));
-        }
 
         // To get a smoother transition when showing this fragment, delay loading of events until
         // the fragment is expended fully and the calendar controls are gone.

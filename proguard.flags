@@ -6,10 +6,8 @@
   *** setControlsOffset(...);
 }
 -keepclassmembers class com.android.calendar.selectcalendars.SelectVisibleCalendarsActivity {
-  *** handleSelectSyncedCalendarsClicked(...);
 }
 -keepclassmembers class com.android.calendar.AllInOneActivity {
-  *** handleSelectSyncedCalendarsClicked(...);
 }
 -keepclassmembers class com.android.calendar.AsyncQueryService {
   *** setTestHandler(...);

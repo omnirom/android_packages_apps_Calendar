@@ -163,7 +163,6 @@ public class MonthWeekEventsView extends SimpleWeekView {
     protected int mEventChipOutlineColor = 0xFFFFFFFF;
     protected int mDaySeparatorInnerColor;
     protected int mTodayAnimateColor;
-    protected int mBorderBgColor;
 
     private boolean mAnimateToday;
     private int mAnimateTodayAlpha = 0;
@@ -329,7 +328,6 @@ public class MonthWeekEventsView extends SimpleWeekView {
         TEXT_SIZE_EVENT_TITLE = res.getDimensionPixelSize(R.dimen.text_size_event_title);
         TEXT_SIZE_MONTH_NUMBER = res.getDimensionPixelSize(R.dimen.text_size_month_number);
         GRID_LINE_WIDTH = (int) res.getDimensionPixelSize(R.dimen.calendar_grid_line_with);
-        mBorderBgColor = res.getColor(R.color.calendar_border_background);
         SPACING_WEEK_NUMBER = (int) res.getDimensionPixelSize(R.dimen.week_num_width);
     }
 
@@ -637,13 +635,6 @@ public class MonthWeekEventsView extends SimpleWeekView {
             p.setColor(mMonthBGTodayColor);
             r.left = computeDayLeftPosition(mTodayIndex);
             r.right = computeDayLeftPosition(mTodayIndex + 1);
-            canvas.drawRect(r, p);
-        }
-        if (mShowWeekNum) {
-            p.setColor(mBorderBgColor);
-            p.setStyle(Style.FILL);
-            r.left = 0;
-            r.right = SPACING_WEEK_NUMBER + mPadding;
             canvas.drawRect(r, p);
         }
     }

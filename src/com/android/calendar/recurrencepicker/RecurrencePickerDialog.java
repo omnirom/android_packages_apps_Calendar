@@ -18,7 +18,6 @@ package com.android.calendar.recurrencepicker;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -55,6 +54,8 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.fragment.app.DialogFragment;
 
 import com.android.calendar.R;
 import com.android.calendar.Utils;

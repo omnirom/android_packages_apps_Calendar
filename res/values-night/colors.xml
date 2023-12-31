@@ -24,10 +24,7 @@
     <color name="omni_text1">#ffffffff</color>
     <color name="omni_text2">#ffeeeeee</color>
     <color name="omni_text3">#eeeeeeee</color>
-    <color name="primary_dark_color">@color/omni_color2</color>
     <color name="primary_color">@color/omni_color1</color>
-    <!--<color name="accent">@color/omni_color5</color>-->
-    <color name="background_color">@color/omni_color1</color>
     <color name="event_background">@color/omni_color2</color>
     <color name="calendar_grid_line_color">#20ffffff</color>
     <color name="calendar_grid_scroll_line_color">#60ffffff</color>
@@ -37,10 +34,9 @@
     <color name="calendar_hidden">@color/omni_text3</color>
     <color name="calendar_secondary_visible">@color/omni_text2</color>
     <color name="calendar_secondary_hidden">@color/omni_text3</color>
-    <color name="calendar_future_bg_color">@color/omni_color2</color>
+    <color name="calendar_future_bg_color">@color/omni_color1</color>
     <color name="calendar_hour_label">@color/omni_text1</color>
-    <color name="calendar_border_background">@color/omni_color1</color>
-    <color name="calendar_past_bg_color">@color/omni_color1</color>
+    <color name="calendar_past_bg_color">@color/omni_color2</color>
     <color name="calendar_past_text_color">@color/omni_text3</color>
     <color name="week_today">@android:color/white</color>
     <color name="week_today_bg">@color/accent</color>
@@ -62,7 +58,6 @@
     <color name="month_focus_bgcolor">@color/omni_color1</color>
     <color name="month_selected_week_bgcolor">@color/omni_color2</color>
     <color name="month_today_bgcolor">@color/accent</color>
-    <color name="month_bgcolor">@color/omni_color2</color>
 
     <color name="agenda_text_color">@color/omni_text1</color>
     <color name="agenda_item_not_selected">#00000000</color>

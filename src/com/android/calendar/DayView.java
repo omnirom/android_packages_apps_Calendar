@@ -449,7 +449,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private static int mFutureBgColor;
     private static int mPastBgColor;
     private static int mTodayBgColor;
-    private static int mBorderBgColor;
     private static int mNewEventHintColor;
     private static int mCalendarHourLabelColor;
     private static int mMoreAlldayEventsTextAlpha = MORE_EVENTS_MAX_ALPHA;
@@ -803,7 +802,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         mWeek_normal = mResources.getColor(R.color.week_normal);
         mFutureBgColor = mResources.getColor(R.color.calendar_future_bg_color);
         mPastBgColor = mResources.getColor(R.color.calendar_past_bg_color);
-        mBorderBgColor = mResources.getColor(R.color.calendar_border_background);
         mCalendarGridAreaSelected= mResources.getColor(R.color.calendar_grid_area_selected);
         mCalendarGridScrollLineColor = mResources.getColor(R.color.calendar_grid_scroll_line_color);
         mCalendarGridLineColor = mResources
@@ -2036,22 +2034,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
     private void drawAllDayHighlights(Rect r, Canvas canvas, Paint p) {
         if (mFutureBgColor != 0) {
-            // First, color the labels area light gray
-            r.top = 0;
-            r.bottom = DAY_HEADER_HEIGHT;
-            r.left = 0;
-            r.right = mViewWidth;
-            p.setColor(mBorderBgColor);
-            p.setStyle(Style.FILL);
-            canvas.drawRect(r, p);
-
-            // and the area that says All day
-            r.top = DAY_HEADER_HEIGHT;
-            r.bottom = mFirstCell - 1;
-            r.left = 0;
-            r.right = mHoursWidth;
-            canvas.drawRect(r, p);
-
             int startIndex = -1;
 
             int todayIndex = mTodayJulianDay - mFirstJulianDay;
@@ -2344,21 +2326,13 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
      */
     private void drawBgColors(Rect r, Canvas canvas, Paint p) {
         int todayIndex = mTodayJulianDay - mFirstJulianDay;
-        // Draw the hours background color
-        r.top = mDestRect.top;
-        r.bottom = mDestRect.bottom;
-        r.left = 0;
-        r.right = mHoursWidth;
-        p.setColor(mBorderBgColor);
-        p.setStyle(Style.FILL);
-        p.setAntiAlias(false);
-        canvas.drawRect(r, p);
-
         // past
         r.left = computeDayLeftPosition(0) + 1;
         r.right = computeDayLeftPosition(mNumDays);
         r.top = mDestRect.top;
         r.bottom = mDestRect.bottom;
+        p.setStyle(Style.FILL);
+        p.setAntiAlias(false);
         p.setColor(mPastBgColor);
         canvas.drawRect(r, p);
 

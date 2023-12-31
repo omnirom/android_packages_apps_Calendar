@@ -19,8 +19,7 @@
     android:layout_height="48dip"
     android:singleLine="true"
     android:textSize="16sp"
-    android:textColor="@color/calendar_view_switch_menu_text_color"
     android:gravity="left|center_vertical"
     android:paddingRight="8dip"
     android:paddingLeft="12dip"
-    android:background="@color/primary_color" />
+    android:textColor="?android:attr/textColorPrimary"/>

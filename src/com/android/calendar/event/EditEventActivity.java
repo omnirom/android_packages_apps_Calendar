@@ -20,8 +20,6 @@ import static android.provider.CalendarContract.EXTRA_EVENT_ALL_DAY;
 import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
-import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,6 +27,10 @@ import android.provider.CalendarContract.Events;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.MenuItem;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.calendar.AbstractCalendarActivity;
 import com.android.calendar.CalendarController;
@@ -70,11 +72,11 @@ public class EditEventActivity extends AbstractCalendarActivity {
         mEventColorInitialized = getIntent().hasExtra(EXTRA_EVENT_COLOR);
         mEventColor = getIntent().getIntExtra(EXTRA_EVENT_COLOR, -1);
 
-        mEditFragment = (EditEventFragment) getFragmentManager().findFragmentById(R.id.main_frame);
+        mEditFragment = (EditEventFragment) getSupportFragmentManager().findFragmentById(R.id.main_frame);
 
-        getActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
-        getActionBar().setElevation(0);
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel_white);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
+        getSupportActionBar().setElevation(0);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel_white);
 
         if (mEditFragment == null) {
             Intent intent = null;
@@ -88,7 +90,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
             mEditFragment.mShowModifyDialogOnLaunch = getIntent().getBooleanExtra(
                     CalendarController.EVENT_EDIT_ON_LAUNCH, false);
 
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.main_frame, mEditFragment);
             ft.show(mEditFragment);
             ft.commit();

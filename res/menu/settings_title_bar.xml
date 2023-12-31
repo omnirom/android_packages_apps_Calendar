@@ -15,10 +15,11 @@
 -->
 
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_add_account"
         android:alphabeticShortcut="a"
         android:title="@string/add_account"
         android:icon="@drawable/ic_menu_add_white"
-        android:showAsAction="always" />
+        app:showAsAction="always" />
 </menu>

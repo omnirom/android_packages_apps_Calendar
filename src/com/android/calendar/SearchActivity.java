@@ -18,10 +18,7 @@ package com.android.calendar;
 import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -39,14 +36,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
-import android.widget.SearchView;
+import android.widget.EditText;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.view.MenuItemCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.calendar.CalendarController.EventInfo;
 import com.android.calendar.CalendarController.EventType;
 import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.agenda.AgendaFragment;
 
-public class SearchActivity extends Activity implements CalendarController.EventHandler,
+public class SearchActivity extends AppCompatActivity implements CalendarController.EventHandler,
         SearchView.OnQueryTextListener, OnActionExpandListener {
 
     private static final String TAG = SearchActivity.class.getSimpleName();
@@ -117,7 +121,7 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
         mContentResolver = getContentResolver();
 
-        getActionBar().setDisplayOptions(0,
+        getSupportActionBar().setDisplayOptions(0,
                     ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
 
         // Must be the first to register because this activity can modify the
@@ -161,7 +165,7 @@ public class SearchActivity extends Activity implements CalendarController.Event
     }
 
     private void initFragments(long timeMillis, String query) {
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
         AgendaFragment searchResultsFragment = new AgendaFragment(timeMillis, true);
@@ -176,7 +180,7 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
     private void showEventInfo(EventInfo event) {
         if (mShowEventDetailsWithAgenda) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();
 
             mEventInfoFragment = new EventInfoFragment(this, event.id,
@@ -230,18 +234,13 @@ public class SearchActivity extends Activity implements CalendarController.Event
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.search_title_bar, menu);
 
-        // replace the default top layer drawable of the today icon with a custom drawable
-        // that shows the day of the month of today
-        MenuItem menuItem = menu.findItem(R.id.action_today);
-        LayerDrawable icon = (LayerDrawable) menuItem.getIcon();
-        Utils.setTodayIcon(
-                icon, this, Utils.getTimeZone(SearchActivity.this, mTimeChangesUpdater));
-
         MenuItem item = menu.findItem(R.id.action_search);
         item.expandActionView();
         item.setOnActionExpandListener(this);
-        mSearchView = (SearchView) item.getActionView();
-        Utils.setUpSearchView(mSearchView, this);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(item);
+        EditText searchPlate = (EditText) mSearchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchPlate.setHint(R.string.search);
+        mSearchView.setOnQueryTextListener(this);
         mSearchView.setQuery(mQuery, false);
         mSearchView.clearFocus();
 
@@ -250,24 +249,7 @@ public class SearchActivity extends Activity implements CalendarController.Event
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Time t = null;
-        final int itemId = item.getItemId();
-        if (itemId == R.id.action_today) {
-            t = new Time();
-            t.setToNow();
-            mController.sendEvent(this, EventType.GO_TO, t, null, -1, ViewType.CURRENT);
-            return true;
-        } else if (itemId == R.id.action_search) {
-            return false;
-        } else if (itemId == R.id.action_settings) {
-            mController.sendEvent(this, EventType.LAUNCH_SETTINGS, null, null, 0, 0);
-            return true;
-        } else if (itemId == android.R.id.home) {
-            Utils.returnToCalendarHome(this);
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     @Override
