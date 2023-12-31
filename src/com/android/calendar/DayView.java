@@ -20,7 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -77,6 +76,8 @@ import android.widget.OverScroller;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.android.calendar.CalendarController.EventType;
 import com.android.calendar.CalendarController.ViewType;

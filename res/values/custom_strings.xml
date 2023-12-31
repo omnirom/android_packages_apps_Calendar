@@ -51,4 +51,6 @@
     <string name="notification_channel_reminder">Reminders</string>
     <string name="preferences_notifications_title">Notifications</string>
     <string name="preferences_show_week_num_summary">In month view</string>
+    <string name="event_color_set_to_default_new">Default</string>
+    <string name="menu_select_visible_calendars_new">"Calendars"</string>
 </resources>

@@ -52,12 +52,8 @@
     <dimen name="recurrence_bubble_size">48dp</dimen>
 
     <!-- Floating action button -->
-    <dimen name="floating_action_button_height">56dp</dimen>
-    <dimen name="floating_action_button_width">56dp</dimen>
-    <dimen name="floating_action_button_radius">28dp</dimen>
-    <dimen name="floating_action_button_translation_z">2dp</dimen>
-    <dimen name="floating_action_button_margin_right">16dp</dimen>
-    <dimen name="floating_action_button_margin_bottom">16dp</dimen>
+    <dimen name="floating_action_button_margin_right">24dp</dimen>
+    <dimen name="floating_action_button_margin_bottom">24dp</dimen>
 
     <dimen name="curent_time_line_width">2dip</dimen>
     <!-- size of event title font in month view  -->

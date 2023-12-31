@@ -151,7 +151,19 @@
         <item name="actionBarStyle">@style/CalendarTheme.Toolbar</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
-    
+
+    <style name="TimePicker" parent="@android:style/Widget.Material.Light.TimePicker">
+        <item name="android:headerBackground">@color/accent</item>
+    </style>
+
+    <style name="DatePicker" parent="@android:style/Widget.Material.Light.DatePicker">
+        <item name="android:headerBackground">@color/accent</item>
+    </style>
+
+    <style name="PrimaryFloatingActionButtonStyle" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/accent</item>
+    </style>
+
     <style name="SearchResultTitle" parent="@android:style/TextAppearance.Material.SearchResult.Title">
         <item name="android:textSize">16sp</item>
     </style>

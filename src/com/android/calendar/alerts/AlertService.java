@@ -45,7 +45,6 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.android.calendar.GeneralPreferences;
-import com.android.calendar.OtherPreferences;
 import com.android.calendar.R;
 import com.android.calendar.Utils;
 
@@ -534,43 +533,7 @@ public class AlertService extends Service {
             final long currentTime, ArrayList<NotificationInfo> highPriorityEvents,
             ArrayList<NotificationInfo> mediumPriorityEvents,
             ArrayList<NotificationInfo> lowPriorityEvents) {
-        // Experimental reminder setting to only remind for events that have
-        // been responded to with "yes" or "maybe".
-        String skipRemindersPref = Utils.getSharedPreference(context,
-                OtherPreferences.KEY_OTHER_REMINDERS_RESPONDED, "");
-        // Skip no-response events if the "Skip Reminders" preference has the second option,
-        // "If declined or not responded", is selected.
-        // Note that by default, the first option will be selected, so this will be false.
-        boolean remindRespondedOnly = skipRemindersPref.equals(context.getResources().
-                getStringArray(R.array.preferences_skip_reminders_values)[1]);
-        // Experimental reminder setting to silence reminders when they are
-        // during the pre-defined quiet hours.
-        boolean useQuietHours = Utils.getSharedPreference(context,
-                OtherPreferences.KEY_OTHER_QUIET_HOURS, false);
-        // Note that the start time may be either before or after the end time,
-        // depending on whether quiet hours cross through midnight.
-        int quietHoursStartHour =
-                OtherPreferences.QUIET_HOURS_DEFAULT_START_HOUR;
-        int quietHoursStartMinute =
-                OtherPreferences.QUIET_HOURS_DEFAULT_START_MINUTE;
-        int quietHoursEndHour =
-                OtherPreferences.QUIET_HOURS_DEFAULT_END_HOUR;
-        int quietHoursEndMinute =
-                OtherPreferences.QUIET_HOURS_DEFAULT_END_MINUTE;
-        if (useQuietHours) {
-            quietHoursStartHour = Utils.getSharedPreference(context,
-                    OtherPreferences.KEY_OTHER_QUIET_HOURS_START_HOUR,
-                    OtherPreferences.QUIET_HOURS_DEFAULT_START_HOUR);
-            quietHoursStartMinute = Utils.getSharedPreference(context,
-                    OtherPreferences.KEY_OTHER_QUIET_HOURS_START_MINUTE,
-                    OtherPreferences.QUIET_HOURS_DEFAULT_START_MINUTE);
-            quietHoursEndHour = Utils.getSharedPreference(context,
-                    OtherPreferences.KEY_OTHER_QUIET_HOURS_END_HOUR,
-                    OtherPreferences.QUIET_HOURS_DEFAULT_END_HOUR);
-            quietHoursEndMinute = Utils.getSharedPreference(context,
-                    OtherPreferences.KEY_OTHER_QUIET_HOURS_END_MINUTE,
-                    OtherPreferences.QUIET_HOURS_DEFAULT_END_MINUTE);
-        }
+
         Time time = new Time();
 
         ContentResolver cr = context.getContentResolver();
@@ -594,45 +557,7 @@ public class AlertService extends Service {
                         .withAppendedId(CalendarAlerts.CONTENT_URI, alertId);
                 final long alarmTime = alertCursor.getLong(ALERT_INDEX_ALARM_TIME);
                 boolean forceQuiet = false;
-                if (useQuietHours) {
-                    // Quiet hours have been set.
-                    time.set(alarmTime);
-                    // Check whether the alarm will fire after the quiet hours
-                    // start time and/or before the quiet hours end time.
-                    boolean alarmAfterQuietHoursStart =
-                            (time.hour > quietHoursStartHour ||
-                                    (time.hour == quietHoursStartHour
-                                    && time.minute >= quietHoursStartMinute));
-                    boolean alarmBeforeQuietHoursEnd =
-                            (time.hour < quietHoursEndHour ||
-                                    (time.hour == quietHoursEndHour
-                                    && time.minute <= quietHoursEndMinute));
-                    // Check if quiet hours crosses through midnight, iff:
-                    // start hour is after end hour, or
-                    // start hour is equal to end hour, and start minute is
-                    // after end minute.
-                    // i.e. 22:30 - 06:45; 12:45 - 12:00
-                    //      01:05 - 10:30; 05:00 - 05:30
-                    boolean quietHoursCrossesMidnight =
-                            quietHoursStartHour > quietHoursEndHour ||
-                            (quietHoursStartHour == quietHoursEndHour
-                            && quietHoursStartMinute > quietHoursEndMinute);
-                    if (quietHoursCrossesMidnight) {
-                        // Quiet hours crosses midnight. Alarm should be quiet
-                        // if it's after start time OR before end time.
-                        if (alarmAfterQuietHoursStart ||
-                                alarmBeforeQuietHoursEnd) {
-                            forceQuiet = true;
-                        }
-                    } else {
-                        // Quiet hours doesn't cross midnight. Alarm should be
-                        // quiet if it's after start time AND before end time.
-                        if (alarmAfterQuietHoursStart &&
-                                alarmBeforeQuietHoursEnd) {
-                            forceQuiet = true;
-                        }
-                    }
-                }
+
                 int state = alertCursor.getInt(ALERT_INDEX_STATE);
                 final boolean allDay = alertCursor.getInt(ALERT_INDEX_ALL_DAY) != 0;
 
@@ -684,12 +609,6 @@ public class AlertService extends Service {
 
                 // Remove declined events
                 boolean sendAlert = !declined;
-                // Check for experimental reminder settings.
-                if (remindRespondedOnly) {
-                    // If the experimental setting is turned on, then only send
-                    // the alert if you've responded to the event.
-                    sendAlert = sendAlert && responded;
-                }
                 if (sendAlert) {
                     if (state == CalendarAlerts.STATE_SCHEDULED || newAlertOverride) {
                         newState = CalendarAlerts.STATE_FIRED;

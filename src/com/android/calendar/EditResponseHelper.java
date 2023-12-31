@@ -17,10 +17,11 @@
 package com.android.calendar;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.widget.Button;
+
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * A helper class for editing the response to an invitation when the invitation

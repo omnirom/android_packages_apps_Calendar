@@ -26,7 +26,6 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
@@ -70,12 +69,13 @@ import android.widget.EditText;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBar.Tab;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.core.view.MenuItemCompat;
-import androidx.appcompat.widget.SearchView;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.android.calendar.CalendarController.EventHandler;
 import com.android.calendar.CalendarController.EventInfo;
@@ -541,6 +541,11 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         invalidateOptionsMenu();
 
         mCalIntentReceiver = Utils.setTimeChangesReceiver(this, mTimeChangesUpdater);
+        updateLightStatusBarStatus();
+    }
+
+    private void updateLightStatusBarStatus() {
+        WindowInsetsControllerCompat insetController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());        insetController.setAppearanceLightStatusBars(!getResources().getConfiguration().isNightModeActive());
     }
 
     @Override

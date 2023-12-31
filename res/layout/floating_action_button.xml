@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,18 +14,16 @@
 -->
 
 <!-- This expects to be included inside a RelativeLayout -->
-<ImageButton
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="@dimen/floating_action_button_width"
-        android:layout_height="@dimen/floating_action_button_height"
-        android:layout_marginEnd="@dimen/floating_action_button_margin_right"
-        android:layout_marginBottom="@dimen/floating_action_button_margin_bottom"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:onClick="createEvent"
-        android:id="@+id/floating_action_button"
-        android:background="@drawable/floating_action_button"
-        android:tint="@color/floating_action_button_icon_color"
-        android:contentDescription="@string/event_create"
-        android:elevation="@dimen/floating_action_button_translation_z"
-        android:src="@drawable/ic_compose_white"/>
+<com.google.android.material.floatingactionbutton.FloatingActionButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/floating_action_button"
+    style="@style/PrimaryFloatingActionButtonStyle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginEnd="@dimen/floating_action_button_margin_right"
+    android:layout_marginBottom="@dimen/floating_action_button_margin_bottom"
+    android:contentDescription="@string/event_create"
+    android:onClick="createEvent"
+    app:srcCompat="@drawable/ic_compose_white" />

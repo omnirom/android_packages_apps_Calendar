@@ -122,6 +122,7 @@ public class ColorPickerDialog extends DialogFragment implements OnColorSelected
         mAlertDialog = new AlertDialog.Builder(activity)
             .setTitle(mTitleResId)
             .setView(view)
+            .setNegativeButton(android.R.string.cancel, null)
             .create();
 
         return mAlertDialog;

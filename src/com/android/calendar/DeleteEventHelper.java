@@ -20,7 +20,6 @@ import com.android.calendar.event.EditEventHelper;
 import com.android.calendarcommon2.EventRecurrence;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -35,6 +34,8 @@ import android.text.TextUtils;
 import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.Arrays;

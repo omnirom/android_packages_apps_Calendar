@@ -21,29 +21,12 @@
 
     <style name="TimePicker" parent="@android:style/Widget.Material.TimePicker">
         <item name="android:headerBackground">@color/accent</item>
-        <item name="android:numbersBackgroundColor">@color/omni_color2</item>
-        <item name="android:background">@color/omni_color1</item>
-        <item name="android:numbersTextColor">?android:attr/textColorPrimary</item>
         <item name="android:numbersInnerTextColor">?android:attr/textColorSecondary</item>
+        <item name="android:numbersBackgroundColor">@color/material_grey_900</item>
     </style>
 
     <style name="DatePicker" parent="@android:style/Widget.Material.DatePicker">
         <item name="android:headerBackground">@color/accent</item>
-        <item name="android:background">@color/omni_color1</item>
     </style>
 
-    <style name="DatePickerDialog" parent="@android:style/Theme.Material.Dialog">
-        <item name="android:colorBackground">@color/omni_color1</item>
-        <item name="android:colorAccent">@color/accent</item>
-        <item name="android:datePickerStyle">@style/DatePicker</item>
-        <item name="android:calendarViewStyle">@style/CalendarViewStyle</item>
-    </style>
-
-    <style name="CalendarViewStyle" parent="@android:style/Widget.Material.CalendarView">
-        <item name="android:dateTextAppearance">@style/TextAppearance.CalendarViewStyle.Day</item>
-    </style>
-
-    <style name="TextAppearance.CalendarViewStyle.Day" parent="@android:style/TextAppearance.Material.Caption">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
 </resources>

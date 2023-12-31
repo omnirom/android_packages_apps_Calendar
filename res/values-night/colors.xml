@@ -15,12 +15,9 @@
 -->
 
 <resources>
-    <color name="material_blue_grey_800">#ff37474f</color>
-    <color name="material_blue_grey_900">#ff263238</color>
-    <color name="material_blue_grey_950">#ff21272b</color>
     <color name="omni_color3">#80eeeeee</color>
-    <color name="omni_color1">@color/material_blue_grey_900</color>
-    <color name="omni_color2">@color/material_blue_grey_950</color>
+    <color name="omni_color1">@color/material_grey_850</color>
+    <color name="omni_color2">@color/material_grey_900</color>
     <color name="omni_text1">#ffffffff</color>
     <color name="omni_text2">#ffeeeeee</color>
     <color name="omni_text3">#eeeeeeee</color>

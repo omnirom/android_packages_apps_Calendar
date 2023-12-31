@@ -68,7 +68,7 @@ public class EventColorPickerDialog extends ColorPickerDialog {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         mAlertDialog.setButton(DialogInterface.BUTTON_NEUTRAL,
-                getActivity().getString(R.string.event_color_set_to_default),
+                getActivity().getString(R.string.event_color_set_to_default_new),
                 new DialogInterface.OnClickListener() {
 
                     @Override

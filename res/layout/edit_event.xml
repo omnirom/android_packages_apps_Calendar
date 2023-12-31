@@ -44,7 +44,8 @@
         android:id="@+id/calendar_selector_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dip"
+        android:paddingStart="20dip"
+        android:paddingEnd="15dip"
         android:paddingBottom="5dip"
         android:paddingTop="5dip"
         android:orientation="horizontal">
@@ -58,9 +59,8 @@
             android:gravity="center_vertical"
             style="@style/TextAppearance.Calendar_Spinner" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/change_color_new_event"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -75,7 +75,8 @@
         android:id="@+id/calendar_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dip"
+        android:paddingStart="20dip"
+        android:paddingEnd="15dip"
         android:paddingBottom="5dip"
         android:paddingTop="5dip"
         android:orientation="horizontal" >
@@ -90,9 +91,8 @@
             android:gravity="center_vertical"
             android:textColor="#FFFFFFFF" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/change_color_existing_event"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"

@@ -97,6 +97,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.android.calendar.CalendarController.EventInfo;
 import com.android.calendar.CalendarController.EventType;
@@ -2187,6 +2188,13 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
         Window window = getActivity().getWindow();
         window.setStatusBarColor(color);
+        showDarkStatusbar();
+    }
+
+    private void showDarkStatusbar() {
+        Window window = getActivity().getWindow();
+        WindowInsetsControllerCompat insetController = new WindowInsetsControllerCompat(window, window.getDecorView());
+        insetController.setAppearanceLightStatusBars(false);
     }
 
     public void doSave() {

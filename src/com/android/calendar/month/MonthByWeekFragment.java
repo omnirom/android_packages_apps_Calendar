@@ -55,7 +55,6 @@ import com.android.calendar.CalendarController.ViewType;
 import com.android.calendar.Event;
 import com.android.calendar.R;
 import com.android.calendar.Utils;
-import com.android.calendar.event.CreateEventDialogFragment;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,8 +66,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         OnTouchListener {
     private static final String TAG = "MonthFragment";
     private static final String TAG_EVENT_DIALOG = "event_dialog";
-
-    private CreateEventDialogFragment mEventDialog;
 
     // Selection and selection args for adding event queries
     private static final String WHERE_CALENDARS_VISIBLE = Calendars.VISIBLE + "=1";
@@ -129,13 +126,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
                         }
                     }
                 }).show().setCanceledOnTouchOutside(true);
-                
-            /*final FragmentManager manager = getFragmentManager();
-            if (manager != null) {
-                Time day = (Time) msg.obj;
-                mEventDialog = new CreateEventDialogFragment(day);
-                mEventDialog.show(manager, TAG_EVENT_DIALOG);
-            }*/
         }
     };
 

@@ -58,7 +58,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.DialogFragment;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.android.calendar.AsyncQueryService;
 import com.android.calendar.CalendarController;
@@ -940,42 +940,16 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         }
         Window window = getActivity().getWindow();
         window.setStatusBarColor(color);
+        showDarkStatusbar();
     }
 
-    public void revert() {
-        // TODO only show if modified
-        //CancelEditDialogFragment.show(this);
+    private void showDarkStatusbar() {
+        Window window = getActivity().getWindow();
+        WindowInsetsControllerCompat insetController = new WindowInsetsControllerCompat(window, window.getDecorView());        insetController.setAppearanceLightStatusBars(false);
     }
 
     public void doRevert() {
         mOnDone.setDoneCode(Utils.DONE_REVERT | Utils.DONE_EXIT);
         mOnDone.run();
-    }
-
-    public static class CancelEditDialogFragment extends DialogFragment {
-
-        public static void show(EditEventFragment fragment) {
-            CancelEditDialogFragment dialog = new CancelEditDialogFragment();
-            dialog.setTargetFragment(fragment, 0);
-            dialog.show(fragment.getFragmentManager(), "cancelEditor");
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                    .setIconAttribute(android.R.attr.alertDialogIcon)
-                    .setMessage(R.string.cancel_confirmation_dialog_message)
-                    .setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int whichButton) {
-                                ((EditEventFragment) getTargetFragment()).doRevert();
-                            }
-                        }
-                    )
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .create();
-            return dialog;
-        }
     }
 }

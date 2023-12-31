@@ -18,7 +18,6 @@ package com.android.calendar;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;

@@ -17,10 +17,8 @@
 package com.android.calendar.event;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.Service;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -78,12 +76,14 @@ import androidx.fragment.app.FragmentActivity;
 import com.android.calendar.CalendarEventModel;
 import com.android.calendar.CalendarEventModel.Attendee;
 import com.android.calendar.CalendarEventModel.ReminderEntry;
+import com.android.calendar.DatePickerDialog;
 import com.android.calendar.EmailAddressAdapter;
 import com.android.calendar.EventInfoFragment;
 import com.android.calendar.EventRecurrenceFormatter;
 import com.android.calendar.GeneralPreferences;
 import com.android.calendar.R;
 import com.android.calendar.RecipientAdapter;
+import com.android.calendar.TimePickerDialog;
 import com.android.calendar.Utils;
 import com.android.calendar.event.EditEventHelper.EditDoneRunnable;
 import com.android.calendar.recurrencepicker.RecurrencePickerDialog;
@@ -1076,6 +1076,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         }
         if (model.isEventColorInitialized()) {
             updateHeadlineColor(model, model.getEventColor());
+            ((EditEventActivity) mActivity).colorActivity(model.getEventColor());
         }
 
         populateWhen();

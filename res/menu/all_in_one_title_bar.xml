@@ -37,7 +37,7 @@
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_select_visible_calendars"
-        android:title="@string/menu_select_visible_calendars"
+        android:title="@string/menu_select_visible_calendars_new"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_filter"

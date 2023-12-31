@@ -75,7 +75,6 @@ public class EditEventActivity extends AbstractCalendarActivity {
         mEditFragment = (EditEventFragment) getSupportFragmentManager().findFragmentById(R.id.main_frame);
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
-        getSupportActionBar().setElevation(0);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_cancel_white);
 
         if (mEditFragment == null) {

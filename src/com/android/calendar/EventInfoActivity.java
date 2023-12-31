@@ -132,6 +132,7 @@ public class EventInfoActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_home_white);
 
         // Create a new fragment if none exists
         if (mInfoFragment == null) {

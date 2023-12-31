@@ -17,7 +17,7 @@
 package com.android.calendar.recurrencepicker;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -55,9 +55,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.android.calendar.R;
+import com.android.calendar.DatePickerDialog;
 import com.android.calendar.Utils;
 import com.android.calendarcommon2.EventRecurrence;
 
@@ -253,7 +255,6 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
                 s.append(Integer.toString(value));
             }
 
-            updateDoneButtonState();
             onChange(value);
         }
 
@@ -344,9 +345,8 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
     private RadioButton mRepeatMonthlyByNthDayOfMonth;
     private String mMonthRepeatByDayOfWeekStr;
 
-    private Button mDone;
-
     private OnRecurrenceSetListener mRecurrenceSetListener;
+    private boolean mEndCountHasFocus;
 
     public RecurrencePickerDialog() {
     }
@@ -615,19 +615,15 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        mRecurrence.wkst = EventRecurrence.timeDay2Day(Utils.getFirstDayOfWeek(getActivity()));
-
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-        boolean endCountHasFocus = false;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
         if (savedInstanceState != null) {
             RecurrenceModel m = (RecurrenceModel) savedInstanceState.get(BUNDLE_MODEL);
             if (m != null) {
                 mModel = m;
             }
-            endCountHasFocus = savedInstanceState.getBoolean(BUNDLE_END_COUNT_HAS_FOCUS);
+            mEndCountHasFocus = savedInstanceState.getBoolean(BUNDLE_END_COUNT_HAS_FOCUS);
         } else {
             Bundle b = getArguments();
             if (b != null) {
@@ -656,9 +652,25 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
                 mTime.setToNow();
             }
         }
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        View view = doCreateView();
+        
+        return new AlertDialog.Builder(getActivity())
+                .setView(view)
+                .setPositiveButton(android.R.string.ok,
+                        (dialogInterface, i) -> this.apply())
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+     }
+
+    private View doCreateView() {
+        mRecurrence.wkst = EventRecurrence.timeDay2Day(Utils.getFirstDayOfWeek(getActivity()));
 
         mResources = getResources();
-        mView = inflater.inflate(R.layout.recurrencepicker, container, true);
+        mView = getLayoutInflater().inflate(R.layout.recurrencepicker, null);
 
         final Activity activity = getActivity();
         final Configuration config = activity.getResources().getConfiguration();
@@ -823,19 +835,9 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
         mRepeatMonthlyByNthDayOfMonth = (RadioButton) mView
                 .findViewById(R.id.repeatMonthlyByNthDayOfMonth);
 
-        mDone = (Button) mView.findViewById(R.id.done);
-        mDone.setOnClickListener(this);
-        Button cancel = (Button) mView.findViewById(R.id.cancel);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
-
         togglePickerOptions();
         updateDialog();
-        if (endCountHasFocus) {
+        if (mEndCountHasFocus) {
             mEndCount.requestFocus();
         }
         return mView;
@@ -874,38 +876,6 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
                 button.setEnabled(true);
             }
         }
-        updateDoneButtonState();
-    }
-
-    private void updateDoneButtonState() {
-        if (mModel.recurrenceState == RecurrenceModel.STATE_NO_RECURRENCE) {
-            mDone.setEnabled(true);
-            return;
-        }
-
-        if (mInterval.getText().toString().length() == 0) {
-            mDone.setEnabled(false);
-            return;
-        }
-
-        if (mEndCount.getVisibility() == View.VISIBLE &&
-                mEndCount.getText().toString().length() == 0) {
-            mDone.setEnabled(false);
-            return;
-        }
-
-        if (mModel.freq == RecurrenceModel.FREQ_WEEKLY) {
-            for (CompoundButton b : mWeekByDayButtons) {
-                if (b.isChecked()) {
-                    mDone.setEnabled(true);
-                    return;
-                }
-            }
-            mDone.setEnabled(false);
-            return;
-        }
-
-        mDone.setEnabled(true);
     }
 
     @Override
@@ -980,7 +950,6 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
                 break;
         }
         updateIntervalText();
-        updateDoneButtonState();
 
         mEndSpinner.setSelection(mModel.end);
         if (mModel.end == RecurrenceModel.END_BY_DATE) {
@@ -1159,17 +1128,18 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
             mDatePickerDialog = new DatePickerDialog(getActivity(), this,
                     mModel.endDate.year, mModel.endDate.month, mModel.endDate.monthDay);
             mDatePickerDialog.show();
-        } else if (mDone == v) {
-            String rrule;
-            if (mModel.recurrenceState == RecurrenceModel.STATE_NO_RECURRENCE) {
-                rrule = null;
-            } else {
-                copyModelToEventRecurrence(mModel, mRecurrence);
-                rrule = mRecurrence.toString();
-            }
-            mRecurrenceSetListener.onRecurrenceSet(rrule);
-            dismiss();
         }
+    }
+
+    private void apply() {
+        String rrule;
+        if (mModel.recurrenceState == RecurrenceModel.STATE_NO_RECURRENCE) {
+            rrule = null;
+        } else {
+            copyModelToEventRecurrence(mModel, mRecurrence);
+            rrule = mRecurrence.toString();
+        }
+        mRecurrenceSetListener.onRecurrenceSet(rrule);
     }
 
     @Override
@@ -1189,7 +1159,6 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
         final String END_DATE_MARKER = "%s";
         final String END_COUNT_MARKER = "%d";
 
-        private LayoutInflater mInflater;
         private int mItemResourceId;
         private int mTextResourceId;
         private ArrayList<CharSequence> mStrings;
@@ -1204,7 +1173,6 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
         public EndSpinnerAdapter(Context context, ArrayList<CharSequence> strings,
                 int itemResourceId, int textResourceId) {
             super(context, itemResourceId, strings);
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mItemResourceId = itemResourceId;
             mTextResourceId = textResourceId;
             mStrings = strings;
@@ -1242,7 +1210,7 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
             View v;
             // Check if we can recycle the view
             if (convertView == null) {
-                v = mInflater.inflate(mTextResourceId, parent, false);
+                v = getLayoutInflater().inflate(mTextResourceId, parent, false);
             } else {
                 v = convertView;
             }
@@ -1308,7 +1276,7 @@ public class RecurrencePickerDialog extends DialogFragment implements OnItemSele
             View v;
             // Check if we can recycle the view
             if (convertView == null) {
-                v = mInflater.inflate(mItemResourceId, parent, false);
+                v = getLayoutInflater().inflate(mItemResourceId, parent, false);
             } else {
                 v = convertView;
             }
