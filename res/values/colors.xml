@@ -47,8 +47,6 @@
     <color name="calendar_past_bg_color">@color/material_grey_50</color>
     <color name="calendar_past_text_color">#FF808080</color>
     
-    <color name="calendar_date_banner_background">#FFEEEEEE</color>
-
     <color name="calendar_grid_area_selected">@color/accent</color>
 
     <color name="calendar_grid_line_color">#FFCCCCCC</color>

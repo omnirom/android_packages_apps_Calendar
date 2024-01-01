@@ -43,10 +43,6 @@
             android:defaultValue="false"
             android:title="@string/preferences_use_home_tz_title"
             android:summary="@string/preferences_use_home_tz_descrip" />
-        <PreferenceScreen
-            android:key="preferences_clear_search_history"
-            android:title="@string/preferences_clear_search_history_title"
-            android:summary="@string/preferences_clear_search_history_summary" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_widget_title">
         <ListPreference

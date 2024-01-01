@@ -22,10 +22,11 @@
         android:title="@string/goto_today"
         android:icon="@drawable/today_icon"
         app:showAsAction="always" />
-    <item android:id="@+id/action_search"
+    <item
+        android:id="@+id/action_search"
         android:title="@string/search"
         android:icon="@drawable/ic_menu_search"
-        app:showAsAction="always|collapseActionView"
+        app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
         android:id="@+id/action_refresh"
@@ -48,10 +49,4 @@
         android:id="@+id/action_settings"
         android:title="@string/menu_preferences"
         app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_hide_controls"
-        android:alphabeticShortcut="h"
-        android:showAsAction="never"
-        android:title="@string/hide_controls" />
 </menu>

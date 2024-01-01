@@ -55,7 +55,6 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     protected int mQueryDays;
     protected boolean mIsMiniMonth = true;
     protected int mOrientation = Configuration.ORIENTATION_LANDSCAPE;
-    private final boolean mShowAgendaWithMonth;
 
     protected ArrayList<ArrayList<Event>> mEventDayList = new ArrayList<ArrayList<Event>>();
     protected ArrayList<Event> mEvents = null;
@@ -86,7 +85,6 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
         if (params.containsKey(WEEK_PARAMS_IS_MINI)) {
             mIsMiniMonth = params.get(WEEK_PARAMS_IS_MINI) != 0;
         }
-        mShowAgendaWithMonth = Utils.getConfigBool(context, R.bool.show_agenda_with_month);
         ViewConfiguration vc = ViewConfiguration.get(context);
         mOnDownDelay = ViewConfiguration.getTapTimeout();
         mMovedPixelToCancel = vc.getScaledTouchSlop();
@@ -287,7 +285,7 @@ public class MonthByWeekAdapter extends SimpleWeeksAdapter {
     @Override
     protected void onDayTapped(Time day) {
         setDayParameters(day);
-         if (mShowAgendaWithMonth || mIsMiniMonth) {
+         if (mIsMiniMonth) {
             // If agenda view is visible with month view , refresh the views
             // with the selected day's info
             mController.sendEvent(mContext, EventType.GO_TO, day, day, -1,

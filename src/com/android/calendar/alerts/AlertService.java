@@ -163,17 +163,11 @@ public class AlertService extends Service {
         @Override
         public void cancel(int id) {
             mNm.cancel(id);
-            if (DEBUG) {
-                Log.d(TAG, "cancel notification id = " + id);
-            }
         }
 
         @Override
         public void notify(int id, NotificationWrapper nw) {
             mNm.notify(id, nw.mNotification);
-            if (DEBUG) {
-                Log.d(TAG, "notify notification id = " + id);
-            }
         }
     }
 
@@ -212,6 +206,8 @@ public class AlertService extends Service {
                 action.equals(AlertReceiver.EVENT_REMINDER_APP_ACTION) ||
                 action.equals(Intent.ACTION_LOCALE_CHANGED)) {
 
+            Utils.refreshCalendars(this);
+            
             // b/7652098: Add a delay after the provider-changed event before refreshing
             // notifications to help issue with the unbundled app installed on HTC having
             // stale notifications.
@@ -223,13 +219,6 @@ public class AlertService extends Service {
                 }
             }
 
-            // If we dismissed a notification for a new event, then we need to sync the cache when
-            // an ACTION_PROVIDER_CHANGED event has been sent. Unfortunately, the data provider
-            // has a delay of CalendarProvider2.SYNC_UPDATE_BROADCAST_TIMEOUT_MILLIS (ie. 30 sec.)
-            // until it notifies us that the sync adapter has finished.
-            // TODO(psliwowski): Find a quicker way to be notified when the data provider has the
-            // syncId for event.
-            GlobalDismissManager.syncSenderDismissCache(this);
             updateAlertNotification(this);
         } else if (action.equals(Intent.ACTION_TIME_CHANGED) ||
                 action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
@@ -274,8 +263,6 @@ public class AlertService extends Service {
             Log.d(TAG, "Beginning updateAlertNotification");
         }
 
-        // Sync CalendarAlerts with global dismiss cache before query it
-        GlobalDismissManager.syncReceiverDismissCache(context);
         Cursor alertCursor = cr.query(CalendarAlerts.CONTENT_URI, ALERT_PROJECTION,
                 (ACTIVE_ALERTS_SELECTION + currentTime), ACTIVE_ALERTS_SELECTION_ARGS,
                 ACTIVE_ALERTS_SORT);
@@ -725,8 +712,6 @@ public class AlertService extends Service {
                     lowPriorityEvents.add(newInfo);
                 }
             }
-            // TODO(psliwowski): move this to account synchronization
-            GlobalDismissManager.processEventIds(context, eventIds.keySet());
         } finally {
             if (alertCursor != null) {
                 alertCursor.close();

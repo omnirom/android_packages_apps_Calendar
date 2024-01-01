@@ -97,7 +97,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     private boolean mUserScrolled = false;
 
     private int mEventsLoadingDelay;
-    private boolean mShowCalendarControls;
     private boolean mIsDetached;
     private CharSequence[] mLongPressItems;
     private String mLongPressTitle;
@@ -258,12 +257,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         ViewConfiguration viewConfig = ViewConfiguration.get(activity);
         mMinimumTwoMonthFlingVelocity = viewConfig.getScaledMaximumFlingVelocity() / 2;
         Resources res = activity.getResources();
-        mShowCalendarControls = Utils.getConfigBool(activity, R.bool.show_calendar_controls);
-        // Synchronized the loading time of the month's events with the animation of the
-        // calendar controls.
-        if (mShowCalendarControls) {
-            mEventsLoadingDelay = res.getInteger(R.integer.calendar_controls_animation_time);
-        }
         mShowDetailsInMonth = res.getBoolean(R.bool.show_details_in_month);
         mLongPressItems = new CharSequence[] {
             res.getString(R.string.new_event_dialog_option)
@@ -275,11 +268,6 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
     public void onDetach() {
         mIsDetached = true;
         super.onDetach();
-        if (mShowCalendarControls) {
-            if (mListView != null) {
-                mListView.removeCallbacks(mLoadingRunnable);
-            }
-        }
     }
 
     @Override
@@ -322,14 +310,7 @@ public class MonthByWeekFragment extends SimpleDayPickerFragment implements
         super.onActivityCreated(savedInstanceState);
         mListView.setSelector(new StateListDrawable());
         mListView.setOnTouchListener(this);
-
-        // To get a smoother transition when showing this fragment, delay loading of events until
-        // the fragment is expended fully and the calendar controls are gone.
-        if (mShowCalendarControls) {
-            mListView.postDelayed(mLoadingRunnable, mEventsLoadingDelay);
-        } else {
-            mLoader = (CursorLoader) getLoaderManager().initLoader(0, null, this);
-        }
+        mLoader = (CursorLoader) getLoaderManager().initLoader(0, null, this);
         mAdapter.setListView(mListView);
     }
 

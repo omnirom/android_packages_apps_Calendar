@@ -19,6 +19,7 @@ package com.android.calendar;
 import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -1662,6 +1663,21 @@ public class Utils {
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         extras.putBoolean("metafeedonly", true);
         ContentResolver.requestSync(account, Calendars.CONTENT_URI.getAuthority(), extras);
+    }
+
+    public static void refreshCalendars(Context context) {
+        Account[] accounts = AccountManager.get(context).getAccounts();
+        String authority = Calendars.CONTENT_URI.getAuthority();
+        for (int i = 0; i < accounts.length; i++) {
+            if (ContentResolver.getIsSyncable(accounts[i], authority) > 0) {
+                if (DEBUG) {
+                    Log.d(TAG, "Refreshing calendars for: " + accounts[i]);
+                }
+                Bundle extras = new Bundle();
+                extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+                ContentResolver.requestSync(accounts[i], authority, extras);
+            }
+        }
     }
 
     /**

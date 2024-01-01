@@ -89,17 +89,16 @@ public class DismissAlarmsService extends IntentService {
             selection = CalendarAlerts.STATE + "=" + CalendarAlerts.STATE_FIRED;
         }
 
-        GlobalDismissManager.dismissGlobally(getApplicationContext(), alarmIds);
+        if (DISMISS_ACTION.equals(intent.getAction()) && notificationId != -1) {
+            GlobalDismissManager.dismissGlobally(getApplicationContext(), alarmIds);
 
-        ContentResolver resolver = getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put(PROJECTION[COLUMN_INDEX_STATE], CalendarAlerts.STATE_DISMISSED);
-        resolver.update(uri, values, selection, null);
+            ContentResolver resolver = getContentResolver();
+            ContentValues values = new ContentValues();
+            values.put(PROJECTION[COLUMN_INDEX_STATE], CalendarAlerts.STATE_DISMISSED);
+            resolver.update(uri, values, selection, null);
 
-        // Remove from notification bar.
-        if (notificationId != -1) {
-            NotificationManager nm =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            // Remove from notification bar.
+            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             nm.cancel(notificationId);
         }
 

@@ -139,11 +139,6 @@
             android:theme="@style/Settings"
             android:exported="false" />
 
-        <activity android:name=".selectcalendars.SelectSyncedCalendarsMultiAccountActivity"
-            android:label="@string/select_synced_calendars_title"
-            android:theme="@style/Settings"
-            android:exported="false" />
-
         <activity android:name="CalendarSettingsActivityNew" android:label="@string/preferences_title"
             android:theme="@style/Settings"
             android:exported="false"/>
@@ -168,14 +163,13 @@
             android:authorities="com.android.calendar.CalendarRecentSuggestionsProvider" />
 
         <!-- Declarations for alerts/reminders -->
-
         <activity android:name=".alerts.QuickResponseActivity" android:launchMode="singleInstance"
              android:theme="@android:style/Theme.Material.Dialog" android:excludeFromRecents="true"
              android:label="@string/quick_response_dialog_title"
             android:exported="false"/>
 
         <receiver android:name=".alerts.AlertReceiver"
-                  android:exported="false" >
+                  android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
@@ -206,7 +200,7 @@
 
         <!-- Declarations for the widget -->
         <receiver android:name=".widget.CalendarAppWidgetProvider" android:label="@string/gadget_title"
-                  android:exported="false">
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.android.calendar.APPWIDGET_UPDATE" />
@@ -215,7 +209,7 @@
         </receiver>
 
         <receiver android:name=".widget.CalendarAppWidgetService$CalendarFactory"
-                  android:exported="false">
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
                 <action android:name="android.intent.action.DATE_CHANGED"/>

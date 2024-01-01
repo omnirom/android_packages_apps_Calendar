@@ -32,8 +32,6 @@ import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.calendar.CloudNotificationBackplane;
-import com.android.calendar.ExtensionsFactory;
 import com.android.calendar.R;
 
 import java.io.IOException;
@@ -171,7 +169,6 @@ public class GlobalDismissManager extends BroadcastReceiver {
     private static final String TAG = "GlobalDismissManager";
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
     private static final String GLOBAL_DISMISS_MANAGER_PREFS = "com.android.calendar.alerts.GDM";
-    private static final String ACCOUNT_KEY = "known_accounts";
 
     static final String[] EVENT_PROJECTION = new String[] {
             Events._ID,
@@ -198,142 +195,6 @@ public class GlobalDismissManager extends BroadcastReceiver {
             new HashMap<GlobalDismissId, Long>();
     private static HashMap<LocalDismissId, Long> sSenderDismissCache =
             new HashMap<LocalDismissId, Long>();
-
-    /**
-     * Look for unknown accounts in a set of events and associate with them.
-     * Must not be called on main thread.
-     *
-     * @param context application context
-     * @param eventIds IDs for events that have posted notifications that may be
-     *            dismissed.
-     */
-    public static void processEventIds(Context context, Set<Long> eventIds) {
-        final String senderId = context.getResources().getString(R.string.notification_sender_id);
-        if (senderId == null || senderId.isEmpty()) {
-            Log.i(TAG, "no sender configured");
-            return;
-        }
-        Map<Long, Long> eventsToCalendars = lookupEventToCalendarMap(context, eventIds);
-        Set<Long> calendars = new LinkedHashSet<Long>();
-        calendars.addAll(eventsToCalendars.values());
-        if (calendars.isEmpty()) {
-            Log.d(TAG, "found no calendars for events");
-            return;
-        }
-
-        Map<Long, Pair<String, String>> calendarsToAccounts =
-                lookupCalendarToAccountMap(context, calendars);
-
-        if (calendarsToAccounts.isEmpty()) {
-            Log.d(TAG, "found no accounts for calendars");
-            return;
-        }
-
-        // filter out non-google accounts (necessary?)
-        Set<String> accounts = new LinkedHashSet<String>();
-        for (Pair<String, String> accountPair : calendarsToAccounts.values()) {
-            if (GOOGLE_ACCOUNT_TYPE.equals(accountPair.first)) {
-                accounts.add(accountPair.second);
-            }
-        }
-
-        // filter out accounts we already know about
-        SharedPreferences prefs =
-                context.getSharedPreferences(GLOBAL_DISMISS_MANAGER_PREFS,
-                        Context.MODE_PRIVATE);
-        Set<String> existingAccounts = prefs.getStringSet(ACCOUNT_KEY,
-                new HashSet<String>());
-        accounts.removeAll(existingAccounts);
-
-        if (accounts.isEmpty()) {
-            // nothing to do, we've already registered all the accounts.
-            return;
-        }
-
-        // subscribe to remaining accounts
-        CloudNotificationBackplane cnb =
-                ExtensionsFactory.getCloudNotificationBackplane();
-        if (cnb.open(context)) {
-            for (String account : accounts) {
-                try {
-                    if (cnb.subscribeToGroup(senderId, account, account)) {
-                        existingAccounts.add(account);
-                    }
-                } catch (IOException e) {
-                    // Try again, next time the account triggers and alert.
-                }
-            }
-            cnb.close();
-            prefs.edit()
-            .putStringSet(ACCOUNT_KEY, existingAccounts)
-            .commit();
-        }
-    }
-
-    /**
-     * Some events don't have a global sync_id when they are dismissed. We need to wait
-     * until the data provider is updated before we can send the global dismiss message.
-     */
-    public static void syncSenderDismissCache(Context context) {
-        final String senderId = context.getResources().getString(R.string.notification_sender_id);
-        if ("".equals(senderId)) {
-            Log.i(TAG, "no sender configured");
-            return;
-        }
-        CloudNotificationBackplane cnb = ExtensionsFactory.getCloudNotificationBackplane();
-        if (!cnb.open(context)) {
-            Log.i(TAG, "Unable to open cloud notification backplane");
-
-        }
-
-        long currentTime = System.currentTimeMillis();
-        ContentResolver resolver = context.getContentResolver();
-        synchronized (sSenderDismissCache) {
-            Iterator<Map.Entry<LocalDismissId, Long>> it =
-                    sSenderDismissCache.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<LocalDismissId, Long> entry = it.next();
-                LocalDismissId dismissId = entry.getKey();
-
-                Uri uri = asSync(Events.CONTENT_URI, dismissId.mAccountType,
-                        dismissId.mAccountName);
-                Cursor cursor = resolver.query(uri, EVENT_SYNC_PROJECTION,
-                        Events._ID + " = " + dismissId.mEventId, null, null);
-                try {
-                    cursor.moveToPosition(-1);
-                    int sync_id_idx = cursor.getColumnIndex(Events._SYNC_ID);
-                    if (sync_id_idx != -1) {
-                        while (cursor.moveToNext()) {
-                            String syncId = cursor.getString(sync_id_idx);
-                            if (syncId != null) {
-                                Bundle data = new Bundle();
-                                long startTime = dismissId.mStartTime;
-                                String accountName = dismissId.mAccountName;
-                                data.putString(SYNC_ID, syncId);
-                                data.putString(START_TIME, Long.toString(startTime));
-                                data.putString(ACCOUNT_NAME, accountName);
-                                try {
-                                    cnb.send(accountName, syncId + ":" + startTime, data);
-                                    it.remove();
-                                } catch (IOException e) {
-                                    // If we couldn't send, then leave dismissal in cache
-                                }
-                            }
-                        }
-                    }
-                } finally {
-                    cursor.close();
-                }
-
-                // Remove old dismissals from cache after a certain time period
-                if (currentTime - entry.getValue() > TIME_TO_LIVE) {
-                    it.remove();
-                }
-            }
-        }
-
-        cnb.close();
-    }
 
     /**
      * Globally dismiss notifications that are backed by the same events.
@@ -377,7 +238,6 @@ public class GlobalDismissManager extends BroadcastReceiver {
                 }
             }
         }
-        syncSenderDismissCache(context);
     }
 
     private static Uri asSync(Uri uri, String accountType, String account) {

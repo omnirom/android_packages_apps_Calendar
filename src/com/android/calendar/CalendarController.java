@@ -812,18 +812,7 @@ public class CalendarController {
      * Performs a manual refresh of calendars in all known accounts.
      */
     public void refreshCalendars() {
-        Account[] accounts = AccountManager.get(mContext).getAccounts();
-        Log.d(TAG, "Refreshing " + accounts.length + " accounts");
-
-        String authority = Calendars.CONTENT_URI.getAuthority();
-        for (int i = 0; i < accounts.length; i++) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Refreshing calendars for: " + accounts[i]);
-            }
-            Bundle extras = new Bundle();
-            extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            ContentResolver.requestSync(accounts[i], authority, extras);
-        }
+        Utils.refreshCalendars(mContext);
     }
 
     // Forces the viewType. Should only be used for initialization.

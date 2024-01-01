@@ -68,13 +68,9 @@ public class GeneralPreferences extends PreferenceFragmentCompat implements OnPr
     public static final String KEY_DAYS_PER_WEEK = "preferences_days_per_week";
     public static final String KEY_SKIP_SETUP = "preferences_skip_setup";
 
-    public static final String KEY_CLEAR_SEARCH_HISTORY = "preferences_clear_search_history";
-
     public static final String KEY_ALERTS_CATEGORY = "preferences_alerts_category";
     public static final String KEY_NOTIFICATIONS = "preferences_notifications";
     public static final String KEY_CATEGORY_QUICK_RESPONSE = "preferences_quick_responses";
-
-    public static final String KEY_SHOW_CONTROLS = "preferences_show_controls";
 
     public static final String KEY_DEFAULT_REMINDER = "preferences_default_reminder";
     public static final int NO_REMINDER = -1;
@@ -279,15 +275,7 @@ public class GeneralPreferences extends PreferenceFragmentCompat implements OnPr
         final String key = preference.getKey();
         SharedPreferences prefs = CalendarUtils.getSharedPreferences(getActivity(),
                 Utils.SHARED_PREFS_NAME);
-        if (KEY_CLEAR_SEARCH_HISTORY.equals(key)) {
-            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getActivity(),
-                    Utils.getSearchAuthority(getActivity()),
-                    CalendarRecentSuggestionsProvider.MODE);
-            suggestions.clearHistory();
-            Toast.makeText(getActivity(), R.string.search_history_cleared,
-                    Toast.LENGTH_SHORT).show();
-            return true;
-        } else if (preference == mStartHour) {
+        if (preference == mStartHour) {
             int startHour = prefs.getInt(KEY_HOURS_FILTER_START,
                 KEY_HOURS_FILTER_START_DEFAULT);
             TimePickerDialog timePicker = new TimePickerDialog(
