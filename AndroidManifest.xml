@@ -54,7 +54,6 @@
 
         <activity
             android:name="AllInOneActivity"
-            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -73,13 +72,7 @@
                        android:resource="@xml/shortcuts" />
         </activity>
 
-        <activity-alias android:name="LaunchActivity"
-            android:targetActivity=".AllInOneActivity"
-            android:exported="true">
-        </activity-alias>
-
         <activity android:name="EventInfoActivity"
-            android:parentActivityName="com.android.calendar.AllInOneActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false">
             <intent-filter>
@@ -98,11 +91,6 @@
         <activity android:name=".event.EditEventActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false">
-        </activity>
-
-        <activity-alias android:name="EditEventActivity"
-            android:targetActivity=".event.EditEventActivity"
-            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.INSERT" />
@@ -115,7 +103,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/event" />
             </intent-filter>
-        </activity-alias>
+        </activity>
 
         <activity android:name="GoogleCalendarUriIntentFilter" android:label="@string/app_label"
             android:theme="@android:style/Theme.NoDisplay"
@@ -139,7 +127,8 @@
             android:theme="@style/Settings"
             android:exported="false" />
 
-        <activity android:name="CalendarSettingsActivityNew" android:label="@string/preferences_title"
+        <activity android:name="CalendarSettingsActivityNew"
+            android:label="@string/preferences_title"
             android:theme="@style/Settings"
             android:exported="false"/>
 
@@ -149,7 +138,6 @@
             android:value="com.android.calendar.SearchActivity"/>
 
         <activity android:name="SearchActivity" android:label="@string/search_title"
-            android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:exported="true">
             <intent-filter>
@@ -158,14 +146,12 @@
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
 
-        <provider android:name=".CalendarRecentSuggestionsProvider"
-            android:exported="false"
-            android:authorities="com.android.calendar.CalendarRecentSuggestionsProvider" />
-
         <!-- Declarations for alerts/reminders -->
-        <activity android:name=".alerts.QuickResponseActivity" android:launchMode="singleInstance"
-             android:theme="@android:style/Theme.Material.Dialog" android:excludeFromRecents="true"
-             android:label="@string/quick_response_dialog_title"
+        <activity android:name=".alerts.QuickResponseActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AlertDialogThemeOld"
+            android:excludeFromRecents="true"
+            android:label="@string/quick_response_dialog_title"
             android:exported="false"/>
 
         <receiver android:name=".alerts.AlertReceiver"

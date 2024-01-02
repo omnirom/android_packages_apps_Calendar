@@ -16,8 +16,8 @@
 
 <resources>
     <color name="omni_color3">#80eeeeee</color>
-    <color name="omni_color1">@color/material_grey_850</color>
-    <color name="omni_color2">@color/material_grey_900</color>
+    <color name="omni_color1">@color/m3_ref_palette_neutral20</color>
+    <color name="omni_color2">@color/m3_ref_palette_neutral10</color>
     <color name="omni_text1">#ffffffff</color>
     <color name="omni_text2">#ffeeeeee</color>
     <color name="omni_text3">#eeeeeeee</color>

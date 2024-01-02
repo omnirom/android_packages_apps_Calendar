@@ -141,10 +141,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     protected static final String BUNDLE_KEY_START_MILLIS = "key_start_millis";
     protected static final String BUNDLE_KEY_END_MILLIS = "key_end_millis";
     protected static final String BUNDLE_KEY_CALENDAR_COLOR = "key_calendar_color";
-    protected static final String BUNDLE_KEY_CALENDAR_COLOR_INIT = "key_calendar_color_init";
     protected static final String BUNDLE_KEY_CURRENT_COLOR = "key_current_color";
     protected static final String BUNDLE_KEY_CURRENT_COLOR_KEY = "key_current_color_key";
-    protected static final String BUNDLE_KEY_CURRENT_COLOR_INIT = "key_current_color_init";
     protected static final String BUNDLE_KEY_ORIGINAL_COLOR = "key_original_color";
     protected static final String BUNDLE_KEY_ORIGINAL_COLOR_INIT = "key_original_color_init";
     protected static final String BUNDLE_KEY_ATTENDEE_RESPONSE = "key_attendee_response";
@@ -362,7 +360,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private ScrollView mScrollView;
     private View mLoadingMsgView;
     private View mErrorMsgView;
-    private ObjectAnimator mAnimateAlpha;
     private long mLoadingMsgStartTime;
     private View mAttendeesContainer;
 
@@ -372,9 +369,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private int mOriginalColor = -1;
     private boolean mOriginalColorInitialized = false;
     private int mCalendarColor = -1;
-    private boolean mCalendarColorInitialized = false;
     private int mCurrentColor = -1;
-    private boolean mCurrentColorInitialized = false;
     private int mCurrentColorKey = -1;
 
     private static final int FADE_IN_TIME = 300;   // in milliseconds
@@ -421,18 +416,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
     };
 
-    private final Runnable mLoadingMsgAlphaUpdater = new Runnable() {
-        @Override
-        public void run() {
-            // Since this is run after a delay, make sure to only show the message
-            // if the event's data is not shown yet.
-            if (!mAnimateAlpha.isRunning() && mEventInfo.getAlpha() == 0) {
-                mLoadingMsgStartTime = System.currentTimeMillis();
-                mLoadingMsgView.setAlpha(1);
-            }
-        }
-    };
-
     private OnItemSelectedListener mReminderChangeListener;
 
     private boolean mIsPaused = true;
@@ -460,32 +443,29 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 }
                 return;
             }
-
+            Log.d(TAG, "onQueryComplete " + token);
             switch (token) {
-            case TOKEN_QUERY_EVENT:
+            case TOKEN_QUERY_EVENT: {
                 mEventCursor = Utils.matrixCursorFromCursor(cursor);
                 if (!initEventCursor()) {
                     displayEventNotFound();
                     return;
                 }
-                if (!mCalendarColorInitialized) {
-                    mCalendarColor = Utils.getDisplayColorFromColor(
-                            mEventCursor.getInt(EVENT_INDEX_CALENDAR_COLOR));
-                    mCalendarColorInitialized = true;
-                }
+
+                mCalendarColor = Utils.getDisplayColorFromColor(
+                        mEventCursor.getInt(EVENT_INDEX_CALENDAR_COLOR));
 
                 if (!mOriginalColorInitialized) {
                     mOriginalColor = mEventCursor.isNull(EVENT_INDEX_EVENT_COLOR)
                             ? mCalendarColor : Utils.getDisplayColorFromColor(
                                     mEventCursor.getInt(EVENT_INDEX_EVENT_COLOR));
                     mOriginalColorInitialized = true;
-                }
-
-                if (!mCurrentColorInitialized) {
                     mCurrentColor = mOriginalColor;
-                    mCurrentColorInitialized = true;
+                } else {
+                    mCurrentColor = mEventCursor.isNull(EVENT_INDEX_EVENT_COLOR)
+                            ? mCalendarColor : Utils.getDisplayColorFromColor(
+                                    mEventCursor.getInt(EVENT_INDEX_EVENT_COLOR));
                 }
-
                 updateEvent(mView);
                 prepareReminders();
 
@@ -496,16 +476,17 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 startQuery(TOKEN_QUERY_CALENDARS, null, uri, CALENDARS_PROJECTION,
                         CALENDARS_WHERE, args, null);
                 break;
-            case TOKEN_QUERY_CALENDARS:
+            }
+            case TOKEN_QUERY_CALENDARS:{
                 mCalendarsCursor = Utils.matrixCursorFromCursor(cursor);
                 updateCalendar(mView);
                 // FRAG_TODO fragments shouldn't set the title anymore
                 updateTitle();
-
-                args = new String[] {
+                
+                String[] args = new String[] {
                         mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_NAME),
                         mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_TYPE) };
-                uri = Colors.CONTENT_URI;
+                Uri uri = Colors.CONTENT_URI;
                 startQuery(TOKEN_QUERY_COLORS, null, uri, COLORS_PROJECTION, COLORS_WHERE, args,
                         null);
 
@@ -529,6 +510,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     sendAccessibilityEventIfQueryDone(TOKEN_QUERY_REMINDERS);
                 }
                 break;
+            }
             case TOKEN_QUERY_COLORS:
                 ArrayList<Integer> colors = new ArrayList<Integer>();
                 if (cursor.moveToFirst()) {
@@ -605,21 +587,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             // All queries are done, show the view.
             if (mCurrentQuery == TOKEN_QUERY_ALL) {
                 mLoadingMsgView.setVisibility(View.GONE);
-                if (mLoadingMsgView.getAlpha() == 1) {
-                    // Loading message is showing, let it stay a bit more (to prevent
-                    // flashing) by adding a start delay to the event animation
-                    long timeDiff = LOADING_MSG_MIN_DISPLAY_TIME - (System.currentTimeMillis() -
-                            mLoadingMsgStartTime);
-                    if (timeDiff > 0) {
-                        mAnimateAlpha.setStartDelay(timeDiff);
-                    }
-                }
-                if (!mAnimateAlpha.isRunning() &&!mAnimateAlpha.isStarted() && !mNoCrossFade) {
-                    mAnimateAlpha.start();
-                } else {
-                    mEventInfo.setAlpha(1);
-                    mLoadingMsgView.setVisibility(View.GONE);
-                }
+                mEventInfo.setAlpha(1);
             }
         }
     }
@@ -792,14 +760,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
         if (savedInstanceState != null) {
             mCalendarColor = savedInstanceState.getInt(BUNDLE_KEY_CALENDAR_COLOR);
-            mCalendarColorInitialized =
-                    savedInstanceState.getBoolean(BUNDLE_KEY_CALENDAR_COLOR_INIT);
             mOriginalColor = savedInstanceState.getInt(BUNDLE_KEY_ORIGINAL_COLOR);
             mOriginalColorInitialized = savedInstanceState.getBoolean(
                     BUNDLE_KEY_ORIGINAL_COLOR_INIT);
             mCurrentColor = savedInstanceState.getInt(BUNDLE_KEY_CURRENT_COLOR);
-            mCurrentColorInitialized = savedInstanceState.getBoolean(
-                    BUNDLE_KEY_CURRENT_COLOR_INIT);
             mCurrentColorKey = savedInstanceState.getInt(BUNDLE_KEY_CURRENT_COLOR_KEY);
 
             mTentativeUserSetResponse = savedInstanceState.getInt(
@@ -848,23 +812,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mEndMillis = savedInstanceState.getLong(BUNDLE_KEY_END_MILLIS);
         }
 
-        mAnimateAlpha = ObjectAnimator.ofFloat(mEventInfo, "Alpha", 0, 1);
-        mAnimateAlpha.setDuration(FADE_IN_TIME);
-        mAnimateAlpha.addListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                // Ensure that the loading message is gone before showing the
-                // event info
-                mLoadingMsgView.removeCallbacks(mLoadingMsgAlphaUpdater);
-                mLoadingMsgView.setVisibility(View.GONE);
-            }
-        });
-
-        mLoadingMsgView.setAlpha(0);
+        mLoadingMsgView.setVisibility(View.VISIBLE);
         mEventInfo.setAlpha(0);
         mErrorMsgView.setVisibility(View.GONE);
-        mLoadingMsgView.postDelayed(mLoadingMsgAlphaUpdater, LOADING_MSG_DELAY);
 
         // start loading the data
 
@@ -1032,11 +982,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         outState.putLong(BUNDLE_KEY_START_MILLIS, mStartMillis);
         outState.putLong(BUNDLE_KEY_END_MILLIS, mEndMillis);
         outState.putInt(BUNDLE_KEY_CALENDAR_COLOR, mCalendarColor);
-        outState.putBoolean(BUNDLE_KEY_CALENDAR_COLOR_INIT, mCalendarColorInitialized);
         outState.putInt(BUNDLE_KEY_ORIGINAL_COLOR, mOriginalColor);
         outState.putBoolean(BUNDLE_KEY_ORIGINAL_COLOR_INIT, mOriginalColorInitialized);
         outState.putInt(BUNDLE_KEY_CURRENT_COLOR, mCurrentColor);
-        outState.putBoolean(BUNDLE_KEY_CURRENT_COLOR_INIT, mCurrentColorInitialized);
         outState.putInt(BUNDLE_KEY_CURRENT_COLOR_KEY, mCurrentColorKey);
 
         // We'll need the temporary response for configuration changes.
@@ -1100,21 +1048,23 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         final int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
             doSave();
-            Utils.returnToCalendarHome(mContext);
-            mActivity.finish();
+            getActivity().finish();
             return true;
         } else if (itemId == R.id.info_action_edit) {
             doEdit();
-            mActivity.finish();
+            return true;
         } else if (itemId == R.id.info_action_delete) {
             mDeleteHelper =
                     new DeleteEventHelper(mActivity, mActivity, true /* exitWhenDone */);
             mDeleteHelper.setDeleteNotificationListener(EventInfoFragment.this);
             mDeleteHelper.delete(mStartMillis, mEndMillis, mEventId, -1, onDeleteRunnable);
+            return true;
         } else if (itemId == R.id.info_action_change_color) {
             showEventColorPickerDialog();
+            return true;
         } else if (itemId == R.id.info_action_share_event) {
             shareEvent();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1513,6 +1463,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (repeatString == null) {
             view.findViewById(R.id.when_repeat).setVisibility(View.GONE);
         } else {
+            view.findViewById(R.id.when_repeat).setVisibility(View.VISIBLE);
             setTextCommon(view, R.id.when_repeat, repeatString);
         }
 
@@ -1523,6 +1474,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (location == null || location.trim().length() == 0) {
             setVisibilityCommon(view, R.id.where, View.GONE);
         } else {
+            setVisibilityCommon(view, R.id.where, View.VISIBLE);
             final TextView textView = mWhere;
             if (textView != null) {
                 textView.setAutoLinkMask(0);
@@ -1998,6 +1950,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mIsPaused = false;
         if (mDismissOnResume) {
             mHandler.post(onDeleteRunnable);
+        } else {
+            reloadEvents();
         }
     }
 

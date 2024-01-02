@@ -4,16 +4,17 @@ android_app {
     srcs: [
         "src/**/*.java",
         "colorpicker/src/**/*.java",
+        "chips/src/**/*.java",
     ],
 
     resource_dirs: [
         "res",
-        "colorpicker/res"
+        "colorpicker/res",
+        "chips/res",
     ],
     
     static_libs: [
         "android-common",
-        "libchips",
         "android-opt-timezonepicker",
         "androidx.legacy_legacy-support-v4",
         "calendar-common",

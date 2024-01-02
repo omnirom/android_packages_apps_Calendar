@@ -156,5 +156,6 @@ public class EditEventActivity extends AbstractCalendarActivity {
     @Override
     public void onBackPressed() {
         mEditFragment.doRevert();
+        super.onBackPressed();
     }
 }

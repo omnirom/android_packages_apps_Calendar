@@ -122,8 +122,6 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     private int mMaybe;
     private int mNoResponse;
 
-    // Cache for loaded photos
-    HashMap<String, Drawable> mRecycledPhotos;
 
     public AttendeesView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -202,15 +200,6 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
 
         CircularImageView badgeView = view.findViewById(android.R.id.icon);
         ImageView statusCircle = view.findViewById(R.id.status_color_circle);
-
-        Drawable badge = null;
-        // Search for photo in recycled photos
-        if (mRecycledPhotos != null) {
-            badge = mRecycledPhotos.get(item.mAttendee.mEmail);
-        }
-        if (badge != null) {
-            item.mBadge = badge;
-        }
         badgeView.setImageDrawable(item.mBadge);
         statusCircle.setVisibility(View.GONE);
         Drawable[] colorDrawable = new Drawable[] {
@@ -251,21 +240,6 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
     }
 
     public void clearAttendees() {
-
-        // Before clearing the views, save all the badges. The updateAtendeeView will use the saved
-        // photo instead of the default badge thus prevent switching between the two while the
-        // most current photo is loaded in the background.
-        mRecycledPhotos = new HashMap<String, Drawable>  ();
-        final int size = getChildCount();
-        for (int i = 0; i < size; i++) {
-            final View view = getChildAt(i);
-            if (view instanceof TextView) { // divider
-                continue;
-            }
-            AttendeeItem attendeeItem = (AttendeeItem) view.getTag();
-            mRecycledPhotos.put(attendeeItem.mAttendee.mEmail, attendeeItem.mBadge);
-        }
-
         removeAllViews();
         mYes = 0;
         mNo = 0;
@@ -414,8 +388,14 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         // Contact not found.  For real emails, keep the QuickContactBadge with
                         // its Email address set, so that the user can create a contact by tapping.
                         item.mContactLookupUri = null;
+                        item.mAttendee.mName = null;
                         if (!Utils.isValidEmail(item.mAttendee.mEmail)) {
                             item.mAttendee.mEmail = null;
+                            updateAttendeeView(item);
+                        } else {
+                            String letterString = item.mAttendee.mEmail;
+                            Bitmap b = Utils.renderLetterTile(mContext, letterString, letterString);
+                            item.mBadge = new BitmapDrawable(getResources(), b);
                             updateAttendeeView(item);
                         }
                     }

@@ -111,7 +111,8 @@
 
     <style name="Settings" parent="@style/Theme.Material3.DayNight">
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/accent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
         <item name="android:windowLightNavigationBar">?attr/isLightTheme</item>
         <item name="android:navigationBarColor">?android:attr/colorBackground</item>
@@ -135,17 +136,24 @@
         <item name="dialogCornerRadius">8dp</item>
     </style>
 
+    <style name="AlertDialogThemeOld" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorPrimary">@color/accent</item>
+        <item name="android:dialogCornerRadius">8dp</item>
+        <item name="android:background">@color/material_grey_50</item>
+    </style>
+
     <style name="CalendarTheme.WithActionBarNew" parent="@style/Theme.Material3.DayNight">
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/accent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
         <item name="android:windowLightNavigationBar">?attr/isLightTheme</item>
         <item name="android:navigationBarColor">?android:attr/colorBackground</item>
         <item name="android:statusBarColor">?android:attr/colorBackground</item>
         <item name="android:endYear">2036</item>
         <item name="android:startYear">1970</item>
-        <item name="android:textAppearanceSearchResultTitle">@style/SearchResultTitle</item>
-        <item name="android:textAppearanceSearchResultSubtitle">@style/SearchResultSubtitle</item>
         <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
         <item name="toolbarStyle">@style/CalendarTheme.Toolbar</item>
         <item name="actionBarStyle">@style/CalendarTheme.Toolbar</item>
@@ -164,39 +172,12 @@
         <item name="backgroundTint">@color/accent</item>
     </style>
 
-    <style name="SearchResultTitle" parent="@android:style/TextAppearance.Material.SearchResult.Title">
-        <item name="android:textSize">16sp</item>
+    <style name="RecipientEditTextViewCustom" parent="@style/RecipientEditTextView">
+        <item name="chipHeight">@dimen/chip_height_new</item>
+        <item name="unselectedChipTextColor">?android:attr/textColorPrimary</item>
+        <item name="unselectedChipBackgroundColor">?android:attr/colorBackground</item>
     </style>
-
-    <style name="SearchResultSubtitle" parent="@android:style/TextAppearance.Material.SearchResult.Subtitle">
-    </style>
-
-    <style name="MultiStateButton">
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:gravity">center_vertical|left</item>
-    </style>
-
-    <style name="EditEventCustomActionButton" parent="android:style/Widget.Material.Light.ActionButton">
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:focusable">true</item>
-        <item name="android:orientation">horizontal</item>
-    </style>
-
-    <style name="EditEventCustomActionButtonText">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:textAppearance">?android:attr/actionMenuTextAppearance</item>
-        <item name="android:textColor">@color/edit_event_action_text_color</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">none</item>
-        <item name="android:padding">4dp</item>
-    </style>
-
+    
     <style name="WidgetDayOfWeekStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

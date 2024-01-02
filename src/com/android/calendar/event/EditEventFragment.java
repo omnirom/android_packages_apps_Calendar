@@ -622,10 +622,14 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             } else {
                 doRevert();
             }
+            return true;
         } else if (itemId == android.R.id.home) {
+            Log.d(TAG, "id.home");
             doRevert();
+            // calls finish
+            return true;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void saveReminders() {
@@ -689,7 +693,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 mModifyDialog.dismiss();
                 mModifyDialog = null;
             }
-            mModifyDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.edit_event_label)
+            mModifyDialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.edit_label)
                     .setItems(items, new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -794,7 +798,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             if ((mCode & Utils.DONE_EXIT) != 0) {
                 // This will exit the edit event screen, should be called
                 // when we want to return to the main calendar views
-                if ((mCode & Utils.DONE_SAVE) != 0) {
+                /*if ((mCode & Utils.DONE_SAVE) != 0) {
                     if (getActivity() != null) {
                         long start = mModel.mStart;
                         long end = mModel.mEnd;
@@ -815,7 +819,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                         CalendarController.getInstance(getActivity()).launchViewEvent(-1, start, end,
                                 Attendees.ATTENDEE_STATUS_NONE);
                     }
-                }
+                }*/
                 Activity a = EditEventFragment.this.getActivity();
                 if (a != null) {
                     a.finish();
@@ -945,10 +949,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     private void showDarkStatusbar() {
         Window window = getActivity().getWindow();
-        WindowInsetsControllerCompat insetController = new WindowInsetsControllerCompat(window, window.getDecorView());        insetController.setAppearanceLightStatusBars(false);
+        WindowInsetsControllerCompat insetController = new WindowInsetsControllerCompat(window, window.getDecorView());
+        insetController.setAppearanceLightStatusBars(false);
     }
 
     public void doRevert() {
+                Log.d(TAG, "doRevert");
+
         mOnDone.setDoneCode(Utils.DONE_REVERT | Utils.DONE_EXIT);
         mOnDone.run();
     }

@@ -17,7 +17,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?android:attr/colorBackground"
+    android:foreground="?android:attr/selectableItemBackground"
     android:minHeight="@dimen/chip_dropdown_height_new" >
 
     <FrameLayout
@@ -43,16 +44,20 @@
 
     <LinearLayout style="@style/ChipTextViewLayoutStyle">
 
-        <TextView style="@style/ChipTitleStyle" />
+        <TextView style="@style/ChipTitleStyle"
+                  android:textColor="?android:attr/textColorPrimary"/>
 
-        <TextView style="@style/ChipSubtitleStyle" />
+        <TextView style="@style/ChipSubtitleStyle"
+                  android:textColor="?android:attr/textColorPrimary"/>
 
         <TextView
             android:id="@+id/chip_indicator_text"
-            style="@style/ChipIndicatorTextStyle" />
+            style="@style/ChipIndicatorTextStyle"
+            android:textColor="?android:attr/textColorPrimary"/>
 
     </LinearLayout>
 
-    <ImageView style="@style/ChipDeleteIconStyle" />
+    <ImageView style="@style/ChipDeleteIconStyle"
+               android:tint="?android:attr/textColorSecondary"/>
 
 </LinearLayout>

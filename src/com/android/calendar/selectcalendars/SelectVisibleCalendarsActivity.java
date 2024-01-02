@@ -98,7 +98,7 @@ public class SelectVisibleCalendarsActivity extends AbstractCalendarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Utils.returnToCalendarHome(this);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

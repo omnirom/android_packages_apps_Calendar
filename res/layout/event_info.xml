@@ -17,25 +17,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/event_info_loading_msg"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <ProgressBar
-            android:layout_width="100dip"
-            android:layout_height="100dip"
-            android:indeterminate="true" />
-
-        <TextView
-            style="@style/TextAppearance.EditEvent_Value"
+            
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dip"
-            android:text="@string/loading" />
-    </LinearLayout>
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/progressBarStyle"
+                android:indeterminate="true" />
+
+        </LinearLayout>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/event_info_error_msg"
@@ -64,6 +65,7 @@
             android:paddingLeft="16dip"
             android:paddingRight="16dip"
             android:paddingBottom="10dip"
+            android:paddingTop="10dip"
             android:scrollbars="none" >
 
             <LinearLayout
@@ -77,7 +79,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView
@@ -100,7 +103,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView
@@ -129,7 +133,8 @@
                     android:drawablePadding="8dp"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:singleLine="false"
                     android:textIsSelectable="true" />
 
@@ -144,7 +149,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView
@@ -203,7 +209,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView
@@ -220,8 +227,9 @@
                     android:id="@+id/attendee_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
     
                     <TextView
@@ -230,13 +238,13 @@
                         android:layout_height="wrap_content"
                         android:drawableLeft="@drawable/ic_event_guests"
                         android:drawablePadding="8dp"
-                        android:gravity="center_vertical"
-                        android:text="@string/attendees_label" />
+                        android:gravity="center_vertical" />
 
                     <!-- GUEST LIST -->
                     <com.android.calendar.event.AttendeesView
                         android:id="@+id/long_attendee_list"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:orientation="vertical" />
                 </LinearLayout>
@@ -247,7 +255,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView
@@ -274,7 +283,8 @@
                     android:drawableLeft="@drawable/ic_event_reminder"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-                    android:paddingTop="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:text="@string/reminders_label" />
 
                 <LinearLayout

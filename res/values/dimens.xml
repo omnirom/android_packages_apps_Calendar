@@ -71,7 +71,8 @@
     <dimen name="agenda_list_footer_height">120dp</dimen>
     <item name="letter_to_tile_ratio" type="dimen">67%</item>
     <dimen name="contact_image_size">40dp</dimen>
-    <dimen name="chip_dropdown_height_new">64dp</dimen>
+    <dimen name="chip_dropdown_height_new">50dp</dimen>
     <dimen name="today_icon_size">30dp</dimen>
     <dimen name="today_icon_number_size">22dp</dimen>
+    <dimen name="chip_height_new">44dp</dimen>
 </resources>

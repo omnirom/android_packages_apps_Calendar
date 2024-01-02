@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.calendar;
 
-import android.content.SearchRecentSuggestionsProvider;
+package com.android.ex.chips;
 
-public class CalendarRecentSuggestionsProvider extends SearchRecentSuggestionsProvider {
+import android.accounts.Account;
 
-    public final static int MODE = DATABASE_MODE_QUERIES;
-
-    public CalendarRecentSuggestionsProvider() {
-    }
-
-    @Override
-    public boolean onCreate() {
-        setupSuggestions(Utils.getSearchAuthority(getContext()), MODE);
-        return super.onCreate();
-    }
-
+/**
+ * The AccountSpecificAdapter interface describes an Adapter
+ * that can take an account to retrieve information tied to
+ * a specific account.
+ */
+public interface AccountSpecifier {
+    public void setAccount(Account account);
 }

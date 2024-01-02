@@ -1429,50 +1429,9 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 protected int getDefaultPhotoResId() {
                     return R.drawable.ic_contact_picture;
                 }
-                // for the popup window contact list
-                @Override
-                protected void bindIconToView(boolean showImage, RecipientEntry entry, ImageView view, AdapterType type) {
-                    if (view == null) {
-                        return;
-                    }
-                    if (showImage) {
-                        byte[] photoBytes = entry.getPhotoBytes();
-                        if (photoBytes != null && photoBytes.length > 0) {
-                            super.bindIconToView(showImage, entry, view, type);
-                            return;
-                        } else {
-                            final Bitmap b = Utils.renderLetterTile(mActivity, entry.getDisplayName(), entry.getLookupKey());
-                            view.setImageBitmap(b);
-                        }
-                        view.setVisibility(View.VISIBLE);
-                    } else {
-                        view.setVisibility(View.GONE);
-                    }
-                }
             });
             // for the text view chips images
-            ((BaseRecipientAdapter) mAddressAdapter).setPhotoManager(new DefaultPhotoManager(mActivity.getContentResolver()) {
-                @Override
-                public void populatePhotoBytesAsync(RecipientEntry entry, PhotoManagerCallback callback) {
-                    final Uri photoThumbnailUri = entry.getPhotoThumbnailUri();
-                    if (photoThumbnailUri != null) {
-                        super.populatePhotoBytesAsync(entry, callback);
-                    } else {
-                        final Bitmap b = Utils.renderLetterTile(mActivity, entry.getDisplayName(), entry.getLookupKey());
-                        byte[] photoBytes = Utils.bitmapToBytes(b);
-                        if (photoBytes != null) {
-                            entry.setPhotoBytes(photoBytes);
-                            if (callback != null) {
-                                callback.onPhotoBytesPopulated();
-                            }
-                        } else {
-                            if (callback != null) {
-                                callback.onPhotoBytesAsyncLoadFailed();
-                            }
-                        }
-                    }
-                }
-            });
+            ((BaseRecipientAdapter) mAddressAdapter).setPhotoManager(new DefaultPhotoManager(mActivity, mActivity.getContentResolver()));
 
             list.setAdapter((BaseRecipientAdapter) mAddressAdapter);
         } else {
