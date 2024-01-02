@@ -139,10 +139,6 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
     private final LayoutInflater mInflater;
     private final ArrayList<Result> mResultList = new ArrayList<Result>();
 
-    // The cache for contacts photos.  We don't have to worry about clearing this, as a
-    // new adapter is created for every edit event.
-    private final Map<Uri, Bitmap> mPhotoCache = new HashMap<Uri, Bitmap>();
-
     /**
      * Constructor.
      */
@@ -209,14 +205,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
                 // resulted in the wrong list items being updated.
                 imageView.setTag(result.mContactPhotoUri);
                 if (result.mContactPhotoUri != null) {
-                    Bitmap cachedPhoto = mPhotoCache.get(result.mContactPhotoUri);
-                    if (cachedPhoto != null) {
-                        // Use photo in cache.
-                        imageView.setImageBitmap(cachedPhoto);
-                    } else {
-                        // Asynchronously load photo and update.
-                        asyncLoadPhotoAndUpdateView(result.mContactPhotoUri, imageView);
-                    }
+                    asyncLoadPhotoAndUpdateView(result.mContactPhotoUri, imageView);
                 }
             }
         }
@@ -235,7 +224,6 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
                         mResolver, contactPhotoUri);
                 if (imageStream != null) {
                     photo = BitmapFactory.decodeStream(imageStream);
-                    mPhotoCache.put(contactPhotoUri, photo);
                 }
                 return photo;
             }
@@ -465,7 +453,7 @@ public class EventLocationAdapter extends ArrayAdapter<EventLocationAdapter.Resu
         // Copy the sorted results.
         List<Result> results = new ArrayList<Result>();
         for (String location : locations) {
-            results.add(new Result(null, location, R.drawable.ic_history_holo_light, null));
+            results.add(new Result(null, location, R.drawable.ic_event_location, null));
         }
         return results;
     }
