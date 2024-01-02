@@ -380,7 +380,7 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         } else {
                             String letterString = TextUtils.isEmpty(item.mAttendee.mName) ?
                                     item.mAttendee.mEmail : item.mAttendee.mName;
-                            Bitmap b = Utils.renderLetterTile(mContext, letterString, lookupKey);
+                            Bitmap b = Utils.renderLetterTile(mContext, letterString, item.mAttendee.mEmail);
                             item.mBadge = new BitmapDrawable(getResources(), b);
                             updateAttendeeView(item);
                         }

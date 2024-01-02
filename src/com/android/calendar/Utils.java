@@ -39,8 +39,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
@@ -2092,6 +2094,7 @@ public class Utils {
         if (sContactImageSize == -1) {
             sContactImageSize = resources.getDimensionPixelSize(R.dimen.contact_image_size);
         }
+        //Log.d(TAG, "renderLetterTile  name = " + name + " identifier = " + identifier);
         final float halfWidth = sContactImageSize / 2;
         final float halfHeight = sContactImageSize / 2;
         final int minOfWidthAndHeight = Math.min(sContactImageSize, sContactImageSize);
@@ -2141,5 +2144,21 @@ public class Utils {
         int color = ta.getColor(0, 0);
         ta.recycle();
         return color;
+    }
+    
+    public static BitmapDrawable getBitmapDrawable(Resources resources, Drawable image) {
+        if (image instanceof BitmapDrawable) {
+            return (BitmapDrawable) image;
+        }
+        final Canvas canvas = new Canvas();
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG,
+                Paint.FILTER_BITMAP_FLAG));
+
+        Bitmap bmResult = Bitmap.createBitmap(image.getIntrinsicWidth(), image.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bmResult);
+        image.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        image.draw(canvas);
+        return new BitmapDrawable(resources, bmResult);
     }
 }

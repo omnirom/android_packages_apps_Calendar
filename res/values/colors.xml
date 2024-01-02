@@ -171,7 +171,7 @@
 
     <color name="ic_launcher_background">#ffffff</color>
     
-    <color name="noresponse_attendee_overlay">#00000000</color>
+    <color name="noresponse_attendee_overlay">@color/material_grey_200</color>
     <color name="declined_attendee_overlay">#d93025</color>
     <color name="accepted_attendee_overlay">#1e8e3e</color>
     <color name="maybe_attendee_overlay">#80868b</color>

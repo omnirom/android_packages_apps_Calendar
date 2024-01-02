@@ -15,6 +15,8 @@ import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.android.calendar.Utils;
+
 /**
  * An ImageView class with a circle mask so that all images are drawn in a
  * circle instead of a square.
@@ -62,10 +64,10 @@ public class CircularImageView extends ImageView {
         // support state list drawable by getting the current state
         if (drawable instanceof StateListDrawable) {
             if (((StateListDrawable) drawable).getCurrent() != null) {
-                bitmapDrawable = (BitmapDrawable) drawable.getCurrent();
+                bitmapDrawable = getBitmapDrawable(drawable.getCurrent());
             }
         } else {
-            bitmapDrawable = (BitmapDrawable) drawable;
+            bitmapDrawable = getBitmapDrawable(drawable);
         }
 
         if (bitmapDrawable == null) {
@@ -110,5 +112,9 @@ public class CircularImageView extends ImageView {
         // Then draw the border.
         canvas.drawCircle(dest.centerX(), dest.centerY(),
                 dest.width() / 2f - circularImageBorder / 2, borderPaint);
+    }
+
+    private BitmapDrawable getBitmapDrawable(Drawable image) {
+        return Utils.getBitmapDrawable(getContext().getResources(), image);
     }
 }

@@ -100,6 +100,7 @@ import com.android.ex.chips.recipientchip.ReplacementDrawableSpan;
 import com.android.ex.chips.recipientchip.VisibleRecipientChip;
 
 import com.android.calendar.R;
+import com.android.calendar.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,7 +185,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
     private OnItemClickListener mAlternatesListener;
 
     private DrawableRecipientChip mSelectedChip;
-    private Bitmap mDefaultContactPhoto;
+    private BitmapDrawable mDefaultContactPhoto;
     private Bitmap mWarningIcon;
     private ReplacementDrawableSpan mMoreChip;
     private TextView mMoreItem;
@@ -1083,7 +1084,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
                     @Override
                     public void onPhotoBytesAsyncLoadFailed() {
                         // TODO: can the scaled down default photo be cached?
-                        tryDrawAndInvalidate(mDefaultContactPhoto);
+                        tryDrawAndInvalidate(mDefaultContactPhoto.getBitmap());
                     }
 
                     private void tryDrawAndInvalidate(Bitmap icon) {
@@ -1281,7 +1282,6 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
             mChipTextEndPadding = overridePadding;
         }
 
-        mDefaultContactPhoto = BitmapFactory.decodeResource(r, R.drawable.ic_contact_picture);
 
         mMoreItem = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.more_item, null);
 
@@ -1304,6 +1304,8 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
         mUnselectedChipTextColor = a.getColor(
                 R.styleable.RecipientEditTextView_unselectedChipTextColor,
                 r.getColor(android.R.color.black));
+        
+        mDefaultContactPhoto = Utils.getBitmapDrawable(r, r.getDrawable(R.drawable.ic_contact_picture));
 
         mUnselectedChipBackgroundColor = a.getColor(
                 R.styleable.RecipientEditTextView_unselectedChipBackgroundColor,

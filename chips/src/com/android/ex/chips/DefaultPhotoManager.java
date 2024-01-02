@@ -84,7 +84,7 @@ public class DefaultPhotoManager implements PhotoManager {
                 fetchPhotoAsync(entry, photoThumbnailUri, callback);
             }
         } else {
-            final Bitmap b = Utils.renderLetterTile(mContext, entry.getDisplayName(), entry.getLookupKey() != null ? entry.getLookupKey() : entry.getDisplayName());
+            final Bitmap b = Utils.renderLetterTile(mContext, entry.getDisplayName(), entry.getDestination());
             byte[] photoBytes = Utils.bitmapToBytes(b);
             if (photoBytes != null) {
                 entry.setPhotoBytes(photoBytes);

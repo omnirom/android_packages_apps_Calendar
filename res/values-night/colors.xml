@@ -89,5 +89,6 @@
         <item>#cc451a</item>
         <item>#595959</item>
     </array>
+    <color name="noresponse_attendee_overlay">@color/omni_color1</color>
 
 </resources>
