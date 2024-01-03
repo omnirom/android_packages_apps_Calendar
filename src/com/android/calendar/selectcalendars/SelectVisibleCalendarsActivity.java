@@ -59,7 +59,8 @@ public class SelectVisibleCalendarsActivity extends AbstractCalendarActivity {
         super.onCreate(icicle);
 
         setContentView(R.layout.simple_frame_layout);
-
+        getSupportActionBar()
+                .setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
         mController = CalendarController.getInstance(this);
         mFragment = (SelectVisibleCalendarsFragment) getSupportFragmentManager().findFragmentById(
                 R.id.main_frame);
@@ -85,13 +86,6 @@ public class SelectVisibleCalendarsActivity extends AbstractCalendarActivity {
     public void onPause() {
         super.onPause();
         getContentResolver().unregisterContentObserver(mObserver);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportActionBar()
-                .setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
-        return true;
     }
 
     @Override

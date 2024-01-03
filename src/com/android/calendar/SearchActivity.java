@@ -63,14 +63,7 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
     protected static final String BUNDLE_KEY_RESTORE_SEARCH_QUERY =
         "key_restore_search_query";
 
-    // display event details to the side of the event list
-   private boolean mShowEventDetailsWithAgenda;
-
     private CalendarController mController;
-
-    private EventInfoFragment mEventInfoFragment;
-
-    private long mCurrentEventId = -1;
 
     private String mQuery;
 
@@ -111,17 +104,14 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         mController = CalendarController.getInstance(this);
         mHandler = new Handler();
 
-        mShowEventDetailsWithAgenda =
-            Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
-
         setContentView(R.layout.search);
 
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
         mContentResolver = getContentResolver();
 
-        getSupportActionBar().setDisplayOptions(0,
-                    ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME);
+        getSupportActionBar()
+                .setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
 
         // Must be the first to register because this activity can modify the
         // list of event handlers in it's handle method. This affects who the
@@ -178,27 +168,15 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
     }
 
     private void showEventInfo(EventInfo event) {
-        if (mShowEventDetailsWithAgenda) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-
-            mEventInfoFragment = new EventInfoFragment(this, event.id,
-                    event.startTime.toMillis(false), event.endTime.toMillis(false),
-                    event.getResponse(), null /* No reminders to explicitly pass in. */);
-            ft.replace(R.id.agenda_event_info, mEventInfoFragment);
-            ft.commit();
-        } else {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
-            intent.setData(eventUri);
-            intent.setClass(this, EventInfoActivity.class);
-            intent.putExtra(EXTRA_EVENT_BEGIN_TIME,
-                    event.startTime != null ? event.startTime.toMillis(true) : -1);
-            intent.putExtra(
-                    EXTRA_EVENT_END_TIME, event.endTime != null ? event.endTime.toMillis(true) : -1);
-            startActivity(intent);
-        }
-        mCurrentEventId = event.id;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
+        intent.setData(eventUri);
+        intent.setClass(this, EventInfoActivity.class);
+        intent.putExtra(EXTRA_EVENT_BEGIN_TIME,
+                event.startTime != null ? event.startTime.toMillis(true) : -1);
+        intent.putExtra(
+                EXTRA_EVENT_END_TIME, event.endTime != null ? event.endTime.toMillis(true) : -1);
+        startActivity(intent);
     }
 
     private void search(String searchQuery, Time goToTime) {
@@ -332,7 +310,7 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
-        Utils.returnToCalendarHome(this);
+        finish();
         return false;
     }
 }
