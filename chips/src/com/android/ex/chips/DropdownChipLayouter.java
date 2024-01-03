@@ -391,7 +391,7 @@ public class DropdownChipLayouter {
      * photo is available.
      */
     protected @DrawableRes int getDefaultPhotoResId() {
-        return R.drawable.ic_contact_picture;
+        return R.drawable.ic_contact_picture_with_bg;
     }
 
     /**

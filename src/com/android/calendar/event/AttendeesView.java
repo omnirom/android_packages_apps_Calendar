@@ -391,6 +391,7 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         item.mAttendee.mName = null;
                         if (!Utils.isValidEmail(item.mAttendee.mEmail)) {
                             item.mAttendee.mEmail = null;
+                            item.mBadge = mDefaultBadge;
                             updateAttendeeView(item);
                         } else {
                             String letterString = item.mAttendee.mEmail;

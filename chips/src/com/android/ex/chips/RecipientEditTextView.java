@@ -1305,7 +1305,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
                 R.styleable.RecipientEditTextView_unselectedChipTextColor,
                 r.getColor(android.R.color.black));
         
-        mDefaultContactPhoto = Utils.getBitmapDrawable(r, r.getDrawable(R.drawable.ic_contact_picture));
+        mDefaultContactPhoto = Utils.getBitmapDrawable(r, r.getDrawable(R.drawable.ic_contact_picture_with_bg));
 
         mUnselectedChipBackgroundColor = a.getColor(
                 R.styleable.RecipientEditTextView_unselectedChipBackgroundColor,

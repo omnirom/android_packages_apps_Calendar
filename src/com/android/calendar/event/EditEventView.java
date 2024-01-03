@@ -1427,7 +1427,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 }
                 @Override
                 protected int getDefaultPhotoResId() {
-                    return R.drawable.ic_contact_picture;
+                    return R.drawable.ic_contact_picture_with_bg;
                 }
             });
             // for the text view chips images

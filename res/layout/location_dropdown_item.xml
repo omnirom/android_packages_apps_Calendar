@@ -28,7 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="10dip"
-        android:src="@drawable/ic_contact_picture"
         android:scaleType="centerCrop"
         android:tint="?android:attr/textColorSecondary"/>
     <LinearLayout

@@ -38,7 +38,7 @@
         <com.android.ex.chips.CircularImageView
             style="@style/ChipIconBaseStyle"
             android:layout_gravity="center"
-            android:src="@drawable/ic_contact_picture" />
+            android:src="@drawable/ic_contact_picture_with_bg" />
 
     </FrameLayout>
 
