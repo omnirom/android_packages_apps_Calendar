@@ -98,8 +98,8 @@ import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
 public class AllInOneActivity extends AbstractCalendarActivity implements EventHandler,
-        SearchView.OnQueryTextListener, ActionBar.TabListener,
-        ActionBar.OnNavigationListener, SearchView.OnSuggestionListener {
+        ActionBar.TabListener,
+        ActionBar.OnNavigationListener {
     private static final String TAG = "AllInOneActivity";
     private static final boolean DEBUG = true;
     private static final String EVENT_INFO_FRAGMENT_TAG = "EventInfoFragment";
@@ -146,7 +146,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private ActionBar.Tab mAgendaTab;
     private ActionBar.Tab mThreeTab;
 
-    private MenuItem mSearchMenu;
     private Menu mOptionsMenu;
     private CalendarViewAdapter mActionBarMenuSpinnerAdapter;
     private QueryHandler mHandler;
@@ -633,8 +632,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         mOptionsMenu = menu;
         getMenuInflater().inflate(R.menu.all_in_one_title_bar, menu);
 
-        mSearchMenu = menu.findItem(R.id.action_search);
-
         MenuItem goToMenu = menu.findItem(R.id.action_goto);
         if (!getResources().getBoolean(R.bool.show_goto_menu)) {
             goToMenu.setVisible(false);
@@ -706,11 +703,8 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
             mController.sendEvent(this, EventType.LAUNCH_SETTINGS, null, null, 0, 0);
             return true;
         } else if (itemId == R.id.action_search) {
-            SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-            EditText searchPlate = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-            searchPlate.setHint(R.string.search);
-            searchView.setOnQueryTextListener(this);
-            searchView.setOnSuggestionListener(this);
+            mController.sendEvent(this, EventType.SEARCH, null, null, -1, ViewType.CURRENT, 0, null,
+                getComponentName());
             return true;
         } else if (itemId == R.id.action_goto) {
             // Get the current time to display in Dialog.
@@ -738,16 +732,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         // Remove this when transition to and from month view looks fine.
         boolean doTransition = viewType != ViewType.MONTH && mCurrentView != ViewType.MONTH;
         FragmentManager fragmentManager = getSupportFragmentManager();
-        // Check if our previous view was an Agenda view
-        // TODO remove this if framework ever supports nested fragments
-        if (mCurrentView == ViewType.AGENDA) {
-            // If it was, we need to do some cleanup on it to prevent the
-            // edit/delete buttons from coming back on a rotation.
-            Fragment oldFrag = fragmentManager.findFragmentById(viewId);
-            if (oldFrag instanceof AgendaFragment) {
-                ((AgendaFragment) oldFrag).removeFragments(fragmentManager);
-            }
-        }
 
         if (viewType != mCurrentView) {
             // The rules for this previous view are different than the
@@ -973,19 +957,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        mSearchMenu.collapseActionView();
-        mController.sendEvent(this, EventType.SEARCH, null, null, -1, ViewType.CURRENT, 0, query,
-                getComponentName());
-        return true;
-    }
-
-    @Override
     public void onTabSelected(Tab tab, FragmentTransaction ft) {
         Log.w(TAG, "TabSelected AllInOne=" + this + " finishing:" + this.isFinishing());
         if (tab == mDayTab && mCurrentView != ViewType.DAY) {
@@ -1049,25 +1020,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                         " Day:" + mDayTab + " Week:" + mWeekTab + " Month:" + mMonthTab +
                         " Agenda:" + mAgendaTab + " 3Days:" + mThreeTab);
                 break;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onSuggestionSelect(int position) {
-        return false;
-    }
-
-    @Override
-    public boolean onSuggestionClick(int position) {
-        mSearchMenu.collapseActionView();
-        return false;
-    }
-
-    @Override
-    public boolean onSearchRequested() {
-        if (mSearchMenu != null) {
-            mSearchMenu.expandActionView();
         }
         return false;
     }

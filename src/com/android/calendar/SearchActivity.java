@@ -69,8 +69,6 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
 
     private SearchView mSearchView;
 
-    private DeleteEventHelper mDeleteEventHelper;
-
     private Handler mHandler;
     private BroadcastReceiver mTimeChangesReceiver;
     private ContentResolver mContentResolver;
@@ -117,9 +115,6 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         // list of event handlers in it's handle method. This affects who the
         // rest of the handlers the controller dispatches to are.
         mController.registerEventHandler(HANDLER_KEY, this);
-
-        mDeleteEventHelper = new DeleteEventHelper(this, this,
-                false /* don't exit when done */);
 
         long millis = 0;
         if (icicle != null) {
@@ -191,12 +186,7 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         mQuery = searchQuery;
         if (mSearchView != null) {
             mSearchView.setQuery(mQuery, false);
-            mSearchView.clearFocus();
         }
-    }
-
-    private void deleteEvent(long eventId, long startMillis, long endMillis) {
-        mDeleteEventHelper.delete(startMillis, endMillis, eventId, -1);
     }
 
     @Override
@@ -212,7 +202,6 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         searchPlate.setHint(R.string.search);
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setQuery(mQuery, false);
-        mSearchView.clearFocus();
 
         return true;
     }
@@ -272,12 +261,13 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
 
     @Override
     public void eventsChanged() {
-        mController.sendEvent(this, EventType.EVENTS_CHANGED, null, null, -1, ViewType.CURRENT);
+        // dont update on events - keep search result list static
+        //mController.sendEvent(this, EventType.EVENTS_CHANGED, null, null, -1, ViewType.CURRENT);
     }
 
     @Override
     public long getSupportedEventTypes() {
-        return EventType.VIEW_EVENT | EventType.DELETE_EVENT;
+        return EventType.VIEW_EVENT;
     }
 
     @Override
@@ -285,21 +275,19 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         long endTime = (event.endTime == null) ? -1 : event.endTime.toMillis(false);
         if (event.eventType == EventType.VIEW_EVENT) {
             showEventInfo(event);
-        } else if (event.eventType == EventType.DELETE_EVENT) {
-            deleteEvent(event.id, event.startTime.toMillis(false), endTime);
         }
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
+    public boolean onQueryTextChange(String query) {
+        mQuery = query;
+        mController.sendEvent(this, EventType.SEARCH, null, null, -1, ViewType.CURRENT, 0, query,
+                    getComponentName());
         return false;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        mQuery = query;
-        mController.sendEvent(this, EventType.SEARCH, null, null, -1, ViewType.CURRENT, 0, query,
-                getComponentName());
         return false;
     }
 

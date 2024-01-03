@@ -92,8 +92,7 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         mTime = new Time(mTimeZone);
         setOnItemClickListener(this);
         setVerticalScrollBarEnabled(false);
-        mWindowAdapter = new AgendaWindowAdapter(context, this,
-                Utils.getConfigBool(context, R.bool.show_event_details_with_agenda));
+        mWindowAdapter = new AgendaWindowAdapter(context, this);
         mWindowAdapter.setSelectedInstanceId(-1/* TODO:instanceId */);
         setAdapter(mWindowAdapter);
         setCacheColorHint(context.getResources().getColor(R.color.agenda_item_not_selected));
@@ -205,8 +204,7 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         }
     }
 
-    public void goTo(Time time, long id, String searchQuery, boolean forced,
-            boolean refreshEventInfo) {
+    public void goTo(Time time, long id, String searchQuery, boolean forced) {
         if (time == null) {
             time = mTime;
             long goToTime = getFirstVisibleTime(null);
@@ -221,11 +219,15 @@ public class AgendaListView extends ListView implements OnItemClickListener {
         if (DEBUG) {
             Log.d(TAG, "Goto with time " + mTime.toString());
         }
-        mWindowAdapter.refresh(mTime, id, searchQuery, forced, refreshEventInfo);
+        mWindowAdapter.refresh(mTime, id, searchQuery, forced);
     }
 
     public void refresh(boolean forced) {
-        mWindowAdapter.refresh(mTime, -1, null, forced, false);
+        mWindowAdapter.refresh(mTime, -1, null, forced);
+    }
+
+    public void refreshWithTime(boolean forced, Time time) {
+        mWindowAdapter.refresh(time, -1, null, forced);
     }
 
     public void deleteSelectedEvent() {

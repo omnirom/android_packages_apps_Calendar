@@ -135,9 +135,9 @@ public class AgendaWindowAdapter extends BaseAdapter
     private static final int OFF_BY_ONE_BUG = 1;
     private static final int MAX_NUM_OF_ADAPTERS = 5;
     private static final int IDEAL_NUM_OF_EVENTS = 50;
-    private static final int MIN_QUERY_DURATION = 7; // days
+    private static final int MIN_QUERY_DURATION = 30; // days
     private static final int MAX_QUERY_DURATION = 60; // days
-    private static final int PREFETCH_BOUNDARY = 1;
+    private static final int PREFETCH_BOUNDARY = 3;
 
     /** Times to auto-expand/retry query after getting no data */
     private static final int RETRIES_ON_NO_DATA = 1;
@@ -191,9 +191,6 @@ public class AgendaWindowAdapter extends BaseAdapter
     private final Formatter mFormatter;
     private final StringBuilder mStringBuilder;
     private String mTimeZone;
-
-    // defines if to pop-up the current event when the agenda is first shown
-    private final boolean mShowEventOnStart;
 
     private final Runnable mTZUpdater = new Runnable() {
         @Override
@@ -332,7 +329,7 @@ public class AgendaWindowAdapter extends BaseAdapter
     }
 
     public AgendaWindowAdapter(Context context,
-            AgendaListView agendaListView, boolean showEventOnStart) {
+            AgendaListView agendaListView) {
         mContext = context;
         mResources = context.getResources();
 
@@ -343,12 +340,8 @@ public class AgendaWindowAdapter extends BaseAdapter
         mStringBuilder = new StringBuilder(50);
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
 
-        mShowEventOnStart = showEventOnStart;
-
-        // Implies there is no sticky header
-        if (!mShowEventOnStart) {
-            mStickyHeaderSize = 0;
-        }
+        mStickyHeaderSize = 0;
+        
         mSearchQuery = null;
 
         LayoutInflater inflater = (LayoutInflater) context
@@ -623,8 +616,7 @@ public class AgendaWindowAdapter extends BaseAdapter
                         item.allDay), selectedTime);
     }
 
-    public void refresh(Time goToTime, long id, String searchQuery, boolean forced,
-            boolean refreshEventInfo) {
+    public void refresh(Time goToTime, long id, String searchQuery, boolean forced) {
         if (searchQuery != null) {
             mSearchQuery = searchQuery;
         }
@@ -632,8 +624,7 @@ public class AgendaWindowAdapter extends BaseAdapter
         if (DEBUGLOG) {
             Log.e(TAG, this + ": refresh " + goToTime.toString() + " id " + id
                     + ((searchQuery != null) ? searchQuery : "")
-                    + (forced ? " forced" : " not forced")
-                    + (refreshEventInfo ? " refresh event info" : ""));
+                    + (forced ? " forced" : " not forced"));
         }
 
         int startDay = Time.getJulianDay(goToTime.toMillis(false), goToTime.gmtoff);
@@ -647,23 +638,6 @@ public class AgendaWindowAdapter extends BaseAdapter
                             OFF_BY_ONE_BUG, mStickyHeaderSize);
                     if (mListViewScrollState == OnScrollListener.SCROLL_STATE_FLING) {
                         mAgendaListView.smoothScrollBy(0, 0);
-                    }
-                    if (refreshEventInfo) {
-                        long newInstanceId = findInstanceIdFromPosition(gotoPosition);
-                        if (newInstanceId != getSelectedInstanceId()) {
-                            setSelectedInstanceId(newInstanceId);
-                            mDataChangedHandler.post(mDataChangedRunnable);
-                            Cursor tempCursor = getCursorByPosition(gotoPosition);
-                            if (tempCursor != null) {
-                                int tempCursorPosition = getCursorPositionByPosition(gotoPosition);
-                                AgendaItem item =
-                                        buildAgendaItemFromCursor(tempCursor, tempCursorPosition,
-                                                false);
-                                mSelectedVH = new AgendaAdapter.ViewHolder();
-                                mSelectedVH.allDay = item.allDay;
-                                sendViewEvent(item, goToTime.toMillis(false));
-                            }
-                        }
                     }
                 }
 
@@ -679,6 +653,7 @@ public class AgendaWindowAdapter extends BaseAdapter
         if (!mCleanQueryInitiated || searchQuery != null) {
             // Query for a total of MIN_QUERY_DURATION days
             int endDay = startDay + MIN_QUERY_DURATION;
+            startDay = startDay - MIN_QUERY_DURATION;
 
             mSelectedInstanceId = -1;
             //mSavedPosition = -1;
@@ -996,40 +971,6 @@ public class AgendaWindowAdapter extends BaseAdapter
 
                     if (!found) {
                         mSelectedInstanceId = -1;
-                    }
-                }
-
-                // Show the requested event
-                if (mShowEventOnStart && data.queryType == QUERY_TYPE_CLEAN) {
-                    Cursor tempCursor = null;
-                    int tempCursorPosition = -1;
-
-                    // If no valid event is selected , just pick the first one
-                    if (mSelectedInstanceId == -1) {
-                        if (cursor.moveToFirst()) {
-                            mSelectedInstanceId = cursor
-                                    .getLong(AgendaWindowAdapter.INDEX_INSTANCE_ID);
-                            // Set up a dummy view holder so we have the right all day
-                            // info when the view is created.
-                            // TODO determine the full set of what might be useful to
-                            // know about the selected view and fill it in.
-                            mSelectedVH = new AgendaAdapter.ViewHolder();
-                            mSelectedVH.allDay =
-                                cursor.getInt(AgendaWindowAdapter.INDEX_ALL_DAY) != 0;
-                            tempCursor = cursor;
-                        }
-                    } else if (newPosition != -1) {
-                         tempCursor = getCursorByPosition(newPosition);
-                         tempCursorPosition = getCursorPositionByPosition(newPosition);
-                    }
-                    if (tempCursor != null) {
-                        AgendaItem item = buildAgendaItemFromCursor(tempCursor, tempCursorPosition,
-                                false);
-                        long selectedTime = findStartTimeFromPosition(newPosition);
-                        if (DEBUGLOG) {
-                            Log.d(TAG, "onQueryComplete: Sending View Event...");
-                        }
-                        sendViewEvent(item, selectedTime);
                     }
                 }
             } else {
