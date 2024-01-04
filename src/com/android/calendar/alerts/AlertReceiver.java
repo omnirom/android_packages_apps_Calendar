@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
@@ -45,7 +46,7 @@ import android.widget.RemoteViews;
 
 import com.android.calendar.R;
 import com.android.calendar.Utils;
-import com.android.calendar.alerts.AlertService.NotificationWrapper;
+import com.android.calendar.alerts.AlertJobService.NotificationWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ import java.util.regex.Pattern;
  *    -n "com.android.calendar/.alerts.AlertReceiver"
  */
 public class AlertReceiver extends BroadcastReceiver {
-    private static final String TAG = "AlertReceiver";
+    private static final String TAG = "Calendar:AlertReceiver";
 
     private static final String MAP_ACTION = "com.android.calendar.MAP";
     private static final String CALL_ACTION = "com.android.calendar.CALL";
@@ -77,8 +78,6 @@ public class AlertReceiver extends BroadcastReceiver {
     public static final String EVENT_REMINDER_APP_ACTION =
             "com.android.calendar.EVENT_REMINDER_APP";
 
-    static final Object mStartingServiceSync = new Object();
-    static PowerManager.WakeLock mStartingService;
     private static final Pattern mBlankLinePattern = Pattern.compile("^\\s*$[\n\r]",
             Pattern.MULTILINE);
 
@@ -89,16 +88,9 @@ public class AlertReceiver extends BroadcastReceiver {
     private static final String TEL_PREFIX = "tel:";
     private static final int MAX_NOTIF_ACTIONS = 3;
 
-    private static Handler sAsyncHandler;
-    static {
-        HandlerThread thr = new HandlerThread("AlertReceiver async");
-        thr.start();
-        sAsyncHandler = new Handler(thr.getLooper());
-    }
-
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if (AlertService.DEBUG) {
+        if (AlertJobService.DEBUG) {
             Log.d(TAG, "onReceive: a=" + intent.getAction() + " " + intent.toString());
         }
         if (MAP_ACTION.equals(intent.getAction())) {
@@ -117,7 +109,7 @@ public class AlertReceiver extends BroadcastReceiver {
                     // No location was found, so update all notifications.
                     // Our alert service does not currently allow us to specify only one
                     // specific notification to refresh.
-                    AlertService.updateAlertNotification(context);
+                    AlertJobService.updateAlertNotification(context);
                 }
             }
         } else if (CALL_ACTION.equals(intent.getAction())) {
@@ -136,7 +128,7 @@ public class AlertReceiver extends BroadcastReceiver {
                     // No call location was found, so update all notifications.
                     // Our alert service does not currently allow us to specify only one
                     // specific notification to refresh.
-                    AlertService.updateAlertNotification(context);
+                    AlertJobService.updateAlertNotification(context);
                 }
             }
         } else if (MAIL_ACTION.equals(intent.getAction())) {
@@ -151,48 +143,14 @@ public class AlertReceiver extends BroadcastReceiver {
                 context.startActivity(i);
             }
         } else {
-            Intent i = new Intent();
-            i.setClass(context, AlertService.class);
-            i.putExtras(intent);
-            i.putExtra("action", intent.getAction());
+            PersistableBundle extras = new PersistableBundle();
+            extras.putString("action", intent.getAction());
             Uri uri = intent.getData();
 
             if (uri != null) {
-                i.putExtra("uri", uri.toString());
+                extras.putString("uri", uri.toString());
             }
-            beginStartingService(context, i);
-        }
-    }
-
-    /**
-     * Start the service to process the current event notifications, acquiring
-     * the wake lock before returning to ensure that the service will run.
-     */
-    public static void beginStartingService(Context context, Intent intent) {
-        synchronized (mStartingServiceSync) {
-            if (mStartingService == null) {
-                PowerManager pm =
-                    (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-                mStartingService = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                        "StartingAlertService");
-                mStartingService.setReferenceCounted(false);
-            }
-            mStartingService.acquire();
-            context.startForegroundService(intent);
-        }
-    }
-
-    /**
-     * Called back by the service when it has finished processing notifications,
-     * releasing the wake lock if the service is now stopping.
-     */
-    public static void finishStartingService(Service service, int startId) {
-        synchronized (mStartingServiceSync) {
-            if (mStartingService != null) {
-                if (service.stopSelfResult(startId)) {
-                    mStartingService.release();
-                }
-            }
+            AlertJobService.scheduleUpdateNow(context, extras);
         }
     }
 
@@ -433,7 +391,7 @@ public class AlertReceiver extends BroadcastReceiver {
      * Creates an expanding digest notification for expired events.
      */
     public static NotificationWrapper makeDigestNotification(Context context,
-            ArrayList<AlertService.NotificationInfo> notificationInfos, String digestTitle,
+            ArrayList<AlertJobService.NotificationInfo> notificationInfos, String digestTitle,
             boolean expandable) {
         if (notificationInfos == null || notificationInfos.size() < 1) {
             return null;
@@ -479,7 +437,7 @@ public class AlertReceiver extends BroadcastReceiver {
                 // Multiple reminders.  Combine into an expanded digest notification.
                 Notification.InboxStyle expandedBuilder = new Notification.InboxStyle();
                 int i = 0;
-                for (AlertService.NotificationInfo info : notificationInfos) {
+                for (AlertJobService.NotificationInfo info : notificationInfos) {
                     if (i < NOTIFICATION_DIGEST_MAX_LENGTH) {
                         String name = info.eventName;
                         if (TextUtils.isEmpty(name)) {
@@ -551,8 +509,8 @@ public class AlertReceiver extends BroadcastReceiver {
         }
 
         NotificationWrapper nw = new NotificationWrapper(n);
-        if (AlertService.DEBUG) {
-            for (AlertService.NotificationInfo info : notificationInfos) {
+        if (AlertJobService.DEBUG) {
+            for (AlertJobService.NotificationInfo info : notificationInfos) {
                 nw.add(new NotificationWrapper(null, 0, info.eventId, info.startMillis,
                         info.endMillis));
             }

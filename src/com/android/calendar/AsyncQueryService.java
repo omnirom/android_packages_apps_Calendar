@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * application which serializes all the calls.
  */
 public class AsyncQueryService extends Handler {
-    private static final String TAG = "AsyncQuery";
+    private static final String TAG = "Calendar:AsyncQuery";
     static final boolean localLOGV = false;
 
     // Used for generating unique tokens for calls to this service

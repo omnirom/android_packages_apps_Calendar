@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.CalendarContract.CalendarAlerts;
+import android.util.Log;
 
 import com.android.calendar.Utils;
 
@@ -33,6 +34,8 @@ import com.android.calendar.Utils;
  * a new alarm in the future.
  */
 public class SnoozeAlarmsService extends IntentService {
+    private static final String TAG = "Calendar:SnoozeAlarmsService";
+
     private static final String[] PROJECTION = new String[] {
             CalendarAlerts.STATE,
     };
@@ -79,13 +82,14 @@ public class SnoozeAlarmsService extends IntentService {
 
             // Add a new alarm
             long alarmTime = System.currentTimeMillis() + Utils.getDefaultSnoozeTime(this);
+            if (AlertJobService.DEBUG) Log.d(TAG, "create snooze alarm at = " + alarmTime);
             ContentValues values = AlertUtils.makeContentValues(eventId, eventStart, eventEnd,
                     alarmTime, 0);
             resolver.insert(uri, values);
             AlertUtils.scheduleAlarm(SnoozeAlarmsService.this, AlertUtils.createAlarmManager(this),
                     alarmTime);
         }
-        AlertService.updateAlertNotification(this);
+        AlertJobService.updateAlertNotification(this);
         stopSelf();
     }
 }

@@ -84,7 +84,7 @@ import java.util.regex.Pattern;
 
 public class Utils {
     private static final boolean DEBUG = false;
-    private static final String TAG = "CalUtils";
+    private static final String TAG = "Calendar:Utils";
 
     // Set to 0 until we have UI to perform undo
     public static final long UNDO_DELAY = 0;

@@ -44,7 +44,7 @@ import java.util.Map;
  * and reminders tables for the next upcoming alert.
  */
 public class AlarmScheduler {
-    private static final String TAG = "AlarmScheduler";
+    private static final String TAG = "Calendar:AlarmScheduler";
 
     private static final String INSTANCES_WHERE = Events.VISIBLE + "=? AND "
             + Instances.BEGIN + ">=? AND " + Instances.BEGIN + "<=? AND "
@@ -178,7 +178,7 @@ public class AlarmScheduler {
     private static void queryNextReminderAndSchedule(Cursor instancesCursor, Context context,
             ContentResolver contentResolver, AlarmManagerInterface alarmManager,
             int batchSize, long currentMillis) {
-        if (AlertService.DEBUG) {
+        if (AlertJobService.DEBUG) {
             int eventCount = instancesCursor.getCount();
             if (eventCount == 0) {
                 Log.d(TAG, "No events found starting within 1 week.");
@@ -302,7 +302,7 @@ public class AlarmScheduler {
         // Add a slight delay (see comments on the member var).
         alarmTime += ALARM_DELAY_MS;
 
-        if (AlertService.DEBUG) {
+        if (AlertJobService.DEBUG) {
             Time time = new Time();
             time.set(alarmTime);
             String schedTime = time.format("%a, %b %d, %Y %I:%M%P");

@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class AlertUtils {
-    private static final String TAG = "AlertUtils";
+    private static final String TAG = "Calendar:AlertUtils";
     static final boolean DEBUG = false;
 
     // We use one notification id for the expired events notification.  All

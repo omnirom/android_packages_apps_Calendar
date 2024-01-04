@@ -19,7 +19,11 @@ package com.android.calendar.alerts;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.Service;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -29,7 +33,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -56,12 +60,13 @@ import java.util.TimeZone;
 /**
  * This service is used to handle calendar event reminders.
  */
-public class AlertService extends Service {
+public class AlertJobService extends JobService {
     static final boolean DEBUG = true;
-    private static final String TAG = "AlertService";
+    private static final String TAG = "Calendar:AlertJobService";
 
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
+    public static final int ONCE_UPDATE_JOB_ID = 1;
 
     static final String[] ALERT_PROJECTION = new String[] {
         CalendarAlerts._ID,                     // 0
@@ -113,14 +118,7 @@ public class AlertService extends Service {
     public static final int MAX_NOTIFICATIONS = 20;
     public static final int REFRESH_NOTIFICATION_ID = MAX_NOTIFICATIONS + 1;
 
-    // Shared prefs key for storing whether the EVENT_REMINDER event from the provider
-    // was ever received.  Some OEMs modified this provider broadcast, so we had to
-    // do the alarm scheduling here in the app, for the unbundled app's reminders to work.
-    // If the EVENT_REMINDER event was ever received, we know we can skip our secondary
-    // alarm scheduling.
-    private static final String PROVIDER_REMINDER_PREF_KEY =
-            "preference_received_provider_reminder_broadcast";
-    private static Boolean sReceivedProviderReminderBroadcast = null;
+    private JobParameters mJobParameters;
 
     // Added wrapper for testing
     public static class NotificationWrapper {
@@ -172,7 +170,7 @@ public class AlertService extends Service {
     }
 
     void processMessage(Message msg) {
-        Bundle bundle = (Bundle) msg.obj;
+        PersistableBundle bundle = (PersistableBundle) msg.obj;
 
         // On reboot, update the notification bar with the contents of the
         // CalendarAlerts table.
@@ -182,43 +180,12 @@ public class AlertService extends Service {
                     + " Action = " + action);
         }
 
-        // Some OEMs had changed the provider's EVENT_REMINDER broadcast to their own event,
-        // which broke our unbundled app's reminders.  So we added backup alarm scheduling to the
-        // app, but we know we can turn it off if we ever receive the EVENT_REMINDER broadcast.
-        boolean providerReminder = action.equals(
-                android.provider.CalendarContract.ACTION_EVENT_REMINDER);
-        if (providerReminder) {
-            if (sReceivedProviderReminderBroadcast == null) {
-                sReceivedProviderReminderBroadcast = Utils.getSharedPreference(this,
-                        PROVIDER_REMINDER_PREF_KEY, false);
-            }
-
-            if (!sReceivedProviderReminderBroadcast) {
-                sReceivedProviderReminderBroadcast = true;
-                Log.d(TAG, "Setting key " + PROVIDER_REMINDER_PREF_KEY + " to: true");
-                Utils.setSharedPreference(this, PROVIDER_REMINDER_PREF_KEY, true);
-            }
-        }
-
-        if (providerReminder ||
-                action.equals(Intent.ACTION_PROVIDER_CHANGED) ||
+        if (action.equals(Intent.ACTION_PROVIDER_CHANGED) ||
                 action.equals(android.provider.CalendarContract.ACTION_EVENT_REMINDER) ||
                 action.equals(AlertReceiver.EVENT_REMINDER_APP_ACTION) ||
                 action.equals(Intent.ACTION_LOCALE_CHANGED)) {
 
             Utils.refreshCalendars(this);
-            
-            // b/7652098: Add a delay after the provider-changed event before refreshing
-            // notifications to help issue with the unbundled app installed on HTC having
-            // stale notifications.
-            if (action.equals(Intent.ACTION_PROVIDER_CHANGED)) {
-                try {
-                    Thread.sleep(5000);
-                } catch (Exception e) {
-                    // Ignore.
-                }
-            }
-
             updateAlertNotification(this);
         } else if (action.equals(Intent.ACTION_TIME_CHANGED) ||
                 action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
@@ -230,11 +197,8 @@ public class AlertService extends Service {
         }
 
         // Schedule the alarm for the next upcoming reminder, if not done by the provider.
-        if (sReceivedProviderReminderBroadcast == null || !sReceivedProviderReminderBroadcast) {
-            Log.d(TAG, "Scheduling next alarm with AlarmScheduler. "
-                   + "sEventReminderReceived: " + sReceivedProviderReminderBroadcast);
-            AlarmScheduler.scheduleNextAlarm(this);
-        }
+        Log.d(TAG, "Scheduling next alarm with AlarmScheduler");
+        AlarmScheduler.scheduleNextAlarm(this);
     }
 
     static void dismissOldAlerts(Context context) {
@@ -260,7 +224,7 @@ public class AlertService extends Service {
         SharedPreferences prefs = GeneralPreferences.getSharedPreferences(context);
 
         if (DEBUG) {
-            Log.d(TAG, "Beginning updateAlertNotification");
+            Log.d(TAG, "Beginning updateAlertNotification currentTime = " + currentTime);
         }
 
         Cursor alertCursor = cr.query(CalendarAlerts.CONTENT_URI, ALERT_PROJECTION,
@@ -273,7 +237,7 @@ public class AlertService extends Service {
             }
 
             if (DEBUG) Log.d(TAG, "No fired or scheduled alerts");
-            nm.cancelAll();
+            //nm.cancelAll();
             return false;
         }
 
@@ -297,7 +261,7 @@ public class AlertService extends Service {
 
         if (highPriorityEvents.size() + mediumPriorityEvents.size()
                 + lowPriorityEvents.size() == 0) {
-            nm.cancelAll();
+            //nm.cancelAll();
             return true;
         }
 
@@ -543,7 +507,6 @@ public class AlertService extends Service {
                 final Uri alertUri = ContentUris
                         .withAppendedId(CalendarAlerts.CONTENT_URI, alertId);
                 final long alarmTime = alertCursor.getLong(ALERT_INDEX_ALARM_TIME);
-                boolean forceQuiet = false;
 
                 int state = alertCursor.getInt(ALERT_INDEX_STATE);
                 final boolean allDay = alertCursor.getInt(ALERT_INDEX_ALL_DAY) != 0;
@@ -551,12 +514,13 @@ public class AlertService extends Service {
                 // Use app local storage to keep track of fired alerts to fix problem of multiple
                 // installed calendar apps potentially causing missed alarms.
                 boolean newAlertOverride = false;
-                if (AlertUtils.BYPASS_DB && ((currentTime - alarmTime) / MINUTE_MS < 1)) {
+                boolean alreadyFired = false;
+                if (AlertUtils.BYPASS_DB) {
                     // To avoid re-firing alerts, only fire if alarmTime is very recent.  Otherwise
                     // we can get refires for non-dismissed alerts after app installation, or if the
                     // SharedPrefs was cleared too early.  This means alerts that were timed while
                     // the phone was off may show up silently in the notification bar.
-                    boolean alreadyFired = AlertUtils.hasAlertFiredInSharedPrefs(context, eventId,
+                    alreadyFired = AlertUtils.hasAlertFiredInSharedPrefs(context, eventId,
                             beginTime, alarmTime);
                     if (!alreadyFired) {
                         newAlertOverride = true;
@@ -575,10 +539,10 @@ public class AlertService extends Service {
                             .append(" beginTime:").append(beginTime)
                             .append(" endTime:").append(endTime)
                             .append(" allDay:").append(allDay)
-                            .append(" alarmTime:").append(alarmTime)
-                            .append(" forceQuiet:").append(forceQuiet);
+                            .append(" alarmTime:").append(alarmTime);
                     if (AlertUtils.BYPASS_DB) {
                         msgBuilder.append(" newAlertOverride: " + newAlertOverride);
+                        msgBuilder.append(" alreadyFired: " + alreadyFired);
                     }
                     Log.d(TAG, msgBuilder.toString());
                 }
@@ -600,11 +564,6 @@ public class AlertService extends Service {
                     if (state == CalendarAlerts.STATE_SCHEDULED || newAlertOverride) {
                         newState = CalendarAlerts.STATE_FIRED;
                         numFired++;
-                        // If quiet hours are forcing the alarm to be silent,
-                        // keep newAlert as false so it will not make noise.
-                        if (!forceQuiet) {
-                            newAlert = true;
-                        }
 
                         // Record the received time in the CalendarAlerts table.
                         // This is useful for finding bugs that cause alarms to be
@@ -635,7 +594,7 @@ public class AlertService extends Service {
                 // Write row to if anything changed
                 if (values.size() > 0) cr.update(alertUri, values, null, null);
 
-                if (state != CalendarAlerts.STATE_FIRED) {
+                if (state != CalendarAlerts.STATE_FIRED || alreadyFired) {
                     continue;
                 }
 
@@ -882,15 +841,33 @@ public class AlertService extends Service {
         @Override
         public void handleMessage(Message msg) {
             processMessage(msg);
-            // NOTE: We MUST not call stopSelf() directly, since we need to
-            // make sure the wake lock acquired by AlertReceiver is released.
-            AlertReceiver.finishStartingService(AlertService.this, msg.arg1);
+            jobFinished(mJobParameters, false);
         }
     }
 
     @Override
+    public boolean onStopJob(JobParameters params) {
+        if (DEBUG) Log.d(TAG, "onStopJob " + params.getJobId());
+        mServiceLooper.quit();
+        return true;
+    }
+
+    @Override
+    public boolean onStartJob(JobParameters params) {
+        if (DEBUG) Log.d(TAG, "onStartJob " + params.getJobId());
+        mJobParameters = params;
+        Message msg = mServiceHandler.obtainMessage();
+        msg.arg1 = params.getJobId();
+        msg.obj = params.getExtras();
+        mServiceHandler.sendMessage(msg);
+        return true;
+    }
+    
+    @Override
     public void onCreate() {
-        HandlerThread thread = new HandlerThread("AlertService",
+        super.onCreate();
+        if (DEBUG) Log.d(TAG, "onCreate");
+        HandlerThread thread = new HandlerThread("AlertJobService",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
 
@@ -901,37 +878,24 @@ public class AlertService extends Service {
         AlertUtils.flushOldAlertsFromInternalStorage(getApplication());
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (isPermissionEnabled(this)) {
-            if (intent != null) {
-                Notification notification = (new Notification.Builder(this, com.android.calendar.CalendarApplication.REFRESH_CHANNEL_ID)).
-                    setContentTitle(getString(R.string.calendar_refresh)).
-                    setSmallIcon(R.drawable.stat_notify_calendar).
-                    setShowWhen(false).
-                    build();
-                startForeground(REFRESH_NOTIFICATION_ID, notification);
+    public static boolean scheduleUpdateNow(Context context, PersistableBundle extras) {
+        if (DEBUG) Log.d(TAG, "scheduleUpdateNow");
 
-                Message msg = mServiceHandler.obtainMessage();
-                msg.arg1 = startId;
-                msg.obj = intent.getExtras();
-                mServiceHandler.sendMessage(msg);
-            }
+        if (isPermissionEnabled(context)) {
+            ComponentName component = new ComponentName(context, AlertJobService.class);
+            JobInfo job = new JobInfo.Builder(ONCE_UPDATE_JOB_ID, component)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setMinimumLatency(1)
+                .setOverrideDeadline(1)
+                .setExtras(extras)
+                .build();
+            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            jobScheduler.schedule(job);
+            return true;
         } else {
             Log.e(TAG, "Blocked onStartCommand because of missing permissions");
-            return START_NOT_STICKY;
+            return false;
         }
-        return START_REDELIVER_INTENT;
-    }
-
-    @Override
-    public void onDestroy() {
-        mServiceLooper.quit();
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     private static boolean isPermissionEnabled(Context context) {

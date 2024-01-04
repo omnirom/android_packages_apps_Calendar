@@ -58,7 +58,7 @@ public class DismissAlarmsService extends IntentService {
 
     @Override
     public void onHandleIntent(Intent intent) {
-        if (AlertService.DEBUG) {
+        if (AlertJobService.DEBUG) {
             Log.d(TAG, "onReceive: a=" + intent.getAction() + " " + intent.toString());
         }
 
