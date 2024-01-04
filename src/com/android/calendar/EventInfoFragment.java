@@ -1376,30 +1376,26 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             eventName = getActivity().getString(R.string.no_title_label);
         }
 
-        // 3rd parties might not have specified the start/end time when firing the
-        // Events.CONTENT_URI intent.  Update these with values read from the db.
-        if (mStartMillis == 0 && mEndMillis == 0) {
-            mStartMillis = mEventCursor.getLong(EVENT_INDEX_DTSTART);
-            mEndMillis = mEventCursor.getLong(EVENT_INDEX_DTEND);
-            if (mEndMillis == 0) {
-                String duration = mEventCursor.getString(EVENT_INDEX_DURATION);
-                if (!TextUtils.isEmpty(duration)) {
-                    try {
-                        Duration d = new Duration();
-                        d.parse(duration);
-                        long endMillis = mStartMillis + d.getMillis();
-                        if (endMillis >= mStartMillis) {
-                            mEndMillis = endMillis;
-                        } else {
-                            Log.d(TAG, "Invalid duration string: " + duration);
-                        }
-                    } catch (DateException e) {
-                        Log.d(TAG, "Error parsing duration string " + duration, e);
+        mStartMillis = mEventCursor.getLong(EVENT_INDEX_DTSTART);
+        mEndMillis = mEventCursor.getLong(EVENT_INDEX_DTEND);
+        if (mEndMillis == 0) {
+            String duration = mEventCursor.getString(EVENT_INDEX_DURATION);
+            if (!TextUtils.isEmpty(duration)) {
+                try {
+                    Duration d = new Duration();
+                    d.parse(duration);
+                    long endMillis = mStartMillis + d.getMillis();
+                    if (endMillis >= mStartMillis) {
+                        mEndMillis = endMillis;
+                    } else {
+                        Log.d(TAG, "Invalid duration string: " + duration);
                     }
+                } catch (DateException e) {
+                    Log.d(TAG, "Error parsing duration string " + duration, e);
                 }
-                if (mEndMillis == 0) {
-                    mEndMillis = mStartMillis;
-                }
+            }
+            if (mEndMillis == 0) {
+                mEndMillis = mStartMillis;
             }
         }
 
