@@ -398,7 +398,7 @@ public class GlobalDismissManager extends BroadcastReceiver {
                                 Long.parseLong(intent.getStringExtra(START_TIME))
                         ), System.currentTimeMillis());
                     }
-                    AlertService.updateAlertNotification(context);
+                    AlertJobService.updateAlertNotification(context);
                 }
                 return null;
             }

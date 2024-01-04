@@ -23,11 +23,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.CalendarCache;
 import android.provider.SearchRecentSuggestions;
@@ -122,7 +119,6 @@ public class GeneralPreferences extends PreferenceFragmentCompat implements OnPr
     public static final int DEFAULT_DETAILED_VIEW = CalendarController.ViewType.DAY;
     public static final boolean DEFAULT_SHOW_WEEK_NUM = false;
     // This should match the XML file.
-    public static final String DEFAULT_RINGTONE = "content://settings/system/notification_sound";
     public static final String SNOOZE_TIME_DEFAULT = "5";
     public static final String KEY_SNOOZE_TIME = "preferences_snooze_time";
 

@@ -22,7 +22,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 public class CalendarApplication extends Application {
-    public static final String REFRESH_CHANNEL_ID = "refresh";
+    private static final String REFRESH_CHANNEL_ID = "refresh";
     public static final String REMINDER_CHANNEL_ID = "reminder";
 
     @Override
@@ -46,12 +46,14 @@ public class CalendarApplication extends Application {
 
     private void makeNotificationChannels(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
-        final NotificationChannel channelRefresh =
+        if (nm.getNotificationChannel(REFRESH_CHANNEL_ID) != null) {
+            nm.deleteNotificationChannel(REFRESH_CHANNEL_ID);
+        }
+        /*final NotificationChannel channelRefresh =
                 new NotificationChannel(
                         REFRESH_CHANNEL_ID,
                         context.getString(R.string.notification_channel_refresh),
-                        NotificationManager.IMPORTANCE_LOW);
-        nm.createNotificationChannel(channelRefresh);
+                        NotificationManager.IMPORTANCE_LOW);*/
 
         final NotificationChannel channelReminder =
                 new NotificationChannel(

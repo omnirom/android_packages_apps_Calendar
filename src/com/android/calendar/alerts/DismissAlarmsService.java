@@ -38,7 +38,7 @@ import java.util.List;
  * Service for asynchronously marking fired alarms as dismissed.
  */
 public class DismissAlarmsService extends IntentService {
-    private static final String TAG = "DismissAlarmsService";
+    private static final String TAG = "Calendar:DismissAlarmsService";
     public static final String SHOW_ACTION = "com.android.calendar.SHOW";
     public static final String DISMISS_ACTION = "com.android.calendar.DISMISS";
 
@@ -58,7 +58,7 @@ public class DismissAlarmsService extends IntentService {
 
     @Override
     public void onHandleIntent(Intent intent) {
-        if (AlertService.DEBUG) {
+        if (AlertJobService.DEBUG) {
             Log.d(TAG, "onReceive: a=" + intent.getAction() + " " + intent.toString());
         }
 

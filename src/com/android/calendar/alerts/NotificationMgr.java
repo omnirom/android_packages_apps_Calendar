@@ -16,7 +16,7 @@
 
 package com.android.calendar.alerts;
 
-import com.android.calendar.alerts.AlertService.NotificationWrapper;
+import com.android.calendar.alerts.AlertJobService.NotificationWrapper;
 
 public abstract class NotificationMgr {
     public abstract void notify(int id, NotificationWrapper notification);
@@ -27,7 +27,7 @@ public abstract class NotificationMgr {
      * might post notifications and we don't want to affect those.
      */
     public void cancelAll() {
-        cancelAllBetween(0, AlertService.MAX_NOTIFICATIONS);
+        cancelAllBetween(0, AlertJobService.MAX_NOTIFICATIONS);
     }
 
     /**
