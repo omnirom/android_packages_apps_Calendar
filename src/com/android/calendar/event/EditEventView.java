@@ -910,7 +910,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             // from the provider, even if the count exceeds the calendar maximum.  (Also, for
             // a new event, we won't have a maxReminders value available.)
             mUnsupportedReminders.clear();
-            for (ReminderEntry re : reminders) {
+            reminders.stream().sorted().forEach(re -> {
                 if (mReminderMethodValues.contains(re.getMethod())
                         || re.getMethod() == Reminders.METHOD_DEFAULT) {
                     EventViewUtils.addReminder(mActivity, mScrollView, this, mReminderItems,
@@ -920,7 +920,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                     // TODO figure out a way to display unsupported reminders
                     mUnsupportedReminders.add(re);
                 }
-            }
+            });
             if (DEBUG) Log.d(TAG, "prepareReminders mReminders = " + model.mReminders + " mUnsupportedReminders = " + mUnsupportedReminders);
         }
 

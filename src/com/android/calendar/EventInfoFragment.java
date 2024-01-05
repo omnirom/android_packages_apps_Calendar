@@ -1652,6 +1652,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
         mReminders.clear();
         mReminders.addAll(mOriginalReminders);
+
         mHasAlarm = mReminders.size() > 0;
 
         if (DEBUG) Log.d(TAG, "initReminders mReminders = " + mReminders + " mUnsupportedReminders = " + mUnsupportedReminders);
@@ -1673,11 +1674,11 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             // Create a UI element for each reminder.  We display all of the reminders we get
             // from the provider, even if the count exceeds the calendar maximum.  (Also, for
             // a new event, we won't have a maxReminders value available.)
-            for (ReminderEntry re : mReminders) {
+            mReminders.stream().sorted().forEach(re -> {
                 EventViewUtils.addReminder(mActivity, mScrollView, this, mReminderViews,
                         mReminderMinuteValues, mReminderMinuteLabels, mReminderMethodValues,
                         mReminderMethodLabels, re, Integer.MAX_VALUE, mReminderChangeListener);
-            }
+            });
             EventViewUtils.updateAddReminderButton(mView, mReminderViews, mMaxReminders);
             // TODO show unsupported reminder types in some fashion.
         }

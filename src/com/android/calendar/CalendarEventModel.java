@@ -159,13 +159,13 @@ public class CalendarEventModel implements Serializable {
         }
 
         /**
-         * Comparison function for a sort ordered primarily descending by minutes,
+         * Comparison function for a sort ordered primarily ascending by minutes,
          * secondarily ascending by method type.
          */
         @Override
         public int compareTo(ReminderEntry re) {
             if (re.mMinutes != mMinutes) {
-                return re.mMinutes - mMinutes;
+                return mMinutes - re.mMinutes;
             }
             if (re.mMethod != mMethod) {
                 return mMethod - re.mMethod;

@@ -817,8 +817,6 @@ public class EditEventHelper {
         if (reminders.size() <= 1) {
             return;
         }
-        // sort
-        Collections.sort(reminders);
 
         // remove duplicates
         ReminderEntry prev = reminders.get(reminders.size()-1);
