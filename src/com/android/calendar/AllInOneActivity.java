@@ -501,14 +501,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     }
 
     @Override
-    protected void onUserLeaveHint() {
-        if (mController != null) {
-            mController.sendEvent(this, EventType.USER_HOME, null, null, -1, ViewType.CURRENT);
-        }
-        super.onUserLeaveHint();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mController == null) {

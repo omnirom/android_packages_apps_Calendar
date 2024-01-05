@@ -70,7 +70,6 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
     private SearchView mSearchView;
 
     private Handler mHandler;
-    private BroadcastReceiver mTimeChangesReceiver;
     private ContentResolver mContentResolver;
 
     private final ContentObserver mObserver = new ContentObserver(new Handler()) {
@@ -82,16 +81,6 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         @Override
         public void onChange(boolean selfChange) {
             eventsChanged();
-        }
-    };
-
-    // runs when a timezone was changed and updates the today icon
-    private final Runnable mTimeChangesUpdater = new Runnable() {
-        @Override
-        public void run() {
-            Utils.setMidnightUpdater(mHandler, mTimeChangesUpdater,
-                    Utils.getTimeZone(SearchActivity.this, mTimeChangesUpdater));
-            SearchActivity.this.invalidateOptionsMenu();
         }
     };
 
@@ -199,7 +188,7 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
         item.setOnActionExpandListener(this);
         mSearchView = (SearchView) MenuItemCompat.getActionView(item);
         EditText searchPlate = (EditText) mSearchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        searchPlate.setHint(R.string.search);
+        searchPlate.setHint(R.string.search_event_hint);
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setQuery(mQuery, false);
 
@@ -240,22 +229,12 @@ public class SearchActivity extends AppCompatActivity implements CalendarControl
     @Override
     protected void onResume() {
         super.onResume();
-
-        Utils.setMidnightUpdater(
-                mHandler, mTimeChangesUpdater, Utils.getTimeZone(this, mTimeChangesUpdater));
-        // Make sure the today icon is up to date
-        invalidateOptionsMenu();
-        mTimeChangesReceiver = Utils.setTimeChangesReceiver(this, mTimeChangesUpdater);
         mContentResolver.registerContentObserver(Events.CONTENT_URI, true, mObserver);
-        // We call this in case the user changed the time zone
-        eventsChanged();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Utils.resetMidnightUpdater(mHandler, mTimeChangesUpdater);
-        Utils.clearTimeChangesReceiver(this, mTimeChangesReceiver);
         mContentResolver.unregisterContentObserver(mObserver);
     }
 

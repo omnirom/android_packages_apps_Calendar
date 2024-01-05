@@ -25,6 +25,7 @@ import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
 import android.text.TextUtils;
 import android.text.util.Rfc822Token;
+import android.util.Log;
 
 import com.android.calendar.event.EditEventHelper;
 import com.android.calendar.event.EventColorCache;
@@ -43,7 +44,7 @@ import java.util.TimeZone;
  * the events table. Only fields that are important to the UI are included.
  */
 public class CalendarEventModel implements Serializable {
-    private static final String TAG = "CalendarEventModel";
+    private static final String TAG = "Calendar:CalendarEventModel";
 
     public static class Attendee implements Serializable {
         @Override
@@ -149,17 +150,7 @@ public class CalendarEventModel implements Serializable {
             }
 
             ReminderEntry re = (ReminderEntry) obj;
-
-            if (re.mMinutes != mMinutes) {
-                return false;
-            }
-
-            // Treat ALERT and DEFAULT as equivalent.  This is useful during the "has anything
-            // "changed" test, so that if DEFAULT is present, but we don't change anything,
-            // the internal conversion of DEFAULT to ALERT doesn't force a database update.
-            return re.mMethod == mMethod ||
-                (re.mMethod == Reminders.METHOD_DEFAULT && mMethod == Reminders.METHOD_ALERT) ||
-                (re.mMethod == Reminders.METHOD_ALERT && mMethod == Reminders.METHOD_DEFAULT);
+            return re.mMethod == mMethod && re.mMinutes == mMinutes;
         }
 
         @Override
@@ -365,22 +356,6 @@ public class CalendarEventModel implements Serializable {
         if (TextUtils.isEmpty(mOwnerAccount)) {
             return false;
         }
-        return true;
-    }
-
-    public boolean isEmpty() {
-        if (mTitle != null && mTitle.trim().length() > 0) {
-            return false;
-        }
-
-        if (mLocation != null && mLocation.trim().length() > 0) {
-            return false;
-        }
-
-        if (mDescription != null && mDescription.trim().length() > 0) {
-            return false;
-        }
-
         return true;
     }
 

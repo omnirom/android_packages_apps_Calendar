@@ -41,12 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventInfoActivity extends AppCompatActivity {
-//        implements CalendarController.EventHandler, SearchView.OnQueryTextListener,
-//        SearchView.OnCloseListener {
-
-    private static final String TAG = "EventInfoActivity";
+    private static final String TAG = "Calendar:EventInfoActivity";
     private EventInfoFragment mInfoFragment;
-    private long mStartMillis, mEndMillis;
     private long mEventId;
 
     // Create an observer so that we can update the views whenever a
@@ -54,14 +50,13 @@ public class EventInfoActivity extends AppCompatActivity {
     private final ContentObserver mObserver = new ContentObserver(new Handler()) {
         @Override
         public boolean deliverSelfNotifications() {
-            return false;
+            return true;
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            if (selfChange) return;
             if (mInfoFragment != null) {
-                mInfoFragment.reloadEvents();
+                mInfoFragment.reloadEvent();
             }
         }
     };
@@ -72,22 +67,11 @@ public class EventInfoActivity extends AppCompatActivity {
 
         // Get the info needed for the fragment
         Intent intent = getIntent();
-        int attendeeResponse = 0;
         mEventId = -1;
-        ArrayList<ReminderEntry> reminders = null;
 
         if (icicle != null) {
             mEventId = icicle.getLong(EventInfoFragment.BUNDLE_KEY_EVENT_ID);
-            mStartMillis = icicle.getLong(EventInfoFragment.BUNDLE_KEY_START_MILLIS);
-            mEndMillis = icicle.getLong(EventInfoFragment.BUNDLE_KEY_END_MILLIS);
-            attendeeResponse = icicle.getInt(EventInfoFragment.BUNDLE_KEY_ATTENDEE_RESPONSE);
-
-            reminders = Utils.readRemindersFromBundle(icicle);
         } else if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            mStartMillis = intent.getLongExtra(EXTRA_EVENT_BEGIN_TIME, 0);
-            mEndMillis = intent.getLongExtra(EXTRA_EVENT_END_TIME, 0);
-            attendeeResponse = intent.getIntExtra(ATTENDEE_STATUS,
-                    Attendees.ATTENDEE_STATUS_NONE);
             Uri data = intent.getData();
             if (data != null) {
                 try {
@@ -97,22 +81,10 @@ public class EventInfoActivity extends AppCompatActivity {
                         // Support non-standard VIEW intent format:
                         //dat = content://com.android.calendar/events/[id]/EventTime/[start]/[end]
                         mEventId = Long.parseLong(pathSegments.get(1));
-                        if (size > 4) {
-                            mStartMillis = Long.parseLong(pathSegments.get(3));
-                            mEndMillis = Long.parseLong(pathSegments.get(4));
-                        }
                     } else {
                         mEventId = Long.parseLong(data.getLastPathSegment());
                     }
                 } catch (NumberFormatException e) {
-                    if (mEventId == -1) {
-                        // do nothing here , deal with it later
-                    } else if (mStartMillis == 0 || mEndMillis ==0) {
-                        // Parsing failed on the start or end time , make sure the times were not
-                        // pulled from the intent's extras and reset them.
-                        mStartMillis = 0;
-                        mEndMillis = 0;
-                    }
                 }
             }
         }
@@ -138,8 +110,7 @@ public class EventInfoActivity extends AppCompatActivity {
         if (mInfoFragment == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();
-            mInfoFragment = new EventInfoFragment(this, mEventId, mStartMillis, mEndMillis,
-                    attendeeResponse, reminders);
+            mInfoFragment = new EventInfoFragment(this, mEventId);
             ft.replace(R.id.main_frame, mInfoFragment);
             ft.commit();
         }
@@ -182,7 +153,9 @@ public class EventInfoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        mInfoFragment.doSave();
+        if (mInfoFragment != null) {
+            mInfoFragment.doSave();
+        }
         super.onBackPressed();
     }
 }

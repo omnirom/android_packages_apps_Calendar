@@ -21,9 +21,11 @@ import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.CalendarContract.Events;
+import android.os.Handler;
+import android.provider.CalendarContract;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.MenuItem;
@@ -62,6 +64,20 @@ public class EditEventActivity extends AbstractCalendarActivity {
 
     private EventInfo mEventInfo;
 
+    private final ContentObserver mObserver = new ContentObserver(new Handler()) {
+        @Override
+        public boolean deliverSelfNotifications() {
+            return true;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            if (mEditFragment != null) {
+                mEditFragment.reloadEvent();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -84,7 +100,7 @@ public class EditEventActivity extends AbstractCalendarActivity {
             }
 
             mEditFragment = new EditEventFragment(mEventInfo, mReminders, mEventColorInitialized,
-                    mEventColor, false, intent);
+                    mEventColor, intent);
 
             mEditFragment.mShowModifyDialogOnLaunch = getIntent().getBooleanExtra(
                     CalendarController.EVENT_EDIT_ON_LAUNCH, false);
@@ -138,8 +154,8 @@ public class EditEventActivity extends AbstractCalendarActivity {
             info.startTime.set(begin);
         }
         info.id = eventId;
-        info.eventTitle = intent.getStringExtra(Events.TITLE);
-        info.calendarId = intent.getLongExtra(Events.CALENDAR_ID, -1);
+        info.eventTitle = intent.getStringExtra(CalendarContract.Events.TITLE);
+        info.calendarId = intent.getLongExtra(CalendarContract.Events.CALENDAR_ID, -1);
 
         if (allDay) {
             info.extraLong = CalendarController.EXTRA_CREATE_ALL_DAY;
@@ -150,12 +166,29 @@ public class EditEventActivity extends AbstractCalendarActivity {
     }
 
     public void colorActivity(int color) {
-        mEditFragment.colorActivity(color);
+        if (mEditFragment != null) {
+            mEditFragment.colorActivity(color);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        mEditFragment.doRevert();
+        if (mEditFragment != null) {
+            mEditFragment.doRevert();
+        }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI,
+                true, mObserver);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getContentResolver().unregisterContentObserver(mObserver);
     }
 }

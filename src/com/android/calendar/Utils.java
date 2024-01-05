@@ -2008,48 +2008,6 @@ public class Utils {
         return false;
     }
 
-    /**
-     * @param bundle The incoming bundle that contains the reminder info.
-     * @return ArrayList<ReminderEntry> of the reminder minutes and methods.
-     */
-    public static ArrayList<ReminderEntry> readRemindersFromBundle(Bundle bundle) {
-        ArrayList<ReminderEntry> reminders = null;
-
-        ArrayList<Integer> reminderMinutes = bundle.getIntegerArrayList(
-                        EventInfoFragment.BUNDLE_KEY_REMINDER_MINUTES);
-        ArrayList<Integer> reminderMethods = bundle.getIntegerArrayList(
-                EventInfoFragment.BUNDLE_KEY_REMINDER_METHODS);
-        if (reminderMinutes == null || reminderMethods == null) {
-            if (reminderMinutes != null || reminderMethods != null) {
-                String nullList = (reminderMinutes == null?
-                        "reminderMinutes" : "reminderMethods");
-                Log.d(TAG, String.format("Error resolving reminders: %s was null",
-                        nullList));
-            }
-            return null;
-        }
-
-        int numReminders = reminderMinutes.size();
-        if (numReminders == reminderMethods.size()) {
-            // Only if the size of the reminder minutes we've read in is
-            // the same as the size of the reminder methods. Otherwise,
-            // something went wrong with bundling them.
-            reminders = new ArrayList<ReminderEntry>(numReminders);
-            for (int reminder_i = 0; reminder_i < numReminders;
-                    reminder_i++) {
-                int minutes = reminderMinutes.get(reminder_i);
-                int method = reminderMethods.get(reminder_i);
-                reminders.add(ReminderEntry.valueOf(minutes, method));
-            }
-        } else {
-            Log.d(TAG, String.format("Error resolving reminders." +
-                        " Found %d reminderMinutes, but %d reminderMethods.",
-                    numReminders, reminderMethods.size()));
-        }
-
-        return reminders;
-    }
-
     public static int shiftColor(int color, float by) {
         if (by == 1f) return color;
         float[] hsv = new float[3];
