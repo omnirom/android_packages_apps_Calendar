@@ -23,6 +23,8 @@ import android.os.Bundle;
 import com.android.calendar.R;
 import com.android.colorpicker.ColorPickerDialog;
 
+import java.util.Arrays;
+
 /**
  * A dialog which displays event colors, with an additional button for the calendar color.
  */
@@ -40,7 +42,11 @@ public class EventColorPickerDialog extends ColorPickerDialog {
     public static EventColorPickerDialog newInstance(int[] colors, int selectedColor,
             int calendarColor) {
         EventColorPickerDialog ret = new EventColorPickerDialog();
-        ret.initialize(R.string.event_color_picker_dialog_title, colors, selectedColor, NUM_COLUMNS,
+        // add clendar color as last
+        int colorsWithCalendarColor[] = Arrays.copyOf(colors, colors.length + 1);
+        colorsWithCalendarColor[colors.length] = calendarColor;
+
+        ret.initialize(R.string.event_color_picker_dialog_title, colorsWithCalendarColor, selectedColor, NUM_COLUMNS,
                 SIZE_SMALL);
         ret.setCalendarColor(calendarColor);
         return ret;
