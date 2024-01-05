@@ -32,16 +32,12 @@
         android:drawableLeft="@drawable/ic_event_description"
         android:drawablePadding="8dp" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/expand_collapse"
-        android:layout_width="32dip"
-        android:layout_height="32dip"
-        android:layout_marginBottom="0dip"
-        android:paddingRight="0dip"
-        android:layout_gravity="right"
-        android:gravity="center_vertical|right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:visibility="gone"
-        android:src="@drawable/ic_expand_down"
-        android:scaleType="fitXY"/>
+        android:src="@drawable/ic_expand_down"/>
 
 </com.android.calendar.ExpandableTextView>

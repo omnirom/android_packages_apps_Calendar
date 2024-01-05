@@ -21,20 +21,18 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class ExpandableTextView extends LinearLayout implements OnClickListener {
 
     TextView mTv;
-    ImageButton mButton; // Button to expand/collapse
+    ImageView mButton; // Button to expand/collapse
 
     private boolean mRelayout = false;
     private boolean mCollapsed = true; // Show short version as default.
     private int mMaxCollapsedLines = 8; // The default number of lines;
-    private Drawable mExpandDrawable;
-    private Drawable mCollapseDrawable;
 
     public ExpandableTextView(Context context) {
         super(context);
@@ -53,8 +51,6 @@ public class ExpandableTextView extends LinearLayout implements OnClickListener 
 
     void init() {
         mMaxCollapsedLines = getResources().getInteger((R.integer.event_info_desc_line_num));
-        mExpandDrawable = getResources().getDrawable(R.drawable.ic_expand_down);
-        mCollapseDrawable = getResources().getDrawable(R.drawable.ic_expand_up);
     }
 
     @Override
@@ -64,7 +60,7 @@ public class ExpandableTextView extends LinearLayout implements OnClickListener 
         }
 
         mCollapsed = !mCollapsed;
-        mButton.setImageDrawable(mCollapsed ? mExpandDrawable : mCollapseDrawable);
+        mButton.setImageResource(mCollapsed ? R.drawable.ic_expand_down : R.drawable.ic_expand_up);
         mTv.setMaxLines(mCollapsed ? mMaxCollapsedLines : Integer.MAX_VALUE);
     }
 
@@ -104,7 +100,7 @@ public class ExpandableTextView extends LinearLayout implements OnClickListener 
     private void findViews() {
         mTv = (TextView) findViewById(R.id.expandable_text);
         mTv.setOnClickListener(this);
-        mButton = (ImageButton) findViewById(R.id.expand_collapse);
+        mButton = (ImageView) findViewById(R.id.expand_collapse);
         mButton.setOnClickListener(this);
     }
 
