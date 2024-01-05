@@ -52,7 +52,7 @@ import java.util.WeakHashMap;
 
 public class CalendarController {
     private static final boolean DEBUG = false;
-    private static final String TAG = "CalendarController";
+    private static final String TAG = "Calendar:CalendarController";
 
     public static final String EVENT_EDIT_ON_LAUNCH = "editMode";
 
@@ -118,9 +118,6 @@ public class CalendarController {
         final long EVENTS_CHANGED = 1L << 7;
 
         final long SEARCH = 1L << 8;
-
-        // User has pressed the home key
-        final long USER_HOME = 1L << 9;
 
         // date range has changed, update the title
         final long UPDATE_TITLE = 1L << 10;
@@ -849,8 +846,6 @@ public class CalendarController {
             tmp = "Refresh events";
         } else if ((eventInfo.eventType & EventType.SEARCH) != 0) {
             tmp = "Search";
-        } else if ((eventInfo.eventType & EventType.USER_HOME) != 0) {
-            tmp = "Gone home";
         } else if ((eventInfo.eventType & EventType.UPDATE_TITLE) != 0) {
             tmp = "Update title";
         }

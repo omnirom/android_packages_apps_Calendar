@@ -45,11 +45,17 @@
         android:id="@+id/calendar_selector_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="20dip"
+        android:paddingStart="15dip"
         android:paddingEnd="15dip"
         android:paddingBottom="15dip"
         android:paddingTop="5dip"
         android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_event_calendar_white" />
 
         <Spinner
             android:id="@+id/calendars_spinner"
@@ -58,6 +64,8 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="center_vertical"
+            android:paddingStart="10dip"
+            android:paddingEnd="10dip"
             style="@style/TextAppearance.Calendar_Spinner" />
 
         <ImageView
@@ -76,11 +84,17 @@
         android:id="@+id/calendar_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="20dip"
+        android:paddingStart="15dip"
         android:paddingEnd="15dip"
         android:paddingBottom="15dip"
         android:paddingTop="5dip"
         android:orientation="horizontal" >
+
+       <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_event_calendar_white" />
 
         <TextView
             android:id="@+id/calendar_textview"
@@ -90,7 +104,9 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:textColor="#FFFFFFFF" />
+            android:paddingStart="10dip"
+            android:paddingEnd="10dip"
+            android:textColor="#fff" />
 
         <ImageView
             android:id="@+id/change_color_existing_event"

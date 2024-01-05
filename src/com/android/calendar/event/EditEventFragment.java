@@ -78,8 +78,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class EditEventFragment extends Fragment implements EventHandler, OnColorSelectedListener {
-    private static final String TAG = "EditEventActivity";
+public class EditEventFragment extends Fragment implements OnColorSelectedListener {
+    private static final String TAG = "Calendar:EditEventActivity";
     private static final String COLOR_PICKER_DIALOG_TAG = "ColorPickerDialog";
 
     private static final int REQUEST_CODE_COLOR_PICKER = 0;
@@ -87,7 +87,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     private static final String BUNDLE_KEY_MODEL = "key_model";
     private static final String BUNDLE_KEY_EDIT_STATE = "key_edit_state";
     private static final String BUNDLE_KEY_EVENT = "key_event";
-    private static final String BUNDLE_KEY_READ_ONLY = "key_read_only";
     private static final String BUNDLE_KEY_EDIT_ON_LAUNCH = "key_edit_on_launch";
     private static final String BUNDLE_KEY_SHOW_COLOR_PALETTE = "show_color_palette";
 
@@ -136,8 +135,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
     private final Done mOnDone = new Done();
 
-    private boolean mSaveOnDetach = true;
-    private boolean mIsReadOnly = false;
     public boolean mShowModifyDialogOnLaunch = false;
     private boolean mShowColorPalette = false;
     private InputMethodManager mInputMethodManager;
@@ -173,7 +170,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                         // was deleted.
                         cursor.close();
                         mOnDone.setDoneCode(Utils.DONE_EXIT);
-                        mSaveOnDetach = false;
                         mOnDone.run();
                         return;
                     }
@@ -425,13 +421,12 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     }
 
     public EditEventFragment() {
-        this(null, null, false, -1, false, null);
+        this(null, null, false, -1, null);
     }
 
     public EditEventFragment(EventInfo event, ArrayList<ReminderEntry> reminders,
-            boolean eventColorInitialized, int eventColor, boolean readOnly, Intent intent) {
+            boolean eventColorInitialized, int eventColor, Intent intent) {
         mEvent = event;
-        mIsReadOnly = readOnly;
         mIntent = intent;
 
         mReminders = reminders;
@@ -583,16 +578,11 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             if (savedInstanceState.containsKey(BUNDLE_KEY_EVENT)) {
                 mEventBundle = (EventBundle) savedInstanceState.getSerializable(BUNDLE_KEY_EVENT);
             }
-            if (savedInstanceState.containsKey(BUNDLE_KEY_READ_ONLY)) {
-                mIsReadOnly = savedInstanceState.getBoolean(BUNDLE_KEY_READ_ONLY);
-            }
             if (savedInstanceState.containsKey(BUNDLE_KEY_SHOW_COLOR_PALETTE)) {
                 mShowColorPalette = savedInstanceState.getBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE);
             }
-
         }
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -604,24 +594,11 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     public boolean onOptionsItemSelected(MenuItem item) {
         final int itemId = item.getItemId();
         if (itemId == R.id.action_done) {
-            if (EditEventHelper.canModifyEvent(mModel) || EditEventHelper.canRespond(mModel)) {
-                if (mView != null && mView.prepareForSave()) {
-                    if (mModification == Utils.MODIFY_UNINITIALIZED) {
-                        mModification = Utils.MODIFY_ALL;
-                    }
-                    mOnDone.setDoneCode(Utils.DONE_SAVE | Utils.DONE_EXIT);
-                    mOnDone.run();
-                } else {
-                    doRevert();
-                }
-            } else if (EditEventHelper.canAddReminders(mModel) && mModel.mId != -1
-                    && mOriginalModel != null && mView.prepareForSave()) {
-                saveReminders();
-                mOnDone.setDoneCode(Utils.DONE_EXIT);
-                mOnDone.run();
-            } else {
-                doRevert();
+            if (mModification == Utils.MODIFY_UNINITIALIZED) {
+                mModification = Utils.MODIFY_ALL;
             }
+            mOnDone.setDoneCode(Utils.DONE_SAVE | Utils.DONE_EXIT);
+            mOnDone.run();
             return true;
         } else if (itemId == android.R.id.home) {
             Log.d(TAG, "id.home");
@@ -630,30 +607,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void saveReminders() {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>(3);
-        boolean changed = EditEventHelper.saveReminders(ops, mModel.mId, mModel.mReminders,
-                mOriginalModel.mReminders, false /* no force save */);
-
-        if (!changed) {
-            return;
-        }
-
-        AsyncQueryService service = new AsyncQueryService(getActivity());
-        service.startBatch(0, null, Calendars.CONTENT_URI.getAuthority(), ops, 0);
-        // Update the "hasAlarm" field for the event
-        Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, mModel.mId);
-        int len = mModel.mReminders.size();
-        boolean hasAlarm = len > 0;
-        if (hasAlarm != mOriginalModel.mHasAlarm) {
-            ContentValues values = new ContentValues();
-            values.put(Events.HAS_ALARM, hasAlarm ? 1 : 0);
-            service.startUpdate(0, null, uri, values, null, null, 0);
-        }
-
-        Toast.makeText(getActivity(), R.string.saving_event, Toast.LENGTH_SHORT).show();
     }
 
     protected void displayEditWhichDialog() {
@@ -739,39 +692,19 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
 
         @Override
         public void run() {
-            // We only want this to get called once, either because the user
-            // pressed back/home or one of the buttons on screen
-            mSaveOnDetach = false;
             if (mModification == Utils.MODIFY_UNINITIALIZED) {
                 // If this is uninitialized the user hit back, the only
                 // changeable item is response to default to all events.
                 mModification = Utils.MODIFY_ALL;
             }
 
-            if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null
-                    && (EditEventHelper.canRespond(mModel)
-                            || EditEventHelper.canModifyEvent(mModel)
-                            || EditEventHelper.canAddReminders(mModel))
-                    && mView.prepareForSave()
-                    && !isEmptyNewEvent()
-                    && mHelper.saveEvent(mModel, mOriginalModel, mModification)) {
-                int stringResource;
-                if (!mModel.mAttendeesList.isEmpty()) {
-                    if (mModel.mUri != null) {
-                        stringResource = R.string.saving_event_with_guest;
-                    } else {
-                        stringResource = R.string.creating_event_with_guest;
-                    }
-                } else {
-                    if (mModel.mUri != null) {
-                        stringResource = R.string.saving_event;
-                    } else {
-                        stringResource = R.string.creating_event;
-                    }
+            if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null) {
+                if ((EditEventHelper.canRespond(mModel)
+                        || EditEventHelper.canModifyEvent(mModel)
+                        || EditEventHelper.canAddReminders(mModel))
+                        && mView.prepareForSave()) {
+                    mHelper.saveEvent(mModel, mOriginalModel, mModification);
                 }
-                Toast.makeText(getActivity(), stringResource, Toast.LENGTH_SHORT).show();
-            } else if ((mCode & Utils.DONE_SAVE) != 0 && mModel != null && isEmptyNewEvent()) {
-                Toast.makeText(getActivity(), R.string.empty_event, Toast.LENGTH_SHORT).show();
             }
 
             if ((mCode & Utils.DONE_DELETE) != 0 && mOriginalModel != null
@@ -791,39 +724,8 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                         break;
                 }
                 DeleteEventHelper deleteHelper = new DeleteEventHelper(
-                        getActivity(), getActivity(), !mIsReadOnly /* exitWhenDone */);
+                        getActivity(), getActivity(), true);
                 deleteHelper.delete(begin, end, mOriginalModel, which);
-            }
-
-            if ((mCode & Utils.DONE_EXIT) != 0) {
-                // This will exit the edit event screen, should be called
-                // when we want to return to the main calendar views
-                /*if ((mCode & Utils.DONE_SAVE) != 0) {
-                    if (getActivity() != null) {
-                        long start = mModel.mStart;
-                        long end = mModel.mEnd;
-                        if (mModel.mAllDay) {
-                            // For allday events we want to go to the day in the
-                            // user's current tz
-                            String tz = Utils.getTimeZone(getActivity(), null);
-                            Time t = new Time(Time.TIMEZONE_UTC);
-                            t.set(start);
-                            t.timezone = tz;
-                            start = t.toMillis(true);
-
-                            t.timezone = Time.TIMEZONE_UTC;
-                            t.set(end);
-                            t.timezone = tz;
-                            end = t.toMillis(true);
-                        }
-                        CalendarController.getInstance(getActivity()).launchViewEvent(-1, start, end,
-                                Attendees.ATTENDEE_STATUS_NONE);
-                    }
-                }*/
-                Activity a = EditEventFragment.this.getActivity();
-                if (a != null) {
-                    a.finish();
-                }
             }
 
             // Hide a software keyboard so that user won't see it even after this Fragment's
@@ -833,34 +735,18 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
                 mInputMethodManager.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
                 focusedView.clearFocus();
             }
+            
+            if ((mCode & Utils.DONE_EXIT) != 0) {
+                Activity a = EditEventFragment.this.getActivity();
+                if (a != null) {
+                    a.finish();
+                }
+            }
         }
-    }
-
-    boolean isEmptyNewEvent() {
-        if (mOriginalModel != null) {
-            // Not new
-            return false;
-        }
-
-        if (mModel.mOriginalStart != mModel.mStart || mModel.mOriginalEnd != mModel.mEnd) {
-            return false;
-        }
-
-        if (!mModel.mAttendeesList.isEmpty()) {
-            return false;
-        }
-
-        return mModel.isEmpty();
     }
 
     @Override
     public void onPause() {
-        Activity act = getActivity();
-        if (mSaveOnDetach && act != null && !mIsReadOnly && !act.isChangingConfigurations()
-                && mView.prepareForSave()) {
-            mOnDone.setDoneCode(Utils.DONE_SAVE);
-            mOnDone.run();
-        }
         super.onPause();
     }
 
@@ -874,11 +760,6 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
             mModifyDialog = null;
         }
         super.onDestroy();
-    }
-
-    @Override
-    public void eventsChanged() {
-        // TODO Requery to see if event has changed
     }
 
     @Override
@@ -898,27 +779,7 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
         }
         outState.putBoolean(BUNDLE_KEY_EDIT_ON_LAUNCH, mShowModifyDialogOnLaunch);
         outState.putSerializable(BUNDLE_KEY_EVENT, mEventBundle);
-        outState.putBoolean(BUNDLE_KEY_READ_ONLY, mIsReadOnly);
         outState.putBoolean(BUNDLE_KEY_SHOW_COLOR_PALETTE, mView.isColorPaletteVisible());
-    }
-
-    @Override
-    public long getSupportedEventTypes() {
-        return EventType.USER_HOME;
-    }
-
-    @Override
-    public void handleEvent(EventInfo event) {
-        // It's currently unclear if we want to save the event or not when home
-        // is pressed. When creating a new event we shouldn't save since we
-        // can't get the id of the new event easily.
-        if ((false && event.eventType == EventType.USER_HOME) || (event.eventType == EventType.GO_TO
-                && mSaveOnDetach)) {
-            if (mView != null && mView.prepareForSave()) {
-                mOnDone.setDoneCode(Utils.DONE_SAVE);
-                mOnDone.run();
-            }
-        }
     }
 
     private static class EventBundle implements Serializable {
@@ -954,9 +815,13 @@ public class EditEventFragment extends Fragment implements EventHandler, OnColor
     }
 
     public void doRevert() {
-                Log.d(TAG, "doRevert");
-
         mOnDone.setDoneCode(Utils.DONE_REVERT | Utils.DONE_EXIT);
         mOnDone.run();
+    }
+    
+    public void reloadEvent() {
+        // TODO for edit exisitng events we should observe events changed
+        // and maybe warn when this happens while editing
+        // and let user decice what to do then
     }
 }

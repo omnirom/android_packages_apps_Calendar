@@ -57,7 +57,7 @@ import java.util.LinkedList;
 import java.util.TimeZone;
 
 public class EditEventHelper {
-    private static final String TAG = "EditEventHelper";
+    private static final String TAG = "Calendar:EditEventHelper";
 
     private static final boolean DEBUG = false;
 
@@ -316,6 +316,7 @@ public class EditEventHelper {
 
         // Update the "hasAlarm" field for the event
         ArrayList<ReminderEntry> reminders = model.mReminders;
+        Log.d(TAG, "saveEvent mModel.mReminders = " + reminders);
         int len = reminders.size();
         values.put(Events.HAS_ALARM, (len > 0) ? 1 : 0);
 
@@ -845,6 +846,7 @@ public class EditEventHelper {
             ArrayList<ReminderEntry> reminders, ArrayList<ReminderEntry> originalReminders,
             boolean forceSave) {
         normalizeReminders(reminders);
+        Log.d(TAG, "saveReminders reminders = " + reminders + " forceSave = " + forceSave + " originalReminders = " + originalReminders);
         // If the reminders have not changed, then don't update the database
         if (reminders.equals(originalReminders) && !forceSave) {
             return false;
@@ -860,6 +862,7 @@ public class EditEventHelper {
 
         ContentValues values = new ContentValues();
         int len = reminders.size();
+        Log.d(TAG, "saveReminders reminders = " + reminders);
 
         // Insert the new reminders, if any
         for (int i = 0; i < len; i++) {

@@ -112,7 +112,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         DialogInterface.OnClickListener, OnItemSelectedListener,
         RecurrencePickerDialog.OnRecurrenceSetListener {
 
-    private static final String TAG = "EditEvent";
+    private static final String TAG = "Calendar:EditEvent";
     private static final String GOOGLE_SECONDARY_CALENDAR = "calendar.google.com";
     private static final String PERIOD_SPACE = ". ";
 
@@ -507,6 +507,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                     mReminderItems, mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
         mModel.normalizeReminders();
+                Log.d(TAG, "fillModelFromReadOnlyUi mModel.mReminders = " + mModel.mReminders);
+
         int status = EventInfoFragment.getResponseFromButtonId(
                 mResponseRadioGroup.getCheckedRadioButtonId());
         if (status != Attendees.ATTENDEE_STATUS_NONE) {
@@ -601,6 +603,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
         mModel.normalizeReminders();
+                        Log.d(TAG, "fillModelFromUI mModel.mReminders = " + mModel.mReminders);
+
         mModel.mHasAlarm = mReminderItems.size() > 0;
         mModel.mTitle = mTitleTextView.getText().toString();
         mModel.mAllDay = mAllDayCheckBox.isChecked();
@@ -1635,6 +1639,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mModel.mReminders.clear();
         mModel.mReminders.addAll(mModel.mDefaultReminders);
         mModel.mHasAlarm = mModel.mReminders.size() != 0;
+        Log.d(TAG, "onItemSelected mModel.mReminders = " + mModel.mReminders);
 
         // Update the UI elements.
         mReminderItems.clear();

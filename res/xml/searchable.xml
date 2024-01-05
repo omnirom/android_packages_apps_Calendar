@@ -18,11 +18,7 @@
     android:value="com.android.calendar.SearchActivity"
     android:label="@string/app_label"
     android:searchMode="showSearchLabelAsBadge"
-
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
     android:voiceLanguageModel="free_form"
-
-    android:searchSuggestAuthority="com.android.calendar.CalendarRecentSuggestionsProvider"
-    android:searchSuggestSelection=" ? "
     android:imeOptions="actionSearch" >
 </searchable>
