@@ -819,6 +819,7 @@ public class EditEventHelper {
         }
         // sort
         Collections.sort(reminders);
+
         // remove duplicates
         ReminderEntry prev = reminders.get(reminders.size()-1);
         for (int i = reminders.size()-2; i >= 0; --i) {
@@ -845,12 +846,11 @@ public class EditEventHelper {
     public static boolean saveReminders(ArrayList<ContentProviderOperation> ops, long eventId,
             ArrayList<ReminderEntry> reminders, ArrayList<ReminderEntry> originalReminders,
             boolean forceSave) {
-        normalizeReminders(reminders);
-        Log.d(TAG, "saveReminders reminders = " + reminders + " forceSave = " + forceSave + " originalReminders = " + originalReminders);
         // If the reminders have not changed, then don't update the database
         if (reminders.equals(originalReminders) && !forceSave) {
             return false;
         }
+        EditEventHelper.normalizeReminders(reminders);
 
         // Delete all the existing reminders for this event
         String where = Reminders.EVENT_ID + "=?";
@@ -897,6 +897,7 @@ public class EditEventHelper {
         if (reminders.equals(originalReminders) && !forceSave) {
             return false;
         }
+        EditEventHelper.normalizeReminders(reminders);
 
         // Delete all the existing reminders for this event
         ContentProviderOperation.Builder b = ContentProviderOperation

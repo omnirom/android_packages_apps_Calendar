@@ -219,8 +219,6 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                         if (mReminders == null) {
                             // mReminders should not be null.
                             mReminders = new ArrayList<ReminderEntry>();
-                        } else {
-                            Collections.sort(mReminders);
                         }
                         mOriginalModel.mReminders = mReminders;
                         mModel.mReminders =
@@ -304,10 +302,6 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                             mModel.mReminders.add(re);
                             mOriginalModel.mReminders.add(re);
                         }
-
-                        // Sort appropriately for display
-                        Collections.sort(mModel.mReminders);
-                        Collections.sort(mOriginalModel.mReminders);
                     } finally {
                         cursor.close();
                     }

@@ -112,9 +112,10 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         DialogInterface.OnClickListener, OnItemSelectedListener,
         RecurrencePickerDialog.OnRecurrenceSetListener {
 
-    private static final String TAG = "Calendar:EditEvent";
+    private static final String TAG = "Calendar:EditEventView";
     private static final String GOOGLE_SECONDARY_CALENDAR = "calendar.google.com";
     private static final String PERIOD_SPACE = ". ";
+    public static final boolean DEBUG = true;
 
     private static final String FRAG_TAG_RECUR_PICKER = "recurrencePickerDialogFragment";
 
@@ -506,8 +507,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mModel.mReminders = EventViewUtils.reminderItemsToReminders(
                     mReminderItems, mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
-        mModel.normalizeReminders();
-                Log.d(TAG, "fillModelFromReadOnlyUi mModel.mReminders = " + mModel.mReminders);
 
         int status = EventInfoFragment.getResponseFromButtonId(
                 mResponseRadioGroup.getCheckedRadioButtonId());
@@ -602,8 +601,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mModel.mReminders = EventViewUtils.reminderItemsToReminders(mReminderItems,
                 mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
-        mModel.normalizeReminders();
-                        Log.d(TAG, "fillModelFromUI mModel.mReminders = " + mModel.mReminders);
 
         mModel.mHasAlarm = mReminderItems.size() > 0;
         mModel.mTitle = mTitleTextView.getText().toString();
@@ -924,6 +921,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                     mUnsupportedReminders.add(re);
                 }
             }
+            if (DEBUG) Log.d(TAG, "prepareReminders mReminders = " + model.mReminders + " mUnsupportedReminders = " + mUnsupportedReminders);
         }
 
         updateRemindersVisibility(numReminders);
@@ -1639,7 +1637,6 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mModel.mReminders.clear();
         mModel.mReminders.addAll(mModel.mDefaultReminders);
         mModel.mHasAlarm = mModel.mReminders.size() != 0;
-        Log.d(TAG, "onItemSelected mModel.mReminders = " + mModel.mReminders);
 
         // Update the UI elements.
         mReminderItems.clear();

@@ -130,7 +130,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         OnClickListener, DeleteEventHelper.DeleteNotifyListener,
         OnColorSelectedListener {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static final String TAG = "Calendar:EventInfoFragment";
     public static final String COLOR_PICKER_DIALOG_TAG = "EventColorPickerDialog";
@@ -372,6 +372,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private final ArrayList<LinearLayout> mReminderViews = new ArrayList<LinearLayout>(0);
     public ArrayList<ReminderEntry> mOriginalReminders = new ArrayList<ReminderEntry>();
     public ArrayList<ReminderEntry> mReminders = new ArrayList<ReminderEntry>();
+    private ArrayList<ReminderEntry> mUnsupportedReminders = new ArrayList<ReminderEntry>();
 
     /**
      * Contents of the "minutes" spinner.  This has default values from the XML file, augmented
@@ -459,8 +460,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             case TOKEN_QUERY_CALENDARS:{
                 mCalendarsCursor = Utils.matrixCursorFromCursor(cursor);
                 updateCalendar(mView);
-                // FRAG_TODO fragments shouldn't set the title anymore
-                updateTitle();
                 
                 String[] args = new String[] {
                         mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_NAME),
@@ -503,17 +502,13 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     } while (cursor.moveToNext());
                 }
                 cursor.close();
-                Integer[] sortedColors = new Integer[colors.size()];
-                Arrays.sort(colors.toArray(sortedColors), new HsvColorComparator());
-                mColors = new int[sortedColors.length];
-                for (int i = 0; i < sortedColors.length; i++) {
-                    mColors[i] = sortedColors[i].intValue();
 
-                    float[] hsv = new float[3];
-                    Color.colorToHSV(mColors[i], hsv);
-                    if (DEBUG) {
-                        Log.d("Color", "H:" + hsv[0] + ",S:" + hsv[1] + ",V:" + hsv[2]);
-                    }
+                Collections.sort(colors, new HsvColorComparator());
+                mColors = new int[colors.size()];
+                int i = 0;
+                for (Integer color : colors) {
+                    mColors[i] = color.intValue();
+                    i++;
                 }
                 updateMenu();
                 break;
@@ -793,15 +788,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             }
         }
     };
-
-    private void updateTitle() {
-        Resources res = getActivity().getResources();
-        if (mCanModifyCalendar && !mIsOrganizer) {
-            getActivity().setTitle(res.getString(R.string.event_info_title_invite));
-        } else {
-            getActivity().setTitle(res.getString(R.string.event_info_title));
-        }
-    }
 
     /**
      * Initializes the event cursor, which is expected to point to the first
@@ -1660,14 +1646,15 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
             if (method == Reminders.METHOD_DEFAULT || mReminderMethodValues.contains(method)) {
                 mOriginalReminders.add(ReminderEntry.valueOf(minutes, method));
+            } else {
+                mUnsupportedReminders.add(ReminderEntry.valueOf(minutes, method));
             }
         }
-        Collections.sort(mOriginalReminders);
         mReminders.clear();
         mReminders.addAll(mOriginalReminders);
         mHasAlarm = mReminders.size() > 0;
 
-        if (DEBUG) Log.d(TAG, "initReminders mReminders = " + mReminders);
+        if (DEBUG) Log.d(TAG, "initReminders mReminders = " + mReminders + " mUnsupportedReminders = " + mUnsupportedReminders);
         LinearLayout parent = (LinearLayout) mScrollView
                 .findViewById(R.id.reminder_items_container);
         if (parent != null) {
@@ -1893,7 +1880,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         // Read reminders from UI
         mReminders = EventViewUtils.reminderItemsToReminders(mReminderViews,
                 mReminderMinuteValues, mReminderMethodValues);
-        Collections.sort(mReminders);
+        mReminders.addAll(mUnsupportedReminders);
 
         // Check if there are any changes in the reminder
         boolean changed = EditEventHelper.saveReminders(ops, mEventId, mReminders,

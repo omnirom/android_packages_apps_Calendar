@@ -849,33 +849,6 @@ public class CalendarEventModel implements Serializable {
         return true;
     }
 
-    /**
-     * Sort and uniquify mReminderMinutes.
-     *
-     * @return true (for convenience of caller)
-     */
-    public boolean normalizeReminders() {
-        if (mReminders.size() <= 1) {
-            return true;
-        }
-
-        // sort
-        Collections.sort(mReminders);
-
-        // remove duplicates
-        ReminderEntry prev = mReminders.get(mReminders.size()-1);
-        for (int i = mReminders.size()-2; i >= 0; --i) {
-            ReminderEntry cur = mReminders.get(i);
-            if (prev.equals(cur)) {
-                // match, remove later entry
-                mReminders.remove(i+1);
-            }
-            prev = cur;
-        }
-
-        return true;
-    }
-
     public boolean isCalendarColorInitialized() {
         return mCalendarColorInitialized;
     }
