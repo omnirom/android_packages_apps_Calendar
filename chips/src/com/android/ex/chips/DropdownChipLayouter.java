@@ -19,6 +19,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Rfc822Tokenizer;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,12 +31,15 @@ import android.widget.TextView;
 import com.android.ex.chips.Queries.Query;
 
 import com.android.calendar.R;
+import com.android.calendar.Utils;
 
 /**
  * A class that inflates and binds the views in the dropdown list from
  * RecipientEditTextView.
  */
 public class DropdownChipLayouter {
+    private static final String TAG = "Calendar:DropdownChipLayouter";
+
     /**
      * The type of adapter that is requesting a chip layout.
      */
@@ -168,7 +172,8 @@ public class DropdownChipLayouter {
                 break;
             case SINGLE_RECIPIENT:
                 if (!PhoneUtil.isPhoneNumber(entry.getDestination())) {
-                    destination = Rfc822Tokenizer.tokenize(entry.getDestination())[0].getAddress();
+                    displayName = Rfc822Tokenizer.tokenize(entry.getDestination())[0].getAddress();
+                    destination = null;
                 }
                 destinationType = null;
         }
@@ -249,7 +254,7 @@ public class DropdownChipLayouter {
 
         if (showImage) {
             switch (type) {
-                case BASE_RECIPIENT:
+                case BASE_RECIPIENT: {
                     byte[] photoBytes = entry.getPhotoBytes();
                     if (photoBytes != null && photoBytes.length > 0) {
                         final Bitmap photo = BitmapFactory.decodeByteArray(photoBytes, 0,
@@ -259,17 +264,36 @@ public class DropdownChipLayouter {
                         view.setImageResource(getDefaultPhotoResId());
                     }
                     break;
-                case RECIPIENT_ALTERNATES:
+                }
+                case RECIPIENT_ALTERNATES: {
                     Uri thumbnailUri = entry.getPhotoThumbnailUri();
                     if (thumbnailUri != null) {
                         // TODO: see if this needs to be done outside the main thread
                         // as it may be too slow to get immediately.
                         view.setImageURI(thumbnailUri);
                     } else {
-                        view.setImageResource(getDefaultPhotoResId());
+                        final Bitmap b = Utils.renderLetterTile(mContext, entry.getDisplayName(), entry.getDestination());
+                        byte[] photoBytes = Utils.bitmapToBytes(b);
+                        if (photoBytes != null && photoBytes.length > 0) {
+                            final Bitmap photo = BitmapFactory.decodeByteArray(photoBytes, 0,
+                                photoBytes.length);
+                            view.setImageBitmap(photo);
+                        } else {
+                            view.setImageResource(getDefaultPhotoResId());
+                        }
                     }
                     break;
+                }
                 case SINGLE_RECIPIENT:
+                    final Bitmap b = Utils.renderLetterTile(mContext, entry.getDisplayName(), entry.getDestination());
+                    byte[] photoBytes = Utils.bitmapToBytes(b);
+                    if (photoBytes != null && photoBytes.length > 0) {
+                        final Bitmap photo = BitmapFactory.decodeByteArray(photoBytes, 0,
+                            photoBytes.length);
+                        view.setImageBitmap(photo);
+                    } else {
+                        view.setImageResource(getDefaultPhotoResId());
+                    }
                 default:
                     break;
             }

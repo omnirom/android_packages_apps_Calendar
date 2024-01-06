@@ -200,7 +200,8 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                         mHandler.startQuery(TOKEN_ATTENDEES, null, attUri,
                                 EditEventHelper.ATTENDEES_PROJECTION,
                                 EditEventHelper.ATTENDEES_WHERE /* selection */,
-                                whereArgs /* selection args */, null /* sort order */);
+                                whereArgs /* selection args */,
+                                EditEventHelper.ATTENDEES_SORT_ORDER /* sort order */);
                     } else {
                         setModelIfDone(TOKEN_ATTENDEES);
                     }
@@ -249,6 +250,11 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                             int status = cursor.getInt(EditEventHelper.ATTENDEES_INDEX_STATUS);
                             int relationship = cursor
                                     .getInt(EditEventHelper.ATTENDEES_INDEX_RELATIONSHIP);
+
+                            if (DEBUG) Log.d(TAG, "onQueryComplete pre name = " + name + " email = " + email);
+                            if (TextUtils.isEmpty(name)) {
+                                name = EditEventHelper.getDisplayNameForEmail(getActivity(), email);
+                            }
                             if (relationship == Attendees.RELATIONSHIP_ORGANIZER) {
                                 if (email != null) {
                                     mModel.mOrganizer = email;
@@ -268,6 +274,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                                     mOriginalModel.mOrganizerDisplayName = name;
                                 }
                             }
+                            if (DEBUG) Log.d(TAG, "onQueryComplete post name = " + name + " email = " + email);
 
                             if (email != null) {
                                 if (mModel.mOwnerAccount != null &&
@@ -279,6 +286,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                                     mOriginalModel.mOwnerAttendeeId = attendeeId;
                                     mOriginalModel.mSelfAttendeeStatus = status;
                                     continue;
+                                    // TODO add organizer to list?
                                 }
                             }
                             Attendee attendee = new Attendee(name, email);
@@ -595,7 +603,6 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
             mOnDone.run();
             return true;
         } else if (itemId == android.R.id.home) {
-            Log.d(TAG, "id.home");
             doRevert();
             // calls finish
             return true;

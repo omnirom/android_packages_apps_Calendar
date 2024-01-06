@@ -17,6 +17,7 @@
 package com.android.calendar.event;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -26,8 +27,10 @@ import android.net.Uri;
 import android.provider.CalendarContract.Attendees;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Colors;
+import android.provider.ContactsContract.Contacts;
 import android.provider.CalendarContract.Events;
 import android.provider.CalendarContract.Reminders;
+import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -227,12 +230,23 @@ public class EditEventHelper {
             Attendees.ATTENDEE_RELATIONSHIP, // 3
             Attendees.ATTENDEE_STATUS, // 4
     };
+
     static final int ATTENDEES_INDEX_ID = 0;
     static final int ATTENDEES_INDEX_NAME = 1;
     static final int ATTENDEES_INDEX_EMAIL = 2;
     static final int ATTENDEES_INDEX_RELATIONSHIP = 3;
     static final int ATTENDEES_INDEX_STATUS = 4;
-    static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=? AND attendeeEmail IS NOT NULL";
+
+    static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
+
+    static final String ATTENDEES_SORT_ORDER = Attendees.ATTENDEE_NAME + " ASC, "
+            + Attendees.ATTENDEE_EMAIL + " ASC";
+
+    private static final int EMAIL_PROJECTION_DISPLAY_NAME_INDEX = 0; // String
+
+    private static final String[] DISPLAY_NAME_PROJECTION = new String[] {
+        Contacts.DISPLAY_NAME, // 0
+    };
 
     public static class AttendeeItem {
         public boolean mRemoved;
@@ -446,8 +460,11 @@ public class EditEventHelper {
             String ownerEmail = model.mOwnerAccount;
             if (model.mAttendeesList.size() != 0 && Utils.isValidEmail(ownerEmail)) {
                 // Add organizer as attendee since we got some attendees
+                if (DEBUG) Log.d(TAG, "saveEvent organizer name = " + model.mOrganizerDisplayName + " email = " + ownerEmail);
 
                 values.clear();
+                // dont set name columns - will be resolved on display
+                //values.put(Attendees.ATTENDEE_NAME, model.mOrganizerDisplayName);
                 values.put(Attendees.ATTENDEE_EMAIL, ownerEmail);
                 values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ORGANIZER);
                 values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED);
@@ -542,8 +559,10 @@ public class EditEventHelper {
                 if (newAttendees.size() > 0) {
                     // Insert the new attendees
                     for (Attendee attendee : newAttendees.values()) {
+                        if (DEBUG) Log.d(TAG, "saveEvent attendee name = " + attendee.mName + " email = " + attendee.mEmail);
                         values.clear();
-                        values.put(Attendees.ATTENDEE_NAME, attendee.mName);
+                        // dont set name columns - will be resolved on display
+                        //values.put(Attendees.ATTENDEE_NAME, attendee.mName);
                         values.put(Attendees.ATTENDEE_EMAIL, attendee.mEmail);
                         values.put(Attendees.ATTENDEE_RELATIONSHIP,
                                 Attendees.RELATIONSHIP_ATTENDEE);
@@ -1410,5 +1429,26 @@ public class EditEventHelper {
 
     public interface EditDoneRunnable extends Runnable {
         public void setDoneCode(int code);
+    }
+
+    public static String getDisplayNameForEmail(Context context, String email) {
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(Email.CONTENT_LOOKUP_URI, Uri.encode(email));
+        
+        Cursor cursor = cr.query(uri,
+                DISPLAY_NAME_PROJECTION,
+                null /* selection */,
+                null /* selectionArgs */,
+                null /* sort */);
+
+        if (cursor == null || cursor.getCount() == 0) {
+            cursor.close();
+            return "";
+        }
+
+        cursor.moveToFirst();
+        String displayName = cursor.getString(EMAIL_PROJECTION_DISPLAY_NAME_INDEX);
+        cursor.close();
+        return displayName;
     }
 }

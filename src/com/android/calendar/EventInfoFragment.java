@@ -305,7 +305,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
     private boolean mHasAttendeeData;
     private String mEventOrganizerEmail;
-    private String mEventOrganizerDisplayName = "";
+    private String mEventOrganizerDisplayName;
     private boolean mIsOrganizer;
     private long mCalendarOwnerAttendeeId = EditEventHelper.ATTENDEE_ID_NONE;
     private boolean mOwnerCanRespond;
@@ -361,10 +361,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private boolean mNoCrossFade = false;  // Used to prevent repeated cross-fade
     private RadioGroup mResponseRadioGroup;
 
-    ArrayList<Attendee> mAcceptedAttendees = new ArrayList<Attendee>();
-    ArrayList<Attendee> mDeclinedAttendees = new ArrayList<Attendee>();
-    ArrayList<Attendee> mTentativeAttendees = new ArrayList<Attendee>();
-    ArrayList<Attendee> mNoResponseAttendees = new ArrayList<Attendee>();
+    ArrayList<Attendee> mVisibleAttendees = new ArrayList<Attendee>();
     ArrayList<String> mToEmails = new ArrayList<String>();
     ArrayList<String> mCcEmails = new ArrayList<String>();
 
@@ -819,34 +816,30 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (mAttendeesCursor != null) {
             mNumOfAttendees = mAttendeesCursor.getCount();
             if (mAttendeesCursor.moveToFirst()) {
-                mAcceptedAttendees.clear();
-                mDeclinedAttendees.clear();
-                mTentativeAttendees.clear();
-                mNoResponseAttendees.clear();
-
+                mVisibleAttendees.clear();
                 do {
                     int status = mAttendeesCursor.getInt(ATTENDEES_INDEX_STATUS);
                     String name = mAttendeesCursor.getString(ATTENDEES_INDEX_NAME);
                     String email = mAttendeesCursor.getString(ATTENDEES_INDEX_EMAIL);
-
-                    if (mAttendeesCursor.getInt(ATTENDEES_INDEX_RELATIONSHIP) ==
-                            Attendees.RELATIONSHIP_ORGANIZER) {
-
-                        // Overwrites the one from Event table if available
-                        if (!TextUtils.isEmpty(name)) {
-                            mEventOrganizerDisplayName = name;
-                            if (!mIsOrganizer) {
-                                setVisibilityCommon(view, R.id.organizer_container, View.VISIBLE);
-                                setTextCommon(view, R.id.organizer, mEventOrganizerDisplayName);
-                            }
+                    if (DEBUG) Log.d(TAG, "initAttendeesCursor pre name = " + name + " email = " + email);
+                    if (TextUtils.isEmpty(name)) {
+                        name = EditEventHelper.getDisplayNameForEmail(getActivity(), email);
+                    }
+                    if (mAttendeesCursor.getInt(ATTENDEES_INDEX_RELATIONSHIP) == Attendees.RELATIONSHIP_ORGANIZER) {
+                        mEventOrganizerDisplayName = name;
+                        if (!mIsOrganizer && !TextUtils.isEmpty(name)) {
+                            setVisibilityCommon(view, R.id.organizer_container, View.VISIBLE);
+                            setTextCommon(view, R.id.organizer, mEventOrganizerDisplayName);
                         }
                     }
 
+                    if (DEBUG)  Log.d(TAG, "initAttendeesCursor post name = " + name + " email = " + email);
                     if (mCalendarOwnerAttendeeId == EditEventHelper.ATTENDEE_ID_NONE &&
                             mCalendarOwnerAccount.equalsIgnoreCase(email)) {
                         mCalendarOwnerAttendeeId = mAttendeesCursor.getInt(ATTENDEES_INDEX_ID);
                         mOriginalAttendeeResponse = mAttendeesCursor.getInt(ATTENDEES_INDEX_STATUS);
                     } else {
+                        // TODO also add organizer in list?
                         String identity = null;
                         String idNamespace = null;
 
@@ -854,31 +847,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                             identity = mAttendeesCursor.getString(ATTENDEES_INDEX_IDENTITY);
                             idNamespace = mAttendeesCursor.getString(ATTENDEES_INDEX_ID_NAMESPACE);
                         }
-
-                        // Don't show your own status in the list because:
-                        //  1) it doesn't make sense for event without other guests.
-                        //  2) there's a spinner for that for events with guests.
-                        switch(status) {
-                            case Attendees.ATTENDEE_STATUS_ACCEPTED:
-                                mAcceptedAttendees.add(new Attendee(name, email,
-                                        Attendees.ATTENDEE_STATUS_ACCEPTED, identity,
-                                        idNamespace));
-                                break;
-                            case Attendees.ATTENDEE_STATUS_DECLINED:
-                                mDeclinedAttendees.add(new Attendee(name, email,
-                                        Attendees.ATTENDEE_STATUS_DECLINED, identity,
-                                        idNamespace));
-                                break;
-                            case Attendees.ATTENDEE_STATUS_TENTATIVE:
-                                mTentativeAttendees.add(new Attendee(name, email,
-                                        Attendees.ATTENDEE_STATUS_TENTATIVE, identity,
-                                        idNamespace));
-                                break;
-                            default:
-                                mNoResponseAttendees.add(new Attendee(name, email,
-                                        Attendees.ATTENDEE_STATUS_NONE, identity,
-                                        idNamespace));
-                        }
+                        Attendee a = new Attendee(name, email,
+                                status, identity,
+                                idNamespace);
+                        mVisibleAttendees.add(a);
                     }
                 } while (mAttendeesCursor.moveToNext());
                 mAttendeesCursor.moveToFirst();
@@ -928,105 +900,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         } else if (itemId == R.id.info_action_change_color) {
             showEventColorPickerDialog();
             return true;
-        } else if (itemId == R.id.info_action_share_event) {
-            shareEvent();
-            return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Generates an .ics formatted file with the event info and launches intent chooser to
-     * share said file
-     */
-    private void shareEvent() {
-        // Create the respective ICalendar objects from the event info
-        VCalendar calendar = new VCalendar();
-        calendar.addProperty(VCalendar.VERSION, "2.0");
-        calendar.addProperty(VCalendar.PRODID, VCalendar.PRODUCT_IDENTIFIER);
-        calendar.addProperty(VCalendar.CALSCALE, "GREGORIAN");
-        calendar.addProperty(VCalendar.METHOD, "REQUEST");
-
-        VEvent event = new VEvent();
-        mEventCursor.moveToFirst();
-        // add event start and end datetime
-        if (!mAllDay) {
-            String eventTimeZone = mEventCursor.getString(EVENT_INDEX_EVENT_TIMEZONE);
-            event.addEventStart(mStartMillis, eventTimeZone);
-            event.addEventEnd(mEndMillis, eventTimeZone);
-        } else {
-            // All-day events' start and end time are stored as UTC.
-            // Treat the event start and end time as being in the local time zone and convert them
-            // to the corresponding UTC datetime. If the UTC time is used as is, the ical recipients
-            // will report the wrong start and end time (+/- 1 day) for the event as they will
-            // convert the UTC time to their respective local time-zones
-            String localTimeZone = Utils.getTimeZone(mActivity, mTZUpdater);
-            long eventStart = IcalendarUtils.convertTimeToUtc(mStartMillis, localTimeZone);
-            long eventEnd = IcalendarUtils.convertTimeToUtc(mEndMillis, localTimeZone);
-            event.addEventStart(eventStart, "UTC");
-            event.addEventEnd(eventEnd, "UTC");
-        }
-
-        event.addProperty(VEvent.LOCATION, mEventCursor.getString(EVENT_INDEX_EVENT_LOCATION));
-        event.addProperty(VEvent.DESCRIPTION, mEventCursor.getString(EVENT_INDEX_DESCRIPTION));
-        event.addProperty(VEvent.SUMMARY, mEventCursor.getString(EVENT_INDEX_TITLE));
-        event.addOrganizer(new Organizer(mEventOrganizerDisplayName, mEventOrganizerEmail));
-
-        // Add Attendees to event
-        for (Attendee attendee : mAcceptedAttendees) {
-            IcalendarUtils.addAttendeeToEvent(attendee, event);
-        }
-
-        for (Attendee attendee : mDeclinedAttendees) {
-            IcalendarUtils.addAttendeeToEvent(attendee, event);
-        }
-
-        for (Attendee attendee : mTentativeAttendees) {
-            IcalendarUtils.addAttendeeToEvent(attendee, event);
-        }
-
-        for (Attendee attendee : mNoResponseAttendees) {
-            IcalendarUtils.addAttendeeToEvent(attendee, event);
-        }
-
-        // compose all of the ICalendar objects
-        calendar.addEvent(event);
-
-        // create and share ics file
-        boolean isShareSuccessful = false;
-        try {
-            // event title serves as the file name prefix
-            String filePrefix = event.getProperty(VEvent.SUMMARY);
-            if (filePrefix == null || filePrefix.length() < 3) {
-                // default to a generic filename if event title doesn't qualify
-                // prefix length constraint is imposed by File#createTempFile
-                filePrefix = "invite";
-            }
-            File inviteFile = File.createTempFile(filePrefix, ".ics",
-                    mActivity.getCacheDir());
-            if (IcalendarUtils.writeCalendarToFile(calendar, inviteFile)) {
-                inviteFile.setReadable(true,false);     // set world-readable
-                Intent shareIntent = new Intent();
-                shareIntent.setAction(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(inviteFile));
-                // the ics file is sent as an extra, the receiving application decides whether to
-                // parse the file to extract calendar events or treat it as a regular file
-                shareIntent.setType("application/octet-stream");
-                startActivity(shareIntent);
-                isShareSuccessful = true;
-
-            } else {
-                // error writing event info to file
-                isShareSuccessful = false;
-            }
-        } catch (IOException e) {
-            isShareSuccessful = false;
-        }
-
-        if (!isShareSuccessful) {
-            Log.e(TAG, "Couldn't generate ics file");
-            Toast.makeText(mActivity, R.string.error_generating_ics, Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void showEventColorPickerDialog() {
@@ -1531,10 +1406,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             }
 
             if (!mIsOrganizer && !TextUtils.isEmpty(mEventOrganizerDisplayName)) {
-                setTextCommon(view, R.id.organizer, mEventOrganizerDisplayName);
+                // to avoid flicker dont set email here but assume its set later in initAttendeesCursor
+                //setTextCommon(view, R.id.organizer, mEventOrganizerDisplayName);
                 setVisibilityCommon(view, R.id.organizer_container, View.VISIBLE);
-            } else {
-                setVisibilityCommon(view, R.id.organizer_container, View.GONE);
             }
             mHasAttendeeData = mEventCursor.getInt(EVENT_INDEX_HAS_ATTENDEE_DATA) != 0;
             mCanModifyCalendar = mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL)
@@ -1561,7 +1435,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         MenuItem delete = mMenu.findItem(R.id.info_action_delete);
         MenuItem edit = mMenu.findItem(R.id.info_action_edit);
         MenuItem changeColor = mMenu.findItem(R.id.info_action_change_color);
-        MenuItem share = mMenu.findItem(R.id.info_action_share_event);
         if (delete != null) {
             delete.setVisible(mCanModifyCalendar);
             delete.setEnabled(mCanModifyCalendar);
@@ -1574,18 +1447,13 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             changeColor.setVisible(mCanModifyCalendar);
             changeColor.setEnabled(mCanModifyCalendar);
         }
-        // TODO fix share
-        share.setVisible(false);
+        // TODO fix share?
     }
 
     private void updateAttendees(View view) {
-        if (mAcceptedAttendees.size() + mDeclinedAttendees.size() +
-                mTentativeAttendees.size() + mNoResponseAttendees.size() > 0) {
+        if (mVisibleAttendees.size() > 0) {
             mLongAttendees.clearAttendees();
-            (mLongAttendees).addAttendees(mAcceptedAttendees);
-            (mLongAttendees).addAttendees(mDeclinedAttendees);
-            (mLongAttendees).addAttendees(mTentativeAttendees);
-            (mLongAttendees).addAttendees(mNoResponseAttendees);
+            mLongAttendees.addAttendees(mVisibleAttendees);
             mAttendeesContainer.setVisibility(View.VISIBLE);
         } else {
             mAttendeesContainer.setVisibility(View.GONE);
@@ -1610,22 +1478,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
      * Returns true if there is at least 1 attendee that is not the viewer.
      */
     private boolean hasEmailableAttendees() {
-        for (Attendee attendee : mAcceptedAttendees) {
-            if (Utils.isEmailableFrom(attendee.mEmail, mSyncAccountName)) {
-                return true;
-            }
-        }
-        for (Attendee attendee : mTentativeAttendees) {
-            if (Utils.isEmailableFrom(attendee.mEmail, mSyncAccountName)) {
-                return true;
-            }
-        }
-        for (Attendee attendee : mNoResponseAttendees) {
-            if (Utils.isEmailableFrom(attendee.mEmail, mSyncAccountName)) {
-                return true;
-            }
-        }
-        for (Attendee attendee : mDeclinedAttendees) {
+        for (Attendee attendee : mVisibleAttendees) {
             if (Utils.isEmailableFrom(attendee.mEmail, mSyncAccountName)) {
                 return true;
             }

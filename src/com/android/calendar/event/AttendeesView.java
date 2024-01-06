@@ -73,19 +73,21 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class AttendeesView extends LinearLayout implements View.OnClickListener {
-    private static final String TAG = "AttendeesView";
+    private static final String TAG = "Calendar:AttendeesView";
     private static final boolean DEBUG = false;
 
     private static final int EMAIL_PROJECTION_CONTACT_ID_INDEX = 0;
     private static final int EMAIL_PROJECTION_CONTACT_LOOKUP_INDEX = 1;
     private static final int EMAIL_PROJECTION_PHOTO_ID_INDEX = 2;
     private static final int EMAIL_PROJECTION_PHOTO_THUMBNAIL_URI = 3; // String
+    private static final int EMAIL_PROJECTION_DISPLAY_NAME_INDEX = 4; // String
 
     private static final String[] PROJECTION = new String[] {
         RawContacts.CONTACT_ID,     // 0
         Contacts.LOOKUP_KEY,        // 1
         Contacts.PHOTO_ID,          // 2
         Contacts.PHOTO_THUMBNAIL_URI, // 3
+        Contacts.DISPLAY_NAME, // 4
     };
 
     private static class PhotoQuery {
@@ -194,31 +196,25 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
             nameView.setVisibility(View.GONE);
             emailView.setText(attendee.mEmail);
         } else {
+            nameView.setVisibility(View.VISIBLE);
             nameView.setText(attendee.mName);
             emailView.setText(attendee.mEmail);
         }
 
         CircularImageView badgeView = view.findViewById(android.R.id.icon);
         ImageView statusCircle = view.findViewById(R.id.status_color_circle);
+        statusCircle.setVisibility(View.VISIBLE);
         badgeView.setImageDrawable(item.mBadge);
-        statusCircle.setVisibility(View.GONE);
         Drawable[] colorDrawable = new Drawable[] {
                     getContext().getResources().getDrawable(R.drawable.calendar_color_oval) };
 
         if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_NONE) {
-            statusCircle.setVisibility(View.VISIBLE);
             statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mNoResponseOverlay));
-        }
-        if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
-            statusCircle.setVisibility(View.VISIBLE);
+        } else if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_DECLINED) {
             statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mDeclinedOverlay));
-        }
-        if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_ACCEPTED) {
-            statusCircle.setVisibility(View.VISIBLE);
+        } else if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_ACCEPTED) {
             statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mAcceptedOverlay));
-        }
-        if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_TENTATIVE) {
-            statusCircle.setVisibility(View.VISIBLE);
+        } else if (item.mAttendee.mStatus == Attendees.ATTENDEE_STATUS_TENTATIVE) {
             statusCircle.setImageDrawable(new ColorStateDrawable(colorDrawable, mMaybeOverlay));
         }
         return view;
@@ -355,6 +351,13 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
 
                         final String lookupKey =
                                 cursor.getString(EMAIL_PROJECTION_CONTACT_LOOKUP_INDEX);
+                        final String displayName =
+                                cursor.getString(EMAIL_PROJECTION_DISPLAY_NAME_INDEX);
+                        // we assume display name has beens resolved already when loading
+                        // attendees list
+                        //if (!TextUtils.isEmpty(displayName)) {
+                        //    item.mAttendee.mName = displayName;
+                        //}
                         item.mContactLookupUri = Contacts.getLookupUri(contactId, lookupKey);
                         item.mBadge = getResources().getDrawable(R.drawable.ic_contact_picture);
                         final long photoId = cursor.getLong(EMAIL_PROJECTION_PHOTO_ID_INDEX);
@@ -392,13 +395,12 @@ public class AttendeesView extends LinearLayout implements View.OnClickListener 
                         if (!Utils.isValidEmail(item.mAttendee.mEmail)) {
                             item.mAttendee.mEmail = null;
                             item.mBadge = mDefaultBadge;
-                            updateAttendeeView(item);
                         } else {
                             String letterString = item.mAttendee.mEmail;
                             Bitmap b = Utils.renderLetterTile(mContext, letterString, letterString);
                             item.mBadge = new BitmapDrawable(getResources(), b);
-                            updateAttendeeView(item);
                         }
+                        updateAttendeeView(item);
                     }
                 }
             } finally {

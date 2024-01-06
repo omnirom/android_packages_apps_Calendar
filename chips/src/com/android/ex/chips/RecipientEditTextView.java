@@ -119,7 +119,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
         OnItemClickListener, Callback, RecipientAlternatesAdapter.OnCheckedItemChangedListener,
         GestureDetector.OnGestureListener, TextView.OnEditorActionListener,
         DropdownChipLayouter.ChipDeleteListener, PermissionRequestDismissedListener {
-    private static final String TAG = "RecipientEditTextView";
+    private static final String TAG = "Calendar:RecipientEditTextView";
 
     private static final char COMMIT_CHAR_COMMA = ',';
     private static final char COMMIT_CHAR_SEMICOLON = ';';
@@ -132,7 +132,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
 
     // TODO: get correct number/ algorithm from with UX.
     // Visible for testing.
-    /*package*/ static final int CHIP_LIMIT = 2;
+    /*package*/ static final int CHIP_LIMIT = 50;
 
     private static final int MAX_CHIPS_PARSED = 50;
     public static final String STATE_TEXT_VIEW = "savedTextView";
@@ -2655,7 +2655,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
             setSelection(getText().getSpanEnd(mSelectedChip));
             setCursorVisible(false);
 
-            if (showAddress) {
+            if (showAddress || currentChip.getContactId() == RecipientEntry.INVALID_CONTACT) {
                 showAddress(currentChip, mAddressPopup);
             } else {
                 showAlternates(currentChip, mAlternatesPopup);
@@ -2675,8 +2675,8 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
 
     private boolean shouldShowEditableText(DrawableRecipientChip currentChip) {
         long contactId = currentChip.getContactId();
-        return contactId == RecipientEntry.INVALID_CONTACT
-                || (!isPhoneQuery() && contactId == RecipientEntry.GENERATED_CONTACT);
+        return /*contactId == RecipientEntry.INVALID_CONTACT
+                ||*/ (!isPhoneQuery() && contactId == RecipientEntry.GENERATED_CONTACT);
     }
 
     private void showAddress(final DrawableRecipientChip currentChip, final ListPopupWindow popup) {

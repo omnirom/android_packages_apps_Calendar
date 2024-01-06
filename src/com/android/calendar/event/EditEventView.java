@@ -1428,6 +1428,10 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                     return R.layout.contact_list_item_margin_view;
                 }
                 @Override
+                protected int getAlternateItemLayoutResId(AdapterType type) {
+                    return R.layout.contact_list_item_margin_view;
+                }
+                @Override
                 protected int getDefaultPhotoResId() {
                     return R.drawable.ic_contact_picture_with_bg;
                 }
