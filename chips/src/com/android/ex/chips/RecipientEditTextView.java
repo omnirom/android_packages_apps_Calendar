@@ -1512,7 +1512,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
             // Don't recreate it.
             return;
         }
-        String token = editable.toString().substring(tokenStart, tokenEnd);
+        String token = editable.toString().substring(tokenStart, tokenEnd).toLowerCase();
         final String trimmedToken = token.trim();
         int commitCharIndex = trimmedToken.lastIndexOf(COMMIT_CHAR_COMMA);
         if (commitCharIndex != -1 && commitCharIndex == trimmedToken.length() - 1) {
@@ -1744,7 +1744,7 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
                     tokenEnd++;
                 }
             }
-            String text = editable.toString().substring(start, tokenEnd).trim();
+            String text = editable.toString().substring(start, tokenEnd).trim().toLowerCase();
             clearComposingText();
             if (text.length() > 0 && !text.equals(" ")) {
                 RecipientEntry entry = createTokenizedEntry(text);
@@ -3521,47 +3521,6 @@ public class RecipientEditTextView extends MultiAutoCompleteTextView implements
     @Override
     public BaseRecipientAdapter getAdapter() {
         return (BaseRecipientAdapter) super.getAdapter();
-    }
-
-    /**
-     * Append a new {@link RecipientEntry} to the end of the recipient chips, leaving any
-     * unfinished text at the end.
-     */
-    public void appendRecipientEntry(final RecipientEntry entry) {
-        clearComposingText();
-
-        final Editable editable = getText();
-        int chipInsertionPoint = 0;
-
-        // Find the end of last chip and see if there's any unchipified text.
-        final DrawableRecipientChip[] recips = getSortedRecipients();
-        if (recips != null && recips.length > 0) {
-            final DrawableRecipientChip last = recips[recips.length - 1];
-            // The chip will be inserted at the end of last chip + 1. All the unfinished text after
-            // the insertion point will be kept untouched.
-            chipInsertionPoint = editable.getSpanEnd(last) + 1;
-        }
-
-        final CharSequence chip = createChip(entry);
-        if (chip != null) {
-            editable.insert(chipInsertionPoint, chip);
-        }
-    }
-
-    /**
-     * Remove all chips matching the given RecipientEntry.
-     */
-    public void removeRecipientEntry(final RecipientEntry entry) {
-        final DrawableRecipientChip[] recips = getText()
-                .getSpans(0, getText().length(), DrawableRecipientChip.class);
-
-        for (final DrawableRecipientChip recipient : recips) {
-            final RecipientEntry existingEntry = recipient.getEntry();
-            if (existingEntry != null && existingEntry.isValid() &&
-                    existingEntry.isSamePerson(entry)) {
-                removeChip(recipient);
-            }
-        }
     }
 
     public void setAlternatePopupAnchor(View v) {

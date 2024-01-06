@@ -87,7 +87,7 @@ public class CalendarEventModel implements Serializable {
         public Attendee(String name, String email, int status, String identity,
                 String idNamespace) {
             mName = name;
-            mEmail = email;
+            mEmail = email.toLowerCase();
             mStatus = status;
             mIdentity = identity;
             mIdNamespace = idNamespace;
