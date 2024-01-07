@@ -16,6 +16,9 @@
 
 package com.android.calendar.event;
 
+import static com.android.calendar.CalendarQueries.*;
+import static com.android.calendar.event.EventQueries.*;
+
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -53,6 +56,7 @@ import com.android.calendarcommon2.RecurrenceProcessor;
 import com.android.calendarcommon2.RecurrenceSet;
 import com.android.common.Rfc822Validator;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,72 +74,6 @@ public class EditEventHelper {
     private EventRecurrence mEventRecurrence = new EventRecurrence();
 
     private static final String NO_EVENT_COLOR = "";
-
-    public static final String[] EVENT_PROJECTION = new String[] {
-            Events._ID, // 0
-            Events.TITLE, // 1
-            Events.DESCRIPTION, // 2
-            Events.EVENT_LOCATION, // 3
-            Events.ALL_DAY, // 4
-            Events.HAS_ALARM, // 5
-            Events.CALENDAR_ID, // 6
-            Events.DTSTART, // 7
-            Events.DTEND, // 8
-            Events.DURATION, // 9
-            Events.EVENT_TIMEZONE, // 10
-            Events.RRULE, // 11
-            Events._SYNC_ID, // 12
-            Events.AVAILABILITY, // 13
-            Events.ACCESS_LEVEL, // 14
-            Events.OWNER_ACCOUNT, // 15
-            Events.HAS_ATTENDEE_DATA, // 16
-            Events.ORIGINAL_SYNC_ID, // 17
-            Events.ORGANIZER, // 18
-            Events.GUESTS_CAN_MODIFY, // 19
-            Events.ORIGINAL_ID, // 20
-            Events.STATUS, // 21
-            Events.CALENDAR_COLOR, // 22
-            Events.EVENT_COLOR, // 23
-            Events.EVENT_COLOR_KEY // 24
-    };
-    protected static final int EVENT_INDEX_ID = 0;
-    protected static final int EVENT_INDEX_TITLE = 1;
-    protected static final int EVENT_INDEX_DESCRIPTION = 2;
-    protected static final int EVENT_INDEX_EVENT_LOCATION = 3;
-    protected static final int EVENT_INDEX_ALL_DAY = 4;
-    protected static final int EVENT_INDEX_HAS_ALARM = 5;
-    protected static final int EVENT_INDEX_CALENDAR_ID = 6;
-    protected static final int EVENT_INDEX_DTSTART = 7;
-    protected static final int EVENT_INDEX_DTEND = 8;
-    protected static final int EVENT_INDEX_DURATION = 9;
-    protected static final int EVENT_INDEX_TIMEZONE = 10;
-    protected static final int EVENT_INDEX_RRULE = 11;
-    protected static final int EVENT_INDEX_SYNC_ID = 12;
-    protected static final int EVENT_INDEX_AVAILABILITY = 13;
-    protected static final int EVENT_INDEX_ACCESS_LEVEL = 14;
-    protected static final int EVENT_INDEX_OWNER_ACCOUNT = 15;
-    protected static final int EVENT_INDEX_HAS_ATTENDEE_DATA = 16;
-    protected static final int EVENT_INDEX_ORIGINAL_SYNC_ID = 17;
-    protected static final int EVENT_INDEX_ORGANIZER = 18;
-    protected static final int EVENT_INDEX_GUESTS_CAN_MODIFY = 19;
-    protected static final int EVENT_INDEX_ORIGINAL_ID = 20;
-    protected static final int EVENT_INDEX_EVENT_STATUS = 21;
-    protected static final int EVENT_INDEX_CALENDAR_COLOR = 22;
-    protected static final int EVENT_INDEX_EVENT_COLOR = 23;
-    protected static final int EVENT_INDEX_EVENT_COLOR_KEY = 24;
-
-    public static final String[] REMINDERS_PROJECTION = new String[] {
-            Reminders._ID, // 0
-            Reminders.MINUTES, // 1
-            Reminders.METHOD, // 2
-    };
-    public static final int REMINDERS_INDEX_MINUTES = 1;
-    public static final int REMINDERS_INDEX_METHOD = 2;
-    public static final String REMINDERS_WHERE = Reminders.EVENT_ID + "=?";
-
-    // Visible for testing
-    static final String ATTENDEES_DELETE_PREFIX = Attendees.EVENT_ID + "=? AND "
-            + Attendees.ATTENDEE_EMAIL + " IN (";
 
     public static final int DOES_NOT_REPEAT = 0;
     public static final int REPEATS_DAILY = 1;
@@ -160,14 +98,6 @@ public class EditEventHelper {
     // if an uri is provided for an event that doesn't exist in the db.
     protected boolean mEventOk = true;
 
-    public static final int ATTENDEE_ID_NONE = -1;
-    public static final int[] ATTENDEE_VALUES = {
-        Attendees.ATTENDEE_STATUS_NONE,
-        Attendees.ATTENDEE_STATUS_ACCEPTED,
-        Attendees.ATTENDEE_STATUS_TENTATIVE,
-        Attendees.ATTENDEE_STATUS_DECLINED,
-    };
-
     /**
      * This is the symbolic name for the key used to pass in the boolean for
      * creating all-day events that is part of the extra data of the intent.
@@ -176,80 +106,10 @@ public class EditEventHelper {
      */
     public static final String EVENT_ALL_DAY = "allDay";
 
-    static final String[] CALENDARS_PROJECTION = new String[] {
-            Calendars._ID, // 0
-            Calendars.CALENDAR_DISPLAY_NAME, // 1
-            Calendars.OWNER_ACCOUNT, // 2
-            Calendars.CALENDAR_COLOR, // 3
-            Calendars.CAN_ORGANIZER_RESPOND, // 4
-            Calendars.CALENDAR_ACCESS_LEVEL, // 5
-            Calendars.VISIBLE, // 6
-            Calendars.MAX_REMINDERS, // 7
-            Calendars.ALLOWED_REMINDERS, // 8
-            Calendars.ALLOWED_ATTENDEE_TYPES, // 9
-            Calendars.ALLOWED_AVAILABILITY, // 10
-            Calendars.ACCOUNT_NAME, // 11
-            Calendars.ACCOUNT_TYPE, //12
-    };
-    static final int CALENDARS_INDEX_ID = 0;
-    static final int CALENDARS_INDEX_DISPLAY_NAME = 1;
-    static final int CALENDARS_INDEX_OWNER_ACCOUNT = 2;
-    static final int CALENDARS_INDEX_COLOR = 3;
-    static final int CALENDARS_INDEX_CAN_ORGANIZER_RESPOND = 4;
-    static final int CALENDARS_INDEX_ACCESS_LEVEL = 5;
-    static final int CALENDARS_INDEX_VISIBLE = 6;
-    static final int CALENDARS_INDEX_MAX_REMINDERS = 7;
-    static final int CALENDARS_INDEX_ALLOWED_REMINDERS = 8;
-    static final int CALENDARS_INDEX_ALLOWED_ATTENDEE_TYPES = 9;
-    static final int CALENDARS_INDEX_ALLOWED_AVAILABILITY = 10;
-    static final int CALENDARS_INDEX_ACCOUNT_NAME = 11;
-    static final int CALENDARS_INDEX_ACCOUNT_TYPE = 12;
-
-    static final String CALENDARS_WHERE_WRITEABLE_VISIBLE = Calendars.CALENDAR_ACCESS_LEVEL + ">="
-            + Calendars.CAL_ACCESS_CONTRIBUTOR + " AND " + Calendars.VISIBLE + "=1";
-
-    static final String CALENDARS_WHERE = Calendars._ID + "=?";
-
-    static final String[] COLORS_PROJECTION = new String[] {
-        Colors._ID, // 0
-        Colors.ACCOUNT_NAME,
-        Colors.ACCOUNT_TYPE,
-        Colors.COLOR, // 1
-        Colors.COLOR_KEY // 2
-    };
-
-    static final String COLORS_WHERE = Colors.ACCOUNT_NAME + "=? AND " + Colors.ACCOUNT_TYPE +
-        "=? AND " + Colors.COLOR_TYPE + "=" + Colors.TYPE_EVENT;
-
-    static final int COLORS_INDEX_ACCOUNT_NAME = 1;
-    static final int COLORS_INDEX_ACCOUNT_TYPE = 2;
-    static final int COLORS_INDEX_COLOR = 3;
-    static final int COLORS_INDEX_COLOR_KEY = 4;
-
-    static final String[] ATTENDEES_PROJECTION = new String[] {
-            Attendees._ID, // 0
-            Attendees.ATTENDEE_NAME, // 1
-            Attendees.ATTENDEE_EMAIL, // 2
-            Attendees.ATTENDEE_RELATIONSHIP, // 3
-            Attendees.ATTENDEE_STATUS, // 4
-    };
-
-    static final int ATTENDEES_INDEX_ID = 0;
-    static final int ATTENDEES_INDEX_NAME = 1;
-    static final int ATTENDEES_INDEX_EMAIL = 2;
-    static final int ATTENDEES_INDEX_RELATIONSHIP = 3;
-    static final int ATTENDEES_INDEX_STATUS = 4;
-
-    static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
-
-    static final String ATTENDEES_SORT_ORDER = Attendees.ATTENDEE_NAME + " ASC, "
-            + Attendees.ATTENDEE_EMAIL + " ASC";
-
-    private static final int EMAIL_PROJECTION_DISPLAY_NAME_INDEX = 0; // String
-
     private static final String[] DISPLAY_NAME_PROJECTION = new String[] {
         Contacts.DISPLAY_NAME, // 0
     };
+    private static final int EMAIL_PROJECTION_DISPLAY_NAME_INDEX = 0; // String
 
     public static class AttendeeItem {
         public boolean mRemoved;

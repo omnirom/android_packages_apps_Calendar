@@ -20,6 +20,8 @@ import static android.provider.CalendarContract.EXTRA_EVENT_ALL_DAY;
 import static android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME;
 import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 import static com.android.calendar.CalendarController.EVENT_EDIT_ON_LAUNCH;
+import static com.android.calendar.CalendarQueries.*;
+import static com.android.calendar.event.EventQueries.*;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -165,130 +167,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
     private int mCurrentQuery = 0;
 
-    private static final String[] EVENT_PROJECTION = new String[] {
-        Events._ID,                  // 0  do not remove; used in DeleteEventHelper
-        Events.TITLE,                // 1  do not remove; used in DeleteEventHelper
-        Events.RRULE,                // 2  do not remove; used in DeleteEventHelper
-        Events.ALL_DAY,              // 3  do not remove; used in DeleteEventHelper
-        Events.CALENDAR_ID,          // 4  do not remove; used in DeleteEventHelper
-        Events.DTSTART,              // 5  do not remove; used in DeleteEventHelper
-        Events._SYNC_ID,             // 6  do not remove; used in DeleteEventHelper
-        Events.EVENT_TIMEZONE,       // 7  do not remove; used in DeleteEventHelper
-        Events.DESCRIPTION,          // 8
-        Events.EVENT_LOCATION,       // 9
-        Calendars.CALENDAR_ACCESS_LEVEL, // 10
-        Events.CALENDAR_COLOR,       // 11
-        Events.EVENT_COLOR,          // 12
-        Events.HAS_ATTENDEE_DATA,    // 13
-        Events.ORGANIZER,            // 14
-        Events.HAS_ALARM,            // 15
-        Calendars.MAX_REMINDERS,     // 16
-        Calendars.ALLOWED_REMINDERS, // 17
-        Events.CUSTOM_APP_PACKAGE,   // 18
-        Events.CUSTOM_APP_URI,       // 19
-        Events.DTEND,                // 20
-        Events.DURATION,             // 21
-        Events.ORIGINAL_SYNC_ID,     // 22 do not remove; used in DeleteEventHelper
-        Events.GUESTS_CAN_MODIFY     // 23
-    };
-    private static final int EVENT_INDEX_ID = 0;
-    private static final int EVENT_INDEX_TITLE = 1;
-    private static final int EVENT_INDEX_RRULE = 2;
-    private static final int EVENT_INDEX_ALL_DAY = 3;
-    private static final int EVENT_INDEX_CALENDAR_ID = 4;
-    private static final int EVENT_INDEX_DTSTART = 5;
-    private static final int EVENT_INDEX_SYNC_ID = 6;
-    private static final int EVENT_INDEX_EVENT_TIMEZONE = 7;
-    private static final int EVENT_INDEX_DESCRIPTION = 8;
-    private static final int EVENT_INDEX_EVENT_LOCATION = 9;
-    private static final int EVENT_INDEX_ACCESS_LEVEL = 10;
-    private static final int EVENT_INDEX_CALENDAR_COLOR = 11;
-    private static final int EVENT_INDEX_EVENT_COLOR = 12;
-    private static final int EVENT_INDEX_HAS_ATTENDEE_DATA = 13;
-    private static final int EVENT_INDEX_ORGANIZER = 14;
-    private static final int EVENT_INDEX_HAS_ALARM = 15;
-    private static final int EVENT_INDEX_MAX_REMINDERS = 16;
-    private static final int EVENT_INDEX_ALLOWED_REMINDERS = 17;
-    private static final int EVENT_INDEX_CUSTOM_APP_PACKAGE = 18;
-    private static final int EVENT_INDEX_CUSTOM_APP_URI = 19;
-    private static final int EVENT_INDEX_DTEND = 20;
-    private static final int EVENT_INDEX_DURATION = 21;
-    private static final int EVENT_INDEX_ORIGINAL_SYNC_ID = 22;
-    private static final int EVENT_INDEX_GUESTS_CAN_MODIFY = 23;
-
-    private static final String[] ATTENDEES_PROJECTION = new String[] {
-        Attendees._ID,                      // 0
-        Attendees.ATTENDEE_NAME,            // 1
-        Attendees.ATTENDEE_EMAIL,           // 2
-        Attendees.ATTENDEE_RELATIONSHIP,    // 3
-        Attendees.ATTENDEE_STATUS,          // 4
-        Attendees.ATTENDEE_IDENTITY,        // 5
-        Attendees.ATTENDEE_ID_NAMESPACE     // 6
-    };
-    private static final int ATTENDEES_INDEX_ID = 0;
-    private static final int ATTENDEES_INDEX_NAME = 1;
-    private static final int ATTENDEES_INDEX_EMAIL = 2;
-    private static final int ATTENDEES_INDEX_RELATIONSHIP = 3;
-    private static final int ATTENDEES_INDEX_STATUS = 4;
-    private static final int ATTENDEES_INDEX_IDENTITY = 5;
-    private static final int ATTENDEES_INDEX_ID_NAMESPACE = 6;
-
-    static {
-        if (!Utils.isJellybeanOrLater()) {
-            EVENT_PROJECTION[EVENT_INDEX_CUSTOM_APP_PACKAGE] = Events._ID; // dummy value
-            EVENT_PROJECTION[EVENT_INDEX_CUSTOM_APP_URI] = Events._ID; // dummy value
-
-            ATTENDEES_PROJECTION[ATTENDEES_INDEX_IDENTITY] = Attendees._ID; // dummy value
-            ATTENDEES_PROJECTION[ATTENDEES_INDEX_ID_NAMESPACE] = Attendees._ID; // dummy value
-        }
-    }
-
-    private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
-
-    private static final String ATTENDEES_SORT_ORDER = Attendees.ATTENDEE_NAME + " ASC, "
-            + Attendees.ATTENDEE_EMAIL + " ASC";
-
-    private static final String[] REMINDERS_PROJECTION = new String[] {
-        Reminders._ID,                      // 0
-        Reminders.MINUTES,            // 1
-        Reminders.METHOD           // 2
-    };
-    private static final int REMINDERS_INDEX_ID = 0;
-    private static final int REMINDERS_MINUTES_ID = 1;
-    private static final int REMINDERS_METHOD_ID = 2;
-
-    private static final String REMINDERS_WHERE = Reminders.EVENT_ID + "=?";
-
-    static final String[] CALENDARS_PROJECTION = new String[] {
-        Calendars._ID,           // 0
-        Calendars.CALENDAR_DISPLAY_NAME,  // 1
-        Calendars.OWNER_ACCOUNT, // 2
-        Calendars.CAN_ORGANIZER_RESPOND, // 3
-        Calendars.ACCOUNT_NAME, // 4
-        Calendars.ACCOUNT_TYPE  // 5
-    };
-    static final int CALENDARS_INDEX_DISPLAY_NAME = 1;
-    static final int CALENDARS_INDEX_OWNER_ACCOUNT = 2;
-    static final int CALENDARS_INDEX_OWNER_CAN_RESPOND = 3;
-    static final int CALENDARS_INDEX_ACCOUNT_NAME = 4;
-    static final int CALENDARS_INDEX_ACCOUNT_TYPE = 5;
-
-    static final String CALENDARS_WHERE = Calendars._ID + "=?";
-    static final String CALENDARS_DUPLICATE_NAME_WHERE = Calendars.CALENDAR_DISPLAY_NAME + "=?";
-    static final String CALENDARS_VISIBLE_WHERE = Calendars.VISIBLE + "=?";
-
-    static final String[] COLORS_PROJECTION = new String[] {
-        Colors._ID, // 0
-        Colors.COLOR, // 1
-        Colors.COLOR_KEY // 2
-    };
-
-    static final String COLORS_WHERE = Colors.ACCOUNT_NAME + "=? AND " + Colors.ACCOUNT_TYPE +
-        "=? AND " + Colors.COLOR_TYPE + "=" + Colors.TYPE_EVENT;
-
-    public static final int COLORS_INDEX_COLOR = 1;
-    public static final int COLORS_INDEX_COLOR_KEY = 2;
-
     private View mView;
 
     private Uri mUri;
@@ -311,7 +189,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private String mEventOrganizerDisplayName;
     private boolean mIsOrganizer;
     private boolean mGuestsCanModify;
-    private long mCalendarOwnerAttendeeId = EditEventHelper.ATTENDEE_ID_NONE;
+    private long mCalendarOwnerAttendeeId = ATTENDEE_ID_NONE;
     private boolean mOwnerCanRespond;
     private String mSyncAccountName;
     private String mCalendarOwnerAccount;
@@ -467,7 +345,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                         mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_NAME),
                         mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_TYPE) };
                 Uri uri = Colors.CONTENT_URI;
-                startQuery(TOKEN_QUERY_COLORS, null, uri, COLORS_PROJECTION, COLORS_WHERE, args,
+                startQuery(TOKEN_QUERY_COLORS, null, uri, COLORS_PROJECTION, COLORS_EVENT_WHERE, args,
                         null);
 
                 if (!mIsBusyFreeCalendar) {
@@ -819,15 +697,13 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         // we've explicitly been provided reminders (e.g. during rotation).
         mHasAlarm = (mEventCursor.getInt(EVENT_INDEX_HAS_ALARM) == 1)? true :
             (mReminders != null && mReminders.size() > 0);
-        mMaxReminders = mEventCursor.getInt(EVENT_INDEX_MAX_REMINDERS);
-        mCalendarAllowedReminders =  mEventCursor.getString(EVENT_INDEX_ALLOWED_REMINDERS);
         return true;
     }
 
     @SuppressWarnings("fallthrough")
     private void initAttendeesCursor(View view) {
         mOriginalAttendeeResponse = Attendees.ATTENDEE_STATUS_NONE;
-        mCalendarOwnerAttendeeId = EditEventHelper.ATTENDEE_ID_NONE;
+        mCalendarOwnerAttendeeId = ATTENDEE_ID_NONE;
         mNumOfAttendees = 0;
         if (mAttendeesCursor != null) {
             mNumOfAttendees = mAttendeesCursor.getCount();
@@ -850,7 +726,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     }
 
                     if (DEBUG)  Log.d(TAG, "initAttendeesCursor post name = " + name + " email = " + email);
-                    if (mCalendarOwnerAttendeeId == EditEventHelper.ATTENDEE_ID_NONE &&
+                    if (mCalendarOwnerAttendeeId == ATTENDEE_ID_NONE &&
                             mCalendarOwnerAccount.equalsIgnoreCase(email)) {
                         mCalendarOwnerAttendeeId = mAttendeesCursor.getInt(ATTENDEES_INDEX_ID);
                         mOriginalAttendeeResponse = mAttendeesCursor.getInt(ATTENDEES_INDEX_STATUS);
@@ -987,7 +863,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
 
         // If we never got an owner attendee id we can't set the status
-        if (mCalendarOwnerAttendeeId == EditEventHelper.ATTENDEE_ID_NONE) {
+        if (mCalendarOwnerAttendeeId == ATTENDEE_ID_NONE) {
             return false;
         }
 
@@ -1166,7 +1042,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         String location = mEventCursor.getString(EVENT_INDEX_EVENT_LOCATION);
         String description = mEventCursor.getString(EVENT_INDEX_DESCRIPTION);
         String rRule = mEventCursor.getString(EVENT_INDEX_RRULE);
-        String eventTimezone = mEventCursor.getString(EVENT_INDEX_EVENT_TIMEZONE);
+        String eventTimezone = mEventCursor.getString(EVENT_INDEX_TIMEZONE);
 
         mHeadlines.setBackgroundColor(mCurrentColor);
         colorActivity(mCurrentColor);
@@ -1412,9 +1288,11 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mCalendarsCursor.moveToFirst();
             String tempAccount = mCalendarsCursor.getString(CALENDARS_INDEX_OWNER_ACCOUNT);
             mCalendarOwnerAccount = (tempAccount == null) ? "" : tempAccount;
-            mOwnerCanRespond = mCalendarsCursor.getInt(CALENDARS_INDEX_OWNER_CAN_RESPOND) != 0;
+            mOwnerCanRespond = mCalendarsCursor.getInt(CALENDARS_INDEX_CAN_ORGANIZER_RESPOND) != 0;
             mSyncAccountName = mCalendarsCursor.getString(CALENDARS_INDEX_ACCOUNT_NAME);
-
+            mMaxReminders = mCalendarsCursor.getInt(CALENDARS_INDEX_MAX_REMINDERS);
+            mCalendarAllowedReminders =  mCalendarsCursor.getString(CALENDARS_INDEX_ALLOWED_REMINDERS);
+            
             // start visible calendars query
             mHandler.startQuery(TOKEN_QUERY_VISIBLE_CALENDARS, null, Calendars.CONTENT_URI,
                     CALENDARS_PROJECTION, CALENDARS_VISIBLE_WHERE, new String[] {"1"}, null);
@@ -1427,19 +1305,19 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                     !mEventOrganizerEmail.endsWith(Utils.MACHINE_GENERATED_ADDRESS)) {
                 mEventOrganizerDisplayName = mEventOrganizerEmail;
             }
-
+        
             if (!mIsOrganizer && !TextUtils.isEmpty(mEventOrganizerDisplayName)) {
                 // to avoid flicker dont set email here but assume its set later in initAttendeesCursor
                 //setTextCommon(view, R.id.organizer, mEventOrganizerDisplayName);
                 setVisibilityCommon(view, R.id.organizer_container, View.VISIBLE);
             }
             mHasAttendeeData = mEventCursor.getInt(EVENT_INDEX_HAS_ATTENDEE_DATA) != 0;
-            mCanModifyCalendar = mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL)
+            mCanModifyCalendar = mCalendarsCursor.getInt(CALENDARS_INDEX_ACCESS_LEVEL)
                     >= Calendars.CAL_ACCESS_CONTRIBUTOR;
             // TODO add "|| mGuestsCanModify" after b/204791550 is fixed
             mCanModifyEvent = mCanModifyCalendar && mIsOrganizer;
             mIsBusyFreeCalendar =
-                    mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL) == Calendars.CAL_ACCESS_FREEBUSY;
+                    mCalendarsCursor.getInt(CALENDARS_INDEX_ACCESS_LEVEL) == Calendars.CAL_ACCESS_FREEBUSY;
 
             mActivity.invalidateOptionsMenu();
         } else {
@@ -1517,8 +1395,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     public void initReminders(View view, Cursor cursor) {
         mOriginalReminders.clear();
         while (cursor.moveToNext()) {
-            int minutes = cursor.getInt(EditEventHelper.REMINDERS_INDEX_MINUTES);
-            int method = cursor.getInt(EditEventHelper.REMINDERS_INDEX_METHOD);
+            int minutes = cursor.getInt(REMINDERS_INDEX_MINUTES);
+            int method = cursor.getInt(REMINDERS_INDEX_METHOD);
 
             if (method == Reminders.METHOD_DEFAULT || mReminderMethodValues.contains(method)) {
                 mOriginalReminders.add(ReminderEntry.valueOf(minutes, method));

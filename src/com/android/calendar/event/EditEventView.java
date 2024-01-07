@@ -16,6 +16,8 @@
 
 package com.android.calendar.event;
 
+import static com.android.calendar.CalendarQueries.*;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.Service;
@@ -641,12 +643,12 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
             int calendarCursorPosition = mCalendarsSpinner.getSelectedItemPosition();
             if (mCalendarsCursor.moveToPosition(calendarCursorPosition)) {
                 String defaultCalendar = mCalendarsCursor.getString(
-                        EditEventHelper.CALENDARS_INDEX_OWNER_ACCOUNT);
+                        CALENDARS_INDEX_OWNER_ACCOUNT);
                 Utils.setSharedPreference(
                         mActivity, GeneralPreferences.KEY_DEFAULT_CALENDAR, defaultCalendar);
                 mModel.mOwnerAccount = defaultCalendar;
                 mModel.mOrganizer = defaultCalendar;
-                mModel.mCalendarId = mCalendarsCursor.getLong(EditEventHelper.CALENDARS_INDEX_ID);
+                mModel.mCalendarId = mCalendarsCursor.getLong(CALENDARS_INDEX_ID);
             }
         }
 
@@ -1624,8 +1626,8 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
 
         mModel.mCalendarId = calendarId;
         mModel.setCalendarColor(displayColor);
-        mModel.mCalendarAccountName = c.getString(EditEventHelper.CALENDARS_INDEX_ACCOUNT_NAME);
-        mModel.mCalendarAccountType = c.getString(EditEventHelper.CALENDARS_INDEX_ACCOUNT_TYPE);
+        mModel.mCalendarAccountName = c.getString(CALENDARS_INDEX_ACCOUNT_NAME);
+        mModel.mCalendarAccountType = c.getString(CALENDARS_INDEX_ACCOUNT_TYPE);
 
         mModel.setEventColor(mModel.getCalendarColor());
         ((EditEventActivity) mActivity).colorActivity(mModel.getEventColor());
