@@ -286,9 +286,6 @@ public class CalendarEventModel implements Serializable {
                 GeneralPreferences.KEY_DEFAULT_REMINDER, GeneralPreferences.NO_REMINDER_STRING);
         int defaultReminderMins = Integer.parseInt(defaultReminder);
         if (defaultReminderMins != GeneralPreferences.NO_REMINDER) {
-            // Assume all calendars allow at least one reminder.
-            mHasAlarm = true;
-            mReminders.add(ReminderEntry.valueOf(defaultReminderMins));
             mDefaultReminders.add(ReminderEntry.valueOf(defaultReminderMins));
         }
     }
@@ -357,6 +354,10 @@ public class CalendarEventModel implements Serializable {
             return false;
         }
         return true;
+    }
+
+    public boolean isNewEvent() {
+        return mUri == null;
     }
 
     public void clear() {

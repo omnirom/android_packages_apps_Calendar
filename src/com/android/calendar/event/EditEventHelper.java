@@ -16,7 +16,9 @@
 
 package com.android.calendar.event;
 
+import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -151,7 +153,8 @@ public class EditEventHelper {
 
     protected static final int DAY_IN_SECONDS = 24 * 60 * 60;
 
-    private final AsyncQueryService mService;
+    //private final AsyncQueryService mService;
+    private Context mContext;
 
     // This allows us to flag the event if something is wrong with it, right now
     // if an uri is provided for an event that doesn't exist in the db.
@@ -263,7 +266,8 @@ public class EditEventHelper {
     }
 
     public EditEventHelper(Context context) {
-        mService = ((AbstractCalendarActivity)context).getAsyncQueryService();
+        mContext = context;
+        //mService = ((AbstractCalendarActivity)context).getAsyncQueryService();
     }
 
     public EditEventHelper(Context context, CalendarEventModel model) {
@@ -280,10 +284,8 @@ public class EditEventHelper {
      * @param modifyWhich For recurring events which type of series modification to use
      * @return true if the event was successfully queued for saving
      */
-    public boolean saveEvent(CalendarEventModel model, CalendarEventModel originalModel,
+    public Uri saveEvent(CalendarEventModel model, CalendarEventModel originalModel,
             int modifyWhich) {
-        boolean forceSaveReminders = false;
-
         if (DEBUG) {
             Log.d(TAG, "Saving event model: " + model);
         }
@@ -292,150 +294,139 @@ public class EditEventHelper {
             if (DEBUG) {
                 Log.w(TAG, "Event no longer exists. Event was not saved.");
             }
-            return false;
+            return null;
         }
 
         // It's a problem if we try to save a non-existent or invalid model or if we're
         // modifying an existing event and we have the wrong original model
         if (model == null) {
             Log.e(TAG, "Attempted to save null model.");
-            return false;
+            return null;
         }
         if (!model.isValid()) {
             Log.e(TAG, "Attempted to save invalid model.");
-            return false;
+            return null;
         }
         if (originalModel != null && !isSameEvent(model, originalModel)) {
             Log.e(TAG, "Attempted to update existing event but models didn't refer to the same "
                     + "event.");
-            return false;
+            return null;
         }
         if (originalModel != null && model.isUnchanged(originalModel)) {
-            return false;
+            return null;
         }
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        int eventIdIndex = -1;
 
         ContentValues values = getContentValuesFromModel(model);
 
         if (model.mUri != null && originalModel == null) {
             Log.e(TAG, "Existing event but no originalModel provided. Aborting save.");
-            return false;
+            return null;
         }
+        boolean newEvent = model.isNewEvent();
         Uri uri = null;
+        long eventId = -1;
         if (model.mUri != null) {
             uri = Uri.parse(model.mUri);
+            eventId = Long.parseLong(uri.getLastPathSegment());
         }
 
         // Update the "hasAlarm" field for the event
         ArrayList<ReminderEntry> reminders = model.mReminders;
-        Log.d(TAG, "saveEvent mModel.mReminders = " + reminders);
-        int len = reminders.size();
-        values.put(Events.HAS_ALARM, (len > 0) ? 1 : 0);
 
         if (uri == null) {
-            // Add hasAttendeeData for a new event
             values.put(Events.HAS_ATTENDEE_DATA, 1);
             values.put(Events.STATUS, Events.STATUS_CONFIRMED);
-            eventIdIndex = ops.size();
-            ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
-                    Events.CONTENT_URI).withValues(values);
-            ops.add(b.build());
-            forceSaveReminders = true;
+            values.put(Events.HAS_ALARM, (reminders.size() > 0) ? 1 : 0);
+            uri = mContext.getContentResolver().insert(Events.CONTENT_URI, values);
+            eventId = Long.parseLong(uri.getLastPathSegment());
+            if (DEBUG) Log.d(TAG, "new event uri = " + uri + " eventId = " + eventId);
+        } 
+        Log.d(TAG, "save event uri = " + uri + " title = " + model.mTitle + " model.mId = " + model.mId + " model.mOriginalId = " + model.mOriginalId);
 
-        } else if (TextUtils.isEmpty(model.mRrule) && TextUtils.isEmpty(originalModel.mRrule)) {
-            // Simple update to a non-recurring event
-            checkTimeDependentFields(originalModel, model, values, modifyWhich);
-            ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
-
-        } else if (TextUtils.isEmpty(originalModel.mRrule)) {
-            // This event was changed from a non-repeating event to a
-            // repeating event.
-            ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
-
-        } else if (modifyWhich == MODIFY_SELECTED) {
-            // Modify contents of the current instance of repeating event
-            // Create a recurrence exception
-            long begin = model.mOriginalStart;
-            values.put(Events.ORIGINAL_SYNC_ID, originalModel.mSyncId);
-            values.put(Events.ORIGINAL_INSTANCE_TIME, begin);
-            boolean allDay = originalModel.mAllDay;
-            values.put(Events.ORIGINAL_ALL_DAY, allDay ? 1 : 0);
-            values.put(Events.STATUS, originalModel.mEventStatus);
-
-            eventIdIndex = ops.size();
-            ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
-                    Events.CONTENT_URI).withValues(values);
-            ops.add(b.build());
-            forceSaveReminders = true;
-
-        } else if (modifyWhich == MODIFY_ALL_FOLLOWING) {
-
-            if (TextUtils.isEmpty(model.mRrule)) {
-                // We've changed a recurring event to a non-recurring event.
-                // If the event we are editing is the first in the series,
-                // then delete the whole series. Otherwise, update the series
-                // to end at the new start time.
-                if (isFirstEventInSeries(model, originalModel)) {
-                    ops.add(ContentProviderOperation.newDelete(uri).build());
-                } else {
-                    // Update the current repeating event to end at the new start time.  We
-                    // ignore the RRULE returned because the exception event doesn't want one.
-                    updatePastEvents(ops, originalModel, model.mOriginalStart);
-                }
-                eventIdIndex = ops.size();
-                values.put(Events.STATUS, originalModel.mEventStatus);
-                ops.add(ContentProviderOperation.newInsert(Events.CONTENT_URI).withValues(values)
-                        .build());
-            } else {
-                if (isFirstEventInSeries(model, originalModel)) {
-                    checkTimeDependentFields(originalModel, model, values, modifyWhich);
-                    ContentProviderOperation.Builder b = ContentProviderOperation.newUpdate(uri)
-                            .withValues(values);
-                    ops.add(b.build());
-                } else {
-                    // We need to update the existing recurrence to end before the exception
-                    // event starts.  If the recurrence rule has a COUNT, we need to adjust
-                    // that in the original and in the exception.  This call rewrites the
-                    // original event's recurrence rule (in "ops"), and returns a new rule
-                    // for the exception.  If the exception explicitly set a new rule, however,
-                    // we don't want to overwrite it.
-                    String newRrule = updatePastEvents(ops, originalModel, model.mOriginalStart);
-                    if (model.mRrule.equals(originalModel.mRrule)) {
-                        values.put(Events.RRULE, newRrule);
-                    }
-
-                    // Create a new event with the user-modified fields
-                    eventIdIndex = ops.size();
-                    values.put(Events.STATUS, originalModel.mEventStatus);
-                    ops.add(ContentProviderOperation.newInsert(Events.CONTENT_URI).withValues(
-                            values).build());
-                }
-            }
-            forceSaveReminders = true;
-
-        } else if (modifyWhich == MODIFY_ALL) {
-
-            // Modify all instances of repeating event
-            if (TextUtils.isEmpty(model.mRrule)) {
-                // We've changed a recurring event to a non-recurring event.
-                // Delete the whole series and replace it with a new
-                // non-recurring event.
-                ops.add(ContentProviderOperation.newDelete(uri).build());
-
-                eventIdIndex = ops.size();
-                ops.add(ContentProviderOperation.newInsert(Events.CONTENT_URI).withValues(values)
-                        .build());
-                forceSaveReminders = true;
-            } else {
-                checkTimeDependentFields(originalModel, model, values, modifyWhich);
+        if (!newEvent) {
+            if (TextUtils.isEmpty(model.mRrule) && TextUtils.isEmpty(originalModel.mRrule)) {
+                // Simple update to a non-recurring event
+                checkTimeDependentFields(originalModel, model, values, modifyWhich);                
                 ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
+
+            } else if (TextUtils.isEmpty(originalModel.mRrule)) {
+                // This event was changed from a non-repeating event to a
+                // repeating event.
+                ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
+
+            } else if (modifyWhich == MODIFY_SELECTED) {
+                // Modify contents of the current instance of repeating event
+                // Create a recurrence exception
+                long begin = model.mOriginalStart;
+                values.put(Events.ORIGINAL_SYNC_ID, originalModel.mSyncId);
+                values.put(Events.ORIGINAL_INSTANCE_TIME, begin);
+                boolean allDay = originalModel.mAllDay;
+                values.put(Events.ORIGINAL_ALL_DAY, allDay ? 1 : 0);
+                values.put(Events.STATUS, originalModel.mEventStatus);
+
+                uri = mContext.getContentResolver().insert(Events.CONTENT_URI, values);
+                eventId = Long.parseLong(uri.getLastPathSegment());
+
+            } else if (modifyWhich == MODIFY_ALL_FOLLOWING) {
+
+                if (TextUtils.isEmpty(model.mRrule)) {
+                    // We've changed a recurring event to a non-recurring event.
+                    // If the event we are editing is the first in the series,
+                    // then delete the whole series. Otherwise, update the series
+                    // to end at the new start time.
+                    if (isFirstEventInSeries(model, originalModel)) {
+                        ops.add(ContentProviderOperation.newDelete(uri).build());
+                    } else {
+                        // Update the current repeating event to end at the new start time.  We
+                        // ignore the RRULE returned because the exception event doesn't want one.
+                        updatePastEvents(ops, originalModel, model.mOriginalStart);
+                    }
+                    values.put(Events.STATUS, originalModel.mEventStatus);
+                    uri = mContext.getContentResolver().insert(Events.CONTENT_URI, values);
+                    eventId = Long.parseLong(uri.getLastPathSegment());
+                } else {
+                    if (isFirstEventInSeries(model, originalModel)) {
+                        checkTimeDependentFields(originalModel, model, values, modifyWhich);
+                        ContentProviderOperation.Builder b = ContentProviderOperation.newUpdate(uri)
+                                .withValues(values);
+                        ops.add(b.build());
+                    } else {
+                        // We need to update the existing recurrence to end before the exception
+                        // event starts.  If the recurrence rule has a COUNT, we need to adjust
+                        // that in the original and in the exception.  This call rewrites the
+                        // original event's recurrence rule (in "ops"), and returns a new rule
+                        // for the exception.  If the exception explicitly set a new rule, however,
+                        // we don't want to overwrite it.
+                        String newRrule = updatePastEvents(ops, originalModel, model.mOriginalStart);
+                        if (model.mRrule.equals(originalModel.mRrule)) {
+                            values.put(Events.RRULE, newRrule);
+                        }
+
+                        // Create a new event with the user-modified fields
+                        values.put(Events.STATUS, originalModel.mEventStatus);
+                        uri = mContext.getContentResolver().insert(Events.CONTENT_URI, values);
+                        eventId = Long.parseLong(uri.getLastPathSegment());
+                    }
+                }
+            } else if (modifyWhich == MODIFY_ALL) {
+
+                // Modify all instances of repeating event
+                if (TextUtils.isEmpty(model.mRrule)) {
+                    // We've changed a recurring event to a non-recurring event.
+                    // Delete the whole series and replace it with a new
+                    // non-recurring event.
+                    ops.add(ContentProviderOperation.newDelete(uri).build());
+                    uri = mContext.getContentResolver().insert(Events.CONTENT_URI, values);
+                    eventId = Long.parseLong(uri.getLastPathSegment());
+                } else {
+                    checkTimeDependentFields(originalModel, model, values, modifyWhich);
+                    ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
+                }
             }
         }
 
-        // New Event or New Exception to an existing event
-        boolean newEvent = (eventIdIndex != -1);
         ArrayList<ReminderEntry> originalReminders;
         if (originalModel != null) {
             originalReminders = originalModel.mReminders;
@@ -443,13 +434,7 @@ public class EditEventHelper {
             originalReminders = new ArrayList<ReminderEntry>();
         }
 
-        if (newEvent) {
-            saveRemindersWithBackRef(ops, eventIdIndex, reminders, originalReminders,
-                    forceSaveReminders);
-        } else if (uri != null) {
-            long eventId = ContentUris.parseId(uri);
-            saveReminders(ops, eventId, reminders, originalReminders, forceSaveReminders);
-        }
+        saveReminders(mContext, ops, eventId, reminders, originalReminders, true);
 
         ContentProviderOperation.Builder b;
         boolean hasAttendeeData = model.mHasAttendeeData;
@@ -469,16 +454,9 @@ public class EditEventHelper {
                 values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ORGANIZER);
                 values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED);
                 values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_ACCEPTED);
-
-                if (newEvent) {
-                    b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
+                values.put(Attendees.EVENT_ID, eventId);
+                b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
                             .withValues(values);
-                    b.withValueBackReference(Attendees.EVENT_ID, eventIdIndex);
-                } else {
-                    values.put(Attendees.EVENT_ID, model.mId);
-                    b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
-                            .withValues(values);
-                }
                 ops.add(b.build());
             }
         } else if (hasAttendeeData &&
@@ -491,14 +469,12 @@ public class EditEventHelper {
 
             values.clear();
             values.put(Attendees.ATTENDEE_STATUS, model.mSelfAttendeeStatus);
-            values.put(Attendees.EVENT_ID, model.mId);
+            values.put(Attendees.EVENT_ID, eventId);
             b = ContentProviderOperation.newUpdate(attUri).withValues(values);
             ops.add(b.build());
         }
 
-        // TODO: is this the right test? this currently checks if this is
-        // a new event or an existing event. or is this a paranoia check?
-        if (hasAttendeeData && (newEvent || uri != null)) {
+        if (hasAttendeeData) {
             String attendees = model.getAttendeesString();
             String originalAttendeesString;
             if (originalModel != null) {
@@ -514,10 +490,6 @@ public class EditEventHelper {
                 // order (but also remove duplicates).
                 HashMap<String, Attendee> newAttendees = model.mAttendeesList;
                 LinkedList<String> removedAttendees = new LinkedList<String>();
-
-                // the eventId is only used if eventIdIndex is -1.
-                // TODO: clean up this code.
-                long eventId = uri != null ? ContentUris.parseId(uri) : -1;
 
                 // only compute deltas if this is an existing event.
                 // new events (being inserted into the Events table) won't
@@ -568,16 +540,9 @@ public class EditEventHelper {
                                 Attendees.RELATIONSHIP_ATTENDEE);
                         values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_REQUIRED);
                         values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_NONE);
-
-                        if (newEvent) {
-                            b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
-                                    .withValues(values);
-                            b.withValueBackReference(Attendees.EVENT_ID, eventIdIndex);
-                        } else {
-                            values.put(Attendees.EVENT_ID, eventId);
-                            b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
-                                    .withValues(values);
-                        }
+                        values.put(Attendees.EVENT_ID, eventId);
+                        b = ContentProviderOperation.newInsert(Attendees.CONTENT_URI)
+                                .withValues(values);
                         ops.add(b.build());
                     }
                 }
@@ -585,10 +550,14 @@ public class EditEventHelper {
         }
 
 
-        mService.startBatch(mService.getNextToken(), null, android.provider.CalendarContract.AUTHORITY, ops,
-                Utils.UNDO_DELAY);
-
-        return true;
+        //mService.startBatch(mService.getNextToken(), null, android.provider.CalendarContract.AUTHORITY, ops,
+        //        Utils.UNDO_DELAY);
+        try {
+            mContext.getContentResolver().applyBatch(android.provider.CalendarContract.AUTHORITY, ops);
+        } catch (Exception e) {
+            Log.e(TAG, "applyBatch", e);
+        }
+        return uri;
     }
 
     public static LinkedHashSet<Rfc822Token> getAddressesFromList(String list,
@@ -860,7 +829,7 @@ public class EditEventHelper {
      * @param forceSave if true, then save the reminders even if they didn't change
      * @return true if operations to update the database were added
      */
-    public static boolean saveReminders(ArrayList<ContentProviderOperation> ops, long eventId,
+    public static boolean saveReminders(Context context, ArrayList<ContentProviderOperation> ops, long eventId,
             ArrayList<ReminderEntry> reminders, ArrayList<ReminderEntry> originalReminders,
             boolean forceSave) {
         // If the reminders have not changed, then don't update the database
@@ -868,7 +837,7 @@ public class EditEventHelper {
             return false;
         }
         EditEventHelper.normalizeReminders(reminders);
-
+                                
         // Delete all the existing reminders for this event
         String where = Reminders.EVENT_ID + "=?";
         String[] args = new String[] {Long.toString(eventId)};
@@ -879,7 +848,6 @@ public class EditEventHelper {
 
         ContentValues values = new ContentValues();
         int len = reminders.size();
-        Log.d(TAG, "saveReminders reminders = " + reminders);
 
         // Insert the new reminders, if any
         for (int i = 0; i < len; i++) {
@@ -892,6 +860,12 @@ public class EditEventHelper {
             b = ContentProviderOperation.newInsert(Reminders.CONTENT_URI).withValues(values);
             ops.add(b.build());
         }
+        
+        Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventId);
+        values.clear();
+        values.put(Events.HAS_ALARM, (len > 0) ? 1 : 0);
+        b = ContentProviderOperation.newUpdate(eventUri).withValues(values);
+        ops.add(b.build());
         return true;
     }
 
@@ -910,6 +884,7 @@ public class EditEventHelper {
     public static boolean saveRemindersWithBackRef(ArrayList<ContentProviderOperation> ops,
             int eventIdIndex, ArrayList<ReminderEntry> reminders,
             ArrayList<ReminderEntry> originalReminders, boolean forceSave) {
+        Log.d(TAG, "saveRemindersWithBackRef reminders = " + reminders);
         // If the reminders have not changed, then don't update the database
         if (reminders.equals(originalReminders) && !forceSave) {
             return false;
@@ -1198,8 +1173,9 @@ public class EditEventHelper {
     }
 
     public static boolean canModifyEvent(CalendarEventModel model) {
+        // TODO add "|| model.mGuestsCanModify" after b/204791550 is fixed
         return canModifyCalendar(model)
-                && (model.mIsOrganizer || model.mGuestsCanModify);
+                && (model.mIsOrganizer /*|| model.mGuestsCanModify*/);
     }
 
     public static boolean canModifyCalendar(CalendarEventModel model) {
@@ -1450,5 +1426,33 @@ public class EditEventHelper {
         String displayName = cursor.getString(EMAIL_PROJECTION_DISPLAY_NAME_INDEX);
         cursor.close();
         return displayName;
+    }
+    
+    private static void listEventReminders(Context context, long eventId) {
+        ContentResolver cr = context.getContentResolver();
+        String[] remArgs = {
+                Long.toString(eventId)
+        };
+        Cursor cursor = cr.query(Reminders.CONTENT_URI,
+                REMINDERS_PROJECTION,
+                REMINDERS_WHERE /* selection */,
+                remArgs /* selectionArgs */,
+                null /* sort */);
+
+        Log.d(TAG, "listEventReminders eventId = " + eventId + " count = " + cursor.getCount());
+
+        if (cursor == null || cursor.getCount() == 0) {
+            cursor.close();
+            return;
+        }
+
+        while (cursor.moveToNext()) {
+            int minutes = cursor.getInt(REMINDERS_INDEX_MINUTES);
+            int method = cursor.getInt(REMINDERS_INDEX_METHOD);
+            ReminderEntry re = ReminderEntry.valueOf(minutes, method);
+            Log.d(TAG, "listEventReminders " + re);
+        }
+
+        cursor.close();
     }
 }

@@ -704,7 +704,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                         || EditEventHelper.canModifyEvent(mModel)
                         || EditEventHelper.canAddReminders(mModel))
                         && mView.prepareForSave()) {
-                    mHelper.saveEvent(mModel, mOriginalModel, mModification);
+                    Uri uri = mHelper.saveEvent(mModel, mOriginalModel, mModification);
                 }
             }
 
@@ -823,6 +823,6 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
     public void reloadEvent() {
         // TODO for edit exisitng events we should observe events changed
         // and maybe warn when this happens while editing
-        // and let user decice what to do then
+        // and let user decide what to do then
     }
 }

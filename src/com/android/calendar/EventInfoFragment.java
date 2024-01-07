@@ -188,7 +188,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         Events.CUSTOM_APP_URI,       // 19
         Events.DTEND,                // 20
         Events.DURATION,             // 21
-        Events.ORIGINAL_SYNC_ID      // 22 do not remove; used in DeleteEventHelper
+        Events.ORIGINAL_SYNC_ID,     // 22 do not remove; used in DeleteEventHelper
+        Events.GUESTS_CAN_MODIFY     // 23
     };
     private static final int EVENT_INDEX_ID = 0;
     private static final int EVENT_INDEX_TITLE = 1;
@@ -212,6 +213,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private static final int EVENT_INDEX_CUSTOM_APP_URI = 19;
     private static final int EVENT_INDEX_DTEND = 20;
     private static final int EVENT_INDEX_DURATION = 21;
+    private static final int EVENT_INDEX_ORIGINAL_SYNC_ID = 22;
+    private static final int EVENT_INDEX_GUESTS_CAN_MODIFY = 23;
 
     private static final String[] ATTENDEES_PROJECTION = new String[] {
         Attendees._ID,                      // 0
@@ -307,6 +310,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private String mEventOrganizerEmail;
     private String mEventOrganizerDisplayName;
     private boolean mIsOrganizer;
+    private boolean mGuestsCanModify;
     private long mCalendarOwnerAttendeeId = EditEventHelper.ATTENDEE_ID_NONE;
     private boolean mOwnerCanRespond;
     private String mSyncAccountName;
@@ -319,6 +323,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     private DeleteEventHelper mDeleteHelper;
 
     private int mOriginalAttendeeResponse;
+    private int mAttendeeResponseFromIntent = Attendees.ATTENDEE_STATUS_NONE;
     private int mUserSetResponse = Attendees.ATTENDEE_STATUS_NONE;
     private int mWhichEvents = -1;
     // Used as the temporary response until the dialog is confirmed. It is also
@@ -570,7 +575,9 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
     }
 
-    private EventInfoFragment(Context context, Uri uri) {
+    public EventInfoFragment(Context context, Uri uri, long startMillis, long endMillis,
+            int attendeeResponse) {
+
         Resources r = context.getResources();
         if (mScale == 0) {
             mScale = context.getResources().getDisplayMetrics().density;
@@ -580,14 +587,20 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
 
         mUri = uri;
+        mStartMillis = startMillis;
+        mEndMillis = endMillis;
+        mAttendeeResponseFromIntent = attendeeResponse;
+        if (DEBUG) Log.d(TAG, "EventInfoFragment mUri = " + mUri + " mStartMillis = " + mStartMillis + " mEndMillis= " + mEndMillis);
     }
 
     // This is currently required by the fragment manager.
     public EventInfoFragment() {
     }
 
-    public EventInfoFragment(Context context, long eventId) {
-        this(context, ContentUris.withAppendedId(Events.CONTENT_URI, eventId));
+    public EventInfoFragment(Context context, long eventId, long startMillis, long endMillis,
+            int attendeeResponse) {
+        this(context, ContentUris.withAppendedId(Events.CONTENT_URI, eventId), startMillis,
+                endMillis, attendeeResponse);
         mEventId = eventId;
     }
 
@@ -701,6 +714,10 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             }
         });
 
+        if (mAttendeeResponseFromIntent != Attendees.ATTENDEE_STATUS_NONE) {
+            mEditResponseHelper.setWhichEvents(UPDATE_ALL);
+            mWhichEvents = mEditResponseHelper.getWhichEvents();
+        }
         mHandler = new QueryHandler(activity);
         setHasOptionsMenu(true);
     }
@@ -768,7 +785,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         String defaultReminderString = prefs.getString(
                 GeneralPreferences.KEY_DEFAULT_REMINDER, GeneralPreferences.NO_REMINDER_STRING);
         mDefaultReminderMinutes = Integer.parseInt(defaultReminderString);
-        prepareReminders();
 
         return mView;
     }
@@ -1117,26 +1133,32 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             eventName = getActivity().getString(R.string.no_title_label);
         }
 
-        mStartMillis = mEventCursor.getLong(EVENT_INDEX_DTSTART);
-        mEndMillis = mEventCursor.getLong(EVENT_INDEX_DTEND);
-        if (mEndMillis == 0) {
-            String duration = mEventCursor.getString(EVENT_INDEX_DURATION);
-            if (!TextUtils.isEmpty(duration)) {
-                try {
-                    Duration d = new Duration();
-                    d.parse(duration);
-                    long endMillis = mStartMillis + d.getMillis();
-                    if (endMillis >= mStartMillis) {
-                        mEndMillis = endMillis;
-                    } else {
-                        Log.d(TAG, "Invalid duration string: " + duration);
-                    }
-                } catch (DateException e) {
-                    Log.d(TAG, "Error parsing duration string " + duration, e);
-                }
-            }
+        // 3rd parties might not have specified the start/end time when firing the
+        // Events.CONTENT_URI intent.  Update these with values read from the db.
+        // mStartMillis and mEndMillis WILL be different for repeating events 
+        // depending on which event in the series is selected
+        if (mStartMillis == 0 && mEndMillis == 0) {
+            mStartMillis = mEventCursor.getLong(EVENT_INDEX_DTSTART);
+            mEndMillis = mEventCursor.getLong(EVENT_INDEX_DTEND);
             if (mEndMillis == 0) {
-                mEndMillis = mStartMillis;
+                String duration = mEventCursor.getString(EVENT_INDEX_DURATION);
+                if (!TextUtils.isEmpty(duration)) {
+                    try {
+                        Duration d = new Duration();
+                        d.parse(duration);
+                        long endMillis = mStartMillis + d.getMillis();
+                        if (endMillis >= mStartMillis) {
+                            mEndMillis = endMillis;
+                        } else {
+                            Log.d(TAG, "Invalid duration string: " + duration);
+                        }
+                    } catch (DateException e) {
+                        Log.d(TAG, "Error parsing duration string " + duration, e);
+                    }
+                }
+                if (mEndMillis == 0) {
+                    mEndMillis = mStartMillis;
+                }
             }
         }
 
@@ -1399,6 +1421,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
             mEventOrganizerEmail = mEventCursor.getString(EVENT_INDEX_ORGANIZER);
             mIsOrganizer = mCalendarOwnerAccount.equalsIgnoreCase(mEventOrganizerEmail);
+            mGuestsCanModify = mEventCursor.getInt(EVENT_INDEX_GUESTS_CAN_MODIFY) != 0;
 
             if (!TextUtils.isEmpty(mEventOrganizerEmail) &&
                     !mEventOrganizerEmail.endsWith(Utils.MACHINE_GENERATED_ADDRESS)) {
@@ -1413,7 +1436,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             mHasAttendeeData = mEventCursor.getInt(EVENT_INDEX_HAS_ATTENDEE_DATA) != 0;
             mCanModifyCalendar = mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL)
                     >= Calendars.CAL_ACCESS_CONTRIBUTOR;
-            // TODO add "|| guestCanModify" after b/1299071 is fixed
+            // TODO add "|| mGuestsCanModify" after b/204791550 is fixed
             mCanModifyEvent = mCanModifyCalendar && mIsOrganizer;
             mIsBusyFreeCalendar =
                     mEventCursor.getInt(EVENT_INDEX_ACCESS_LEVEL) == Calendars.CAL_ACCESS_FREEBUSY;
@@ -1564,6 +1587,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
             response = mTentativeUserSetResponse;
         } else if (mUserSetResponse != Attendees.ATTENDEE_STATUS_NONE) {
             response = mUserSetResponse;
+        } else if (mAttendeeResponseFromIntent != Attendees.ATTENDEE_STATUS_NONE) {
+            response = mAttendeeResponseFromIntent;
         } else {
             response = mOriginalAttendeeResponse;
         }
@@ -1652,6 +1677,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         if (mDismissOnResume) {
             mHandler.post(onDeleteRunnable);
         } else {
+            // TODO edit can create a new event when changing repeating 
+            // but how could we get the new event mUri?
             reloadEvent();
         }
     }
@@ -1737,7 +1764,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mReminders.addAll(mUnsupportedReminders);
 
         // Check if there are any changes in the reminder
-        boolean changed = EditEventHelper.saveReminders(ops, mEventId, mReminders,
+        boolean changed = EditEventHelper.saveReminders(mContext, ops, mEventId, mReminders,
                 mOriginalReminders, false /* no force save */);
 
         if (!changed) {
@@ -1751,15 +1778,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mOriginalReminders.clear();
         mOriginalReminders.addAll(mReminders);
     
-        // Update the "hasAlarm" field for the event
-        Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, mEventId);
-        int len = mReminders.size();
-        boolean hasAlarm = len > 0;
-        if (hasAlarm != mHasAlarm) {
-            ContentValues values = new ContentValues();
-            values.put(Events.HAS_ALARM, hasAlarm ? 1 : 0);
-            service.startUpdate(0, null, uri, values, null, null, 0);
-        }
         return true;
     }
 

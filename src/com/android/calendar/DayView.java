@@ -739,8 +739,8 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             DAY_HEADER_HEIGHT = (int) (DAY_HEADER_HEIGHT + DAY_HEADER_FONT_SIZE + 2);
         }
 
-        mExpandAlldayDrawable = mResources.getDrawable(R.drawable.ic_expand_down);
-        mCollapseAlldayDrawable = mResources.getDrawable(R.drawable.ic_expand_up);
+        mExpandAlldayDrawable = mContext.getDrawable(R.drawable.ic_expand_down);
+        mCollapseAlldayDrawable = mContext.getDrawable(R.drawable.ic_expand_up);
         mNewEventHintColor =  mResources.getColor(R.color.new_event_hint_text_color);
         mCurrentTimeLineColor =  mResources.getColor(R.color.current_time_line_color);
         mEventLoader = eventLoader;

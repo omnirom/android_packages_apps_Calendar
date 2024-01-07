@@ -43,6 +43,7 @@ import java.util.List;
 public class EventInfoActivity extends AppCompatActivity {
     private static final String TAG = "Calendar:EventInfoActivity";
     private EventInfoFragment mInfoFragment;
+    private long mStartMillis, mEndMillis;
     private long mEventId;
 
     // Create an observer so that we can update the views whenever a
@@ -70,11 +71,16 @@ public class EventInfoActivity extends AppCompatActivity {
 
         // Get the info needed for the fragment
         Intent intent = getIntent();
+        int attendeeResponse = 0;
         mEventId = -1;
 
         if (icicle != null) {
             mEventId = icicle.getLong(EventInfoFragment.BUNDLE_KEY_EVENT_ID);
         } else if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            mStartMillis = intent.getLongExtra(EXTRA_EVENT_BEGIN_TIME, 0);
+            mEndMillis = intent.getLongExtra(EXTRA_EVENT_END_TIME, 0);
+            attendeeResponse = intent.getIntExtra(ATTENDEE_STATUS,
+                    Attendees.ATTENDEE_STATUS_NONE);
             Uri data = intent.getData();
             if (data != null) {
                 try {
@@ -84,10 +90,22 @@ public class EventInfoActivity extends AppCompatActivity {
                         // Support non-standard VIEW intent format:
                         //dat = content://com.android.calendar/events/[id]/EventTime/[start]/[end]
                         mEventId = Long.parseLong(pathSegments.get(1));
+                        if (size > 4) {
+                            mStartMillis = Long.parseLong(pathSegments.get(3));
+                            mEndMillis = Long.parseLong(pathSegments.get(4));
+                        }
                     } else {
                         mEventId = Long.parseLong(data.getLastPathSegment());
                     }
                 } catch (NumberFormatException e) {
+                    if (mEventId == -1) {
+                        // do nothing here , deal with it later
+                    } else if (mStartMillis == 0 || mEndMillis ==0) {
+                        // Parsing failed on the start or end time , make sure the times were not
+                        // pulled from the intent's extras and reset them.
+                        mStartMillis = 0;
+                        mEndMillis = 0;
+                    }
                 }
             }
         }
@@ -113,7 +131,8 @@ public class EventInfoActivity extends AppCompatActivity {
         if (mInfoFragment == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();
-            mInfoFragment = new EventInfoFragment(this, mEventId);
+            mInfoFragment = new EventInfoFragment(this, mEventId, mStartMillis, mEndMillis,
+                    attendeeResponse);
             ft.replace(R.id.main_frame, mInfoFragment);
             ft.commit();
         }

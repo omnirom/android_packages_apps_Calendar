@@ -507,6 +507,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         mModel.mReminders = EventViewUtils.reminderItemsToReminders(
                     mReminderItems, mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
+        mModel.mHasAlarm = mModel.mReminders.size() > 0;
 
         int status = EventInfoFragment.getResponseFromButtonId(
                 mResponseRadioGroup.getCheckedRadioButtonId());
@@ -548,6 +549,12 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
         LinearLayout parent = (LinearLayout) reminderItem.getParent();
         parent.removeView(reminderItem);
         mReminderItems.remove(reminderItem);
+        //  note about default reminder when deleting last on new event
+        if (mModel.isNewEvent()) {
+            if (mReminderItems.size() == 0) {
+                EventViewUtils.addReminderEmptyNote(mActivity, parent, mReminderItems);
+            }
+        }
         updateRemindersVisibility(mReminderItems.size());
         EventViewUtils.updateAddReminderButton(mView, mReminderItems, mModel.mCalendarMaxReminders);
     }
@@ -602,7 +609,7 @@ public class EditEventView implements View.OnClickListener, DialogInterface.OnCa
                 mReminderMinuteValues, mReminderMethodValues);
         mModel.mReminders.addAll(mUnsupportedReminders);
 
-        mModel.mHasAlarm = mReminderItems.size() > 0;
+        mModel.mHasAlarm = mModel.mReminders.size() > 0;
         mModel.mTitle = mTitleTextView.getText().toString();
         mModel.mAllDay = mAllDayCheckBox.isChecked();
         mModel.mLocation = mLocationTextView.getText().toString();

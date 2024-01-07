@@ -231,8 +231,16 @@ public class EventViewUtils {
             return false;
         }
 
-        LayoutInflater inflater = activity.getLayoutInflater();
         LinearLayout parent = (LinearLayout) view.findViewById(R.id.reminder_items_container);
+
+        // remove empty not if there
+        if (items.size() == 1) {
+            if (items.get(0).findViewById(R.id.edit_reminder_empty_note) != null) {
+                items.remove(items.get(0));
+                parent.removeAllViews();
+            }
+        }
+        LayoutInflater inflater = activity.getLayoutInflater();
         LinearLayout reminderItem = (LinearLayout) inflater.inflate(R.layout.edit_reminder_item,
                 null);
         parent.addView(reminderItem);
@@ -273,6 +281,16 @@ public class EventViewUtils {
 
         items.add(reminderItem);
 
+        return true;
+    }
+
+    public static boolean addReminderEmptyNote(Activity activity, View view, ArrayList<LinearLayout> items) {
+        LayoutInflater inflater = activity.getLayoutInflater();
+        LinearLayout parent = (LinearLayout) view.findViewById(R.id.reminder_items_container);
+        LinearLayout reminderEmptyNoteItem = (LinearLayout) inflater.inflate(R.layout.edit_reminder_empty_note,
+                null);
+        parent.addView(reminderEmptyNoteItem);
+        items.add(reminderEmptyNoteItem);
         return true;
     }
 
