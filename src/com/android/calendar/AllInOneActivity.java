@@ -100,9 +100,8 @@ import static android.provider.CalendarContract.EXTRA_EVENT_END_TIME;
 public class AllInOneActivity extends AbstractCalendarActivity implements EventHandler,
         ActionBar.TabListener,
         ActionBar.OnNavigationListener {
-    private static final String TAG = "AllInOneActivity";
+    private static final String TAG = "Calendar:AllInOneActivity";
     private static final boolean DEBUG = true;
-    private static final String EVENT_INFO_FRAGMENT_TAG = "EventInfoFragment";
     private static final String BUNDLE_KEY_RESTORE_TIME = "key_restore_time";
     private static final String BUNDLE_KEY_EVENT_ID = "key_event_id";
     private static final String BUNDLE_KEY_RESTORE_VIEW = "key_restore_view";
@@ -121,7 +120,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
     private static final int BUTTON_AGENDA_INDEX = 4;
 
     private CalendarController mController;
-    private static boolean mShowEventDetailsWithAgenda;
     private boolean mOnSaveInstanceStateCalled = false;
     private boolean mBackToPreviousView = false;
     private ContentResolver mContentResolver;
@@ -284,8 +282,6 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
         mShowString = res.getString(R.string.show_controls);
         mOrientation = res.getConfiguration().orientation;
 
-        mShowEventDetailsWithAgenda =
-            Utils.getConfigBool(this, R.bool.show_event_details_with_agenda);
         Utils.setAllowWeekForDetailView(false);
 
         if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
@@ -891,48 +887,23 @@ public class AllInOneActivity extends AbstractCalendarActivity implements EventH
                     : event.startTime.toMillis(true);
             mActionBarMenuSpinnerAdapter.setTime(displayTime);
         } else if (event.eventType == EventType.VIEW_EVENT) {
+            // TODO needed?
+            /*if (event.selectedTime != null && mCurrentView != ViewType.AGENDA) {
+                mController.sendEvent(this, EventType.GO_TO, event.selectedTime,
+                        event.selectedTime, -1, ViewType.CURRENT);
+            }*/
 
-            // If in Agenda view and "show_event_details_with_agenda" is "true",
-            // do not create the event info fragment here, it will be created by the Agenda
-            // fragment
-
-            if (mCurrentView == ViewType.AGENDA && mShowEventDetailsWithAgenda) {
-                if (event.startTime != null && event.endTime != null) {
-                    // Event is all day , adjust the goto time to local time
-                    if (event.isAllDay()) {
-                        Utils.convertAlldayUtcToLocal(
-                                event.startTime, event.startTime.toMillis(false), mTimeZone);
-                        Utils.convertAlldayUtcToLocal(
-                                event.endTime, event.endTime.toMillis(false), mTimeZone);
-                    }
-                    mController.sendEvent(this, EventType.GO_TO, event.startTime, event.endTime,
-                            event.selectedTime, event.id, ViewType.AGENDA,
-                            CalendarController.EXTRA_GOTO_TIME, null, null);
-                } else if (event.selectedTime != null) {
-                    mController.sendEvent(this, EventType.GO_TO, event.selectedTime,
-                        event.selectedTime, event.id, ViewType.AGENDA);
-                }
-            } else {
-                // TODO Fix the temp hack below: && mCurrentView !=
-                // ViewType.AGENDA
-                if (event.selectedTime != null && mCurrentView != ViewType.AGENDA) {
-                    mController.sendEvent(this, EventType.GO_TO, event.selectedTime,
-                            event.selectedTime, -1, ViewType.CURRENT);
-                }
-                int response = event.getResponse();
-
-                // start event info as activity
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
-                intent.setData(eventUri);
-                intent.setClass(this, EventInfoActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra(EXTRA_EVENT_BEGIN_TIME, event.startTime.toMillis(false));
-                intent.putExtra(EXTRA_EVENT_END_TIME, event.endTime.toMillis(false));
-                intent.putExtra(ATTENDEE_STATUS, response);
-                startActivity(intent);
-            }
+            // start event info as activity
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, event.id);
+            intent.setData(eventUri);
+            intent.setClass(this, EventInfoActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra(EXTRA_EVENT_BEGIN_TIME, event.startTime.toMillis(false));
+            intent.putExtra(EXTRA_EVENT_END_TIME, event.endTime.toMillis(false));
+            intent.putExtra(ATTENDEE_STATUS, event.getResponse());
+            startActivity(intent);
             displayTime = event.startTime.toMillis(true);
         } else if (event.eventType == EventType.UPDATE_TITLE) {
             setTitleInActionBar(event);

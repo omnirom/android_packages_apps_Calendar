@@ -265,7 +265,11 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
                 && !mData[position].ownerAccount.endsWith("calendar.google.com")) {
             secondaryText.setText(mData[position].ownerAccount);
         } else if (mData[position].privateCalendar) {
-            secondaryText.setText(mData[position].accountDisplayName);
+            if (!TextUtils.isEmpty(mData[position].accountDisplayName)) {
+                secondaryText.setText(mData[position].accountDisplayName);
+            } else {
+                secondaryText.setText(R.string.calendar_type_mine);
+            }
         } else {
             secondaryText.setText(R.string.calendar_type_other);
         }

@@ -16,6 +16,8 @@
 
 package com.android.calendar;
 
+import static com.android.calendar.event.EventQueries.*;
+
 import com.android.calendar.event.EditEventHelper;
 import com.android.calendarcommon2.EventRecurrence;
 
@@ -209,7 +211,7 @@ public class DeleteEventHelper {
      */
     public void delete(long begin, long end, long eventId, int which) {
         Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
-        mService.startQuery(mService.getNextToken(), null, uri, EditEventHelper.EVENT_PROJECTION,
+        mService.startQuery(mService.getNextToken(), null, uri, EVENT_PROJECTION,
                 null, null, null);
         mStartMillis = begin;
         mEndMillis = end;

@@ -16,6 +16,8 @@
 
 package com.android.calendar;
 
+import static com.android.calendar.CalendarQueries.*;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentUris;
@@ -44,28 +46,6 @@ public class CalendarColorPickerDialog extends ColorPickerDialog {
 
     private static final int TOKEN_QUERY_CALENDARS = 1 << 1;
     private static final int TOKEN_QUERY_COLORS = 1 << 2;
-
-    static final String[] CALENDARS_PROJECTION = new String[] {
-            Calendars.ACCOUNT_NAME,
-            Calendars.ACCOUNT_TYPE,
-            Calendars.CALENDAR_COLOR
-    };
-
-    static final int CALENDARS_INDEX_ACCOUNT_NAME = 0;
-    static final int CALENDARS_INDEX_ACCOUNT_TYPE = 1;
-    static final int CALENDARS_INDEX_CALENDAR_COLOR = 2;
-
-    static final String[] COLORS_PROJECTION = new String[] {
-            Colors.COLOR,
-            Colors.COLOR_KEY
-    };
-
-    static final String COLORS_WHERE = Colors.ACCOUNT_NAME + "=? AND " + Colors.ACCOUNT_TYPE +
-            "=? AND " + Colors.COLOR_TYPE + "=" + Colors.TYPE_CALENDAR;
-
-    public static final int COLORS_INDEX_COLOR = 0;
-    public static final int COLORS_INDEX_COLOR_KEY = 1;
-
 
     private QueryService mService;
     private SparseIntArray mColorKeyMap = new SparseIntArray();
@@ -100,13 +80,13 @@ public class CalendarColorPickerDialog extends ColorPickerDialog {
                         break;
                     }
                     mSelectedColor = Utils.getDisplayColorFromColor(
-                            cursor.getInt(CALENDARS_INDEX_CALENDAR_COLOR));
+                            cursor.getInt(CALENDARS_INDEX_COLOR));
                     Uri uri = Colors.CONTENT_URI;
                     String[] args = new String[] {
                             cursor.getString(CALENDARS_INDEX_ACCOUNT_NAME),
                             cursor.getString(CALENDARS_INDEX_ACCOUNT_TYPE) };
                     cursor.close();
-                    startQuery(TOKEN_QUERY_COLORS, null, uri, COLORS_PROJECTION, COLORS_WHERE,
+                    startQuery(TOKEN_QUERY_COLORS, null, uri, COLORS_PROJECTION, COLORS_CALENDAR_WHERE,
                             args, null);
                     break;
                 case TOKEN_QUERY_COLORS:

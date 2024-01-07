@@ -16,6 +16,9 @@
 
 package com.android.calendar.event;
 
+import static com.android.calendar.CalendarQueries.*;
+import static com.android.calendar.event.EventQueries.*;
+
 import android.app.Activity;
 import android.app.Dialog;
 
@@ -198,10 +201,10 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                             Long.toString(eventId)
                         };
                         mHandler.startQuery(TOKEN_ATTENDEES, null, attUri,
-                                EditEventHelper.ATTENDEES_PROJECTION,
-                                EditEventHelper.ATTENDEES_WHERE /* selection */,
+                                ATTENDEES_PROJECTION,
+                                ATTENDEES_WHERE /* selection */,
                                 whereArgs /* selection args */,
-                                EditEventHelper.ATTENDEES_SORT_ORDER /* sort order */);
+                                ATTENDEES_SORT_ORDER /* sort order */);
                     } else {
                         setModelIfDone(TOKEN_ATTENDEES);
                     }
@@ -213,8 +216,8 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                                 Long.toString(eventId)
                         };
                         mHandler.startQuery(TOKEN_REMINDERS, null, rUri,
-                                EditEventHelper.REMINDERS_PROJECTION,
-                                EditEventHelper.REMINDERS_WHERE /* selection */,
+                                REMINDERS_PROJECTION,
+                                REMINDERS_WHERE /* selection */,
                                 remArgs /* selection args */, null /* sort order */);
                     } else {
                         if (mReminders == null) {
@@ -232,24 +235,24 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                         Long.toString(mModel.mCalendarId)
                     };
                     mHandler.startQuery(TOKEN_CALENDARS, null, Calendars.CONTENT_URI,
-                            EditEventHelper.CALENDARS_PROJECTION, EditEventHelper.CALENDARS_WHERE,
+                            CALENDARS_PROJECTION, CALENDARS_WHERE,
                             selArgs /* selection args */, null /* sort order */);
 
                     // TOKEN_COLORS
                     mHandler.startQuery(TOKEN_COLORS, null, Colors.CONTENT_URI,
-                            EditEventHelper.COLORS_PROJECTION,
-                            Colors.COLOR_TYPE + "=" + Colors.TYPE_EVENT, null, null);
+                            COLORS_PROJECTION,
+                            COLORS_EVENT_WHERE_SIMPLE, null, null);
 
                     setModelIfDone(TOKEN_EVENT);
                     break;
                 case TOKEN_ATTENDEES:
                     try {
                         while (cursor.moveToNext()) {
-                            String name = cursor.getString(EditEventHelper.ATTENDEES_INDEX_NAME);
-                            String email = cursor.getString(EditEventHelper.ATTENDEES_INDEX_EMAIL);
-                            int status = cursor.getInt(EditEventHelper.ATTENDEES_INDEX_STATUS);
+                            String name = cursor.getString(ATTENDEES_INDEX_NAME);
+                            String email = cursor.getString(ATTENDEES_INDEX_EMAIL);
+                            int status = cursor.getInt(ATTENDEES_INDEX_STATUS);
                             int relationship = cursor
-                                    .getInt(EditEventHelper.ATTENDEES_INDEX_RELATIONSHIP);
+                                    .getInt(ATTENDEES_INDEX_RELATIONSHIP);
 
                             if (DEBUG) Log.d(TAG, "onQueryComplete pre name = " + name + " email = " + email);
                             if (TextUtils.isEmpty(name)) {
@@ -280,7 +283,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                                 if (mModel.mOwnerAccount != null &&
                                         mModel.mOwnerAccount.equalsIgnoreCase(email)) {
                                     int attendeeId =
-                                        cursor.getInt(EditEventHelper.ATTENDEES_INDEX_ID);
+                                        cursor.getInt(ATTENDEES_INDEX_ID);
                                     mModel.mOwnerAttendeeId = attendeeId;
                                     mModel.mSelfAttendeeStatus = status;
                                     mOriginalModel.mOwnerAttendeeId = attendeeId;
@@ -304,8 +307,8 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                     try {
                         // Add all reminders to the models
                         while (cursor.moveToNext()) {
-                            int minutes = cursor.getInt(EditEventHelper.REMINDERS_INDEX_MINUTES);
-                            int method = cursor.getInt(EditEventHelper.REMINDERS_INDEX_METHOD);
+                            int minutes = cursor.getInt(REMINDERS_INDEX_MINUTES);
+                            int method = cursor.getInt(REMINDERS_INDEX_METHOD);
                             ReminderEntry re = ReminderEntry.valueOf(minutes, method);
                             mModel.mReminders.add(re);
                             mOriginalModel.mReminders.add(re);
@@ -342,13 +345,13 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
                         EventColorCache cache = new EventColorCache();
                         do
                         {
-                            int colorKey = cursor.getInt(EditEventHelper.COLORS_INDEX_COLOR_KEY);
-                            int rawColor = cursor.getInt(EditEventHelper.COLORS_INDEX_COLOR);
+                            int colorKey = cursor.getInt(COLORS_INDEX_COLOR_KEY);
+                            int rawColor = cursor.getInt(COLORS_INDEX_COLOR);
                             int displayColor = Utils.getDisplayColorFromColor(rawColor);
                             String accountName = cursor
-                                    .getString(EditEventHelper.COLORS_INDEX_ACCOUNT_NAME);
+                                    .getString(COLORS_INDEX_ACCOUNT_NAME);
                             String accountType = cursor
-                                    .getString(EditEventHelper.COLORS_INDEX_ACCOUNT_TYPE);
+                                    .getString(COLORS_INDEX_ACCOUNT_TYPE);
                             cache.insertColor(accountName, accountType,
                                     displayColor, colorKey);
                         } while (cursor.moveToNext());
@@ -504,7 +507,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
             if (DEBUG) {
                 Log.d(TAG, "startQuery: uri for event is " + mUri.toString());
             }
-            mHandler.startQuery(TOKEN_EVENT, null, mUri, EditEventHelper.EVENT_PROJECTION,
+            mHandler.startQuery(TOKEN_EVENT, null, mUri, EVENT_PROJECTION,
                     null /* selection */, null /* selection args */, null /* sort order */);
             if (mEventColorInitialized) {
                 colorActivity(mModel.getEventColor());
@@ -523,13 +526,13 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
 
             // Start a query in the background to read the list of calendars and colors
             mHandler.startQuery(TOKEN_CALENDARS, null, Calendars.CONTENT_URI,
-                    EditEventHelper.CALENDARS_PROJECTION,
-                    EditEventHelper.CALENDARS_WHERE_WRITEABLE_VISIBLE, null /* selection args */,
+                    CALENDARS_PROJECTION,
+                    CALENDARS_WHERE_WRITEABLE_VISIBLE, null /* selection args */,
                     null /* sort order */);
 
             mHandler.startQuery(TOKEN_COLORS, null, Colors.CONTENT_URI,
-                    EditEventHelper.COLORS_PROJECTION,
-                    Colors.COLOR_TYPE + "=" + Colors.TYPE_EVENT, null, null);
+                    COLORS_PROJECTION,
+                    COLORS_EVENT_WHERE_SIMPLE, null, null);
 
             mModification = Utils.MODIFY_ALL;
             mView.setModification(mModification);

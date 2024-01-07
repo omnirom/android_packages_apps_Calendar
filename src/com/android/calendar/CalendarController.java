@@ -761,6 +761,7 @@ public class CalendarController {
     }
 
     public void launchViewEvent(long eventId, long startMillis, long endMillis, int response) {
+        Log.d(TAG, "launchViewEvent eventId =" + eventId);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Uri eventUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventId);
         intent.setData(eventUri);
