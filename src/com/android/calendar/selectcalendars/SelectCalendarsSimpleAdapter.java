@@ -42,10 +42,11 @@ import com.android.calendar.CalendarColorPickerDialog;
 import com.android.calendar.R;
 import com.android.calendar.Utils;
 import com.android.calendar.selectcalendars.CalendarColorCache.OnCalendarColorsLoadedListener;
+import com.android.calendar.event.EditEventHelper;
 
 public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAdapter,
     OnCalendarColorsLoadedListener {
-    private static final String TAG = "SelectCalendarsAdapter";
+    private static final String TAG = "Calendar:SelectCalendarsAdapter";
     private static final String COLOR_PICKER_DIALOG_TAG = "ColorPickerDialog";
     private static final String CONTACTS_CALENDAR_NAME = "#contacts@group.v.calendar.google.com";
 
@@ -60,7 +61,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
     private CalendarColorPickerDialog mColorPickerDialog;
 
     private LayoutInflater mInflater;
-    Resources mRes;
+    private Context mContext;
     private int mLayout;
     private int mOrientation;
     private CalendarRow[] mData;
@@ -96,22 +97,23 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
         boolean selected;
         int accessLevel;
         boolean privateCalendar;
+        String accountDisplayName;
     }
 
     public SelectCalendarsSimpleAdapter(Context context, int layout, Cursor c, FragmentManager fm) {
         super();
+        mContext = context;
         mLayout = layout;
         mOrientation = context.getResources().getConfiguration().orientation;
         initData(c);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mRes = context.getResources();
-        mColorCalendarVisible = mRes.getColor(R.color.calendar_visible);
-        mColorCalendarHidden = mRes.getColor(R.color.calendar_hidden);
-        mColorCalendarSecondaryVisible = mRes.getColor(R.color.calendar_secondary_visible);
-        mColorCalendarSecondaryHidden = mRes.getColor(R.color.calendar_secondary_hidden);
+        mColorCalendarVisible = context.getResources().getColor(R.color.calendar_visible);
+        mColorCalendarHidden = context.getResources().getColor(R.color.calendar_hidden);
+        mColorCalendarSecondaryVisible = context.getResources().getColor(R.color.calendar_secondary_visible);
+        mColorCalendarSecondaryHidden = context.getResources().getColor(R.color.calendar_secondary_hidden);
 
         if (mScale == 0) {
-            mScale = mRes.getDisplayMetrics().density;
+            mScale = context.getResources().getDisplayMetrics().density;
             BOTTOM_ITEM_HEIGHT *= mScale;
             NORMAL_ITEM_HEIGHT *= mScale;
         }
@@ -162,7 +164,12 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
             mData[p].accessLevel = c.getInt(mAccessLevelColumn);
             mData[p].privateCalendar = mData[p].ownerAccount.equals(CONTACTS_CALENDAR_NAME) ||
                     mData[p].accessLevel >= Calendars.CAL_ACCESS_OWNER;
-            //Log.d("maxwen", "" + mData[p].id  + " " + mData[p].displayName + " " +  mData[p].color + " " + mData[p].ownerAccount + " " + mData[p].accountName + " " + mData[p].accountType + " " + mData[p].accessLevel);
+            String accountDisplayName = EditEventHelper.getDisplayNameForEmail(mContext, mData[p].accountName);
+            if (TextUtils.isEmpty(accountDisplayName)) {
+                accountDisplayName = "";
+            }
+            mData[p].accountDisplayName = accountDisplayName;
+            //Log.d(TAG, "" + mData[p].id  + " " + mData[p].displayName + " " +  mData[p].color + " " + mData[p].ownerAccount + " " + mData[p].accountName + " " + mData[p].accountType + " " + mData[p].accessLevel+ " " + mData[p].accountDisplayName);
             p++;
         }
     }
@@ -258,7 +265,7 @@ public class SelectCalendarsSimpleAdapter extends BaseAdapter implements ListAda
                 && !mData[position].ownerAccount.endsWith("calendar.google.com")) {
             secondaryText.setText(mData[position].ownerAccount);
         } else if (mData[position].privateCalendar) {
-            secondaryText.setText(R.string.calendar_type_mine);
+            secondaryText.setText(mData[position].accountDisplayName);
         } else {
             secondaryText.setText(R.string.calendar_type_other);
         }
