@@ -82,7 +82,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class EditEventFragment extends Fragment implements OnColorSelectedListener {
-    private static final String TAG = "Calendar:EditEventActivity";
+    private static final String TAG = "Calendar:EditEventFragment";
+    private static final boolean DEBUG = true;
+
     private static final String COLOR_PICKER_DIALOG_TAG = "ColorPickerDialog";
 
     private static final int REQUEST_CODE_COLOR_PICKER = 0;
@@ -94,9 +96,7 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
     private static final String BUNDLE_KEY_SHOW_COLOR_PALETTE = "show_color_palette";
 
     private static final String BUNDLE_KEY_DATE_BUTTON_CLICKED = "date_button_clicked";
-
-    private static final boolean DEBUG = false;
-
+    
     private static final int TOKEN_EVENT = 1;
     private static final int TOKEN_ATTENDEES = 1 << 1;
     private static final int TOKEN_REMINDERS = 1 << 2;
@@ -672,7 +672,16 @@ public class EditEventFragment extends Fragment implements OnColorSelectedListen
 
                             mView.setModification(mModification);
                         }
-                    }).show();
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Activity a = EditEventFragment.this.getActivity();
+                                if (a != null) {
+                                    a.finish();
+                                }
+                            }
+                    })
+                    .show();
 
             mModifyDialog.setOnCancelListener(new OnCancelListener() {
                 @Override

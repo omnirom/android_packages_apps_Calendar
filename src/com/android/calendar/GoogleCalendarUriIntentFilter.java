@@ -40,8 +40,8 @@ import com.android.calendarcommon2.DateException;
 import com.android.calendarcommon2.Duration;
 
 public class GoogleCalendarUriIntentFilter extends Activity {
-    private static final String TAG = "GoogleCalendarUriIntentFilter";
-    static final boolean debug = false;
+    private static final String TAG = "Calendar:GoogleCalendarUriIntentFilter";
+    static final boolean DEBUG = true;
 
     private static final int EVENT_INDEX_ID = 0;
     private static final int EVENT_INDEX_START = 1;
@@ -69,13 +69,13 @@ public class GoogleCalendarUriIntentFilter extends Activity {
     private String[] extractEidAndEmail(Uri uri) {
         try {
             String eidParam = uri.getQueryParameter("eid");
-            if (debug) Log.d(TAG, "eid=" + eidParam );
+            if (DEBUG) Log.d(TAG, "eid=" + eidParam );
             if (eidParam == null) {
                 return null;
             }
 
             byte[] decodedBytes = Base64.decode(eidParam, Base64.DEFAULT);
-            if (debug) Log.d(TAG, "decoded eid=" + new String(decodedBytes) );
+            if (DEBUG) Log.d(TAG, "decoded eid=" + new String(decodedBytes) );
 
             for (int spacePosn = 0; spacePosn < decodedBytes.length; spacePosn++) {
                 if (decodedBytes[spacePosn] == ' ') {
@@ -117,9 +117,9 @@ public class GoogleCalendarUriIntentFilter extends Activity {
 
                     String eid = new String(decodedBytes, 0, spacePosn);
                     String email = new String(decodedBytes, spacePosn + 1, emailLen);
-                    if (debug) Log.d(TAG, "eid=   " + eid );
-                    if (debug) Log.d(TAG, "email= " + email );
-                    if (debug) Log.d(TAG, "domain=" + domain );
+                    if (DEBUG) Log.d(TAG, "eid=   " + eid );
+                    if (DEBUG) Log.d(TAG, "email= " + email );
+                    if (DEBUG) Log.d(TAG, "domain=" + domain );
                     if (domain != null) {
                         email += domain;
                     }
@@ -147,15 +147,15 @@ public class GoogleCalendarUriIntentFilter extends Activity {
                 } else {
                     final String syncId = eidParts[0];
                     final String ownerAccount = eidParts[1];
-                    if (debug) Log.d(TAG, "eidParts=" + syncId + "/" + ownerAccount);
+                    if (DEBUG) Log.d(TAG, "eidParts=" + syncId + "/" + ownerAccount);
                     final String selection = Events._SYNC_ID + " LIKE \"%" + syncId + "\" AND "
                             + Calendars.OWNER_ACCOUNT + " LIKE \"" + ownerAccount + "\"";
 
-                    if (debug) Log.d(TAG, "selection: " + selection);
+                    if (DEBUG) Log.d(TAG, "selection: " + selection);
                     Cursor eventCursor = getContentResolver().query(Events.CONTENT_URI,
                             EVENT_PROJECTION, selection, null,
                             Calendars.CALENDAR_ACCESS_LEVEL + " desc");
-                    if (debug) Log.d(TAG, "Found: " + eventCursor.getCount());
+                    if (DEBUG) Log.d(TAG, "Found: " + eventCursor.getCount());
 
                     if (eventCursor == null || eventCursor.getCount() == 0) {
                         Log.i(TAG, "NOTE: found no matches on event with id='" + syncId + "'");
@@ -172,13 +172,13 @@ public class GoogleCalendarUriIntentFilter extends Activity {
                             int eventId = eventCursor.getInt(EVENT_INDEX_ID);
                             long startMillis = eventCursor.getLong(EVENT_INDEX_START);
                             long endMillis = eventCursor.getLong(EVENT_INDEX_END);
-                            if (debug) Log.d(TAG, "_id: " + eventCursor.getLong(EVENT_INDEX_ID));
-                            if (debug) Log.d(TAG, "startMillis: " + startMillis);
-                            if (debug) Log.d(TAG, "endMillis:   " + endMillis);
+                            if (DEBUG) Log.d(TAG, "_id: " + eventCursor.getLong(EVENT_INDEX_ID));
+                            if (DEBUG) Log.d(TAG, "startMillis: " + startMillis);
+                            if (DEBUG) Log.d(TAG, "endMillis:   " + endMillis);
 
                             if (endMillis == 0) {
                                 String duration = eventCursor.getString(EVENT_INDEX_DURATION);
-                                if (debug) Log.d(TAG, "duration:    " + duration);
+                                if (DEBUG) Log.d(TAG, "duration:    " + duration);
                                 if (TextUtils.isEmpty(duration)) {
                                     continue;
                                 }
@@ -187,13 +187,13 @@ public class GoogleCalendarUriIntentFilter extends Activity {
                                     Duration d = new Duration();
                                     d.parse(duration);
                                     endMillis = startMillis + d.getMillis();
-                                    if (debug) Log.d(TAG, "startMillis! " + startMillis);
-                                    if (debug) Log.d(TAG, "endMillis!   " + endMillis);
+                                    if (DEBUG) Log.d(TAG, "startMillis! " + startMillis);
+                                    if (DEBUG) Log.d(TAG, "endMillis!   " + endMillis);
                                     if (endMillis < startMillis) {
                                         continue;
                                     }
                                 } catch (DateException e) {
-                                    if (debug) Log.d(TAG, "duration:" + e.toString());
+                                    if (DEBUG) Log.d(TAG, "duration:" + e.toString());
                                     continue;
                                 }
                             }

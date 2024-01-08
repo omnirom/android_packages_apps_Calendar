@@ -174,20 +174,6 @@ public class DeleteEventHelper {
         public void onClick(DialogInterface dialog, int button) {
             // set mWhichDelete to the delete type at that index
             mWhichDelete = mWhichIndex.get(button);
-
-            // Enable the "ok" button now that the user has selected which
-            // events in the series to delete.
-            Button ok = mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            ok.setEnabled(true);
-        }
-    };
-
-    /**
-     * This callback is used when a repeating event is deleted.
-     */
-    private DialogInterface.OnClickListener mDeleteRepeatingDialogListener =
-            new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int button) {
             deleteStarted();
             if (mWhichDelete != -1) {
                 deleteRepeatingEvent(mWhichDelete);
@@ -272,7 +258,6 @@ public class DeleteEventHelper {
         if (TextUtils.isEmpty(rRule)) {
             AlertDialog dialog = new AlertDialog.Builder(mContext)
                     .setMessage(R.string.delete_this_event_title)
-                    .setIconAttribute(android.R.attr.alertDialogIcon)
                     .setNegativeButton(android.R.string.cancel, null).create();
 
             if (originalEvent == null) {
@@ -293,11 +278,11 @@ public class DeleteEventHelper {
             // This is a repeating event.  Pop up a dialog asking which events
             // to delete.
             Resources res = mContext.getResources();
-            ArrayList<String> labelArray = new ArrayList<String>(Arrays.asList(res
+            ArrayList<CharSequence> labelArray = new ArrayList<>(Arrays.asList(res
                     .getStringArray(R.array.delete_repeating_labels)));
             // asList doesn't like int[] so creating it manually.
             int[] labelValues = res.getIntArray(R.array.delete_repeating_values);
-            ArrayList<Integer> labelIndex = new ArrayList<Integer>();
+            ArrayList<Integer> labelIndex = new ArrayList<>();
             for (int val : labelValues) {
                 labelIndex.add(val);
             }
@@ -321,24 +306,12 @@ public class DeleteEventHelper {
                 which = labelIndex.indexOf(which);
             }
             mWhichIndex = labelIndex;
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
-                    android.R.layout.simple_list_item_single_choice, labelArray);
             AlertDialog dialog = new AlertDialog.Builder(mContext)
-                    .setTitle(
-                            mContext.getString(R.string.delete_recurring_event_title,model.mTitle))
-                    .setIconAttribute(android.R.attr.alertDialogIcon)
-                    .setSingleChoiceItems(adapter, which, mDeleteListListener)
-                    .setPositiveButton(android.R.string.ok, mDeleteRepeatingDialogListener)
+                    .setTitle(mContext.getString(R.string.delete_recurring_event_title,model.mTitle))
+                    .setItems(labelArray.toArray(new CharSequence[labelArray.size()]), mDeleteListListener)
                     .setNegativeButton(android.R.string.cancel, null).show();
             dialog.setOnDismissListener(mDismissListener);
             mAlertDialog = dialog;
-
-            if (which == -1) {
-                // Disable the "Ok" button until the user selects which events
-                // to delete.
-                Button ok = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                ok.setEnabled(false);
-            }
         }
     }
 

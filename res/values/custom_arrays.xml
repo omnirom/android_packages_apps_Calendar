@@ -66,4 +66,10 @@
         <item>@string/event_response_maybe</item>
         <item>@string/event_response_no</item>
     </string-array>
+    
+    <string-array name="change_response_labels_new">
+        <item>@string/modify_event</item>
+        <item>@string/modify_all</item>
+    </string-array>
+
 </resources>

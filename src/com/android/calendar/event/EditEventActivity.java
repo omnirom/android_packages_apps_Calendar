@@ -44,7 +44,7 @@ import com.android.calendar.Utils;
 import java.util.ArrayList;
 
 public class EditEventActivity extends AbstractCalendarActivity {
-    private static final String TAG = "EditEventActivity";
+    private static final String TAG = "Calendar:EditEventActivity";
 
     private static final boolean DEBUG = false;
 

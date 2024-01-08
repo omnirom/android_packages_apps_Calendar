@@ -468,7 +468,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         mStartMillis = startMillis;
         mEndMillis = endMillis;
         mAttendeeResponseFromIntent = attendeeResponse;
-        if (DEBUG) Log.d(TAG, "EventInfoFragment mUri = " + mUri + " mStartMillis = " + mStartMillis + " mEndMillis= " + mEndMillis + " mAttendeeResponseFromIntent = " + mAttendeeResponseFromIntent);
+        if (DEBUG) Log.d(TAG, "mUri = " + mUri + " mStartMillis = " + mStartMillis + " mEndMillis= " + mEndMillis + " mAttendeeResponseFromIntent = " + mAttendeeResponseFromIntent);
     }
 
     // This is currently required by the fragment manager.
@@ -513,6 +513,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
     // Implements OnCheckedChangeListener
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
+        Log.d(TAG, "onCheckedChanged mTentativeUserSetResponse= " + mTentativeUserSetResponse + " mIsRepeating = " + mIsRepeating);
         // If we haven't finished the return from the dialog yet, don't display.
         if (mTentativeUserSetResponse != Attendees.ATTENDEE_STATUS_NONE) {
             return;
@@ -528,7 +529,8 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
         // If the selection is the same as the original, then don't display the
         // dialog asking which events to change.
-        if (checkedId == findButtonIdForResponse(mOriginalAttendeeResponse)) {
+        if (mUserSetResponse == mOriginalAttendeeResponse &&
+                checkedId == findButtonIdForResponse(mOriginalAttendeeResponse)) {
             mUserSetResponse = response;
             return;
         }
@@ -536,7 +538,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         // This is a repeating event. We need to ask the user if they mean to
         // change just this one instance or all instances.
         mTentativeUserSetResponse = response;
-        mEditResponseHelper.showDialog(mWhichEvents);
+        mEditResponseHelper.showDialog();
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -556,6 +558,7 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
                 new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
+                Log.d(TAG, "mEditResponseHelper onDismiss mWhichEvents = " + mEditResponseHelper.getWhichEvents());
                 // If the user dismisses the dialog (without hitting OK),
                 // then we want to revert the selection that opened the dialog.
                 if (mEditResponseHelper.getWhichEvents() != -1) {
@@ -687,6 +690,12 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
         }
         mEventCursor.moveToFirst();
         mEventId = mEventCursor.getInt(EVENT_INDEX_ID);
+        String syncId = mEventCursor.getString(EVENT_INDEX_SYNC_ID);
+        String originalSyncId = mEventCursor.getString(EVENT_INDEX_ORIGINAL_SYNC_ID);
+        Long originalId = mEventCursor.getLong(EVENT_INDEX_ORIGINAL_ID);
+        
+        if (DEBUG) Log.d(TAG, "initEventCursor mEventId = " + mEventId + " syncId = " + syncId + " originalSyncId= " + originalSyncId + " originalId = " + originalId);
+        
         String rRule = mEventCursor.getString(EVENT_INDEX_RRULE);
         mIsRepeating = !TextUtils.isEmpty(rRule);
         // mHasAlarm will be true if it was saved in the event already, or if
@@ -1163,8 +1172,6 @@ public class EventInfoFragment extends DialogFragment implements OnCheckedChange
 
             if (TextUtils.isEmpty(customAppPackage) || TextUtils.isEmpty(customAppUri))
                 break buttonSetup;
-
-            Log.d(TAG, "updateCustomAppButton customAppPackage = " + customAppPackage);
 
             PackageManager pm = mContext.getPackageManager();
             if (pm == null)
