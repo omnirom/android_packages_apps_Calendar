@@ -28,7 +28,7 @@ android_app {
     product_specific: true,
 
     optimize: {
-        enabled: false,
+        proguard_flags_files: ["proguard.flags"],
     },
 
     aaptflags: ["--auto-add-overlay"],
