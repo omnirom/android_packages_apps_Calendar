@@ -70,7 +70,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.EdgeEffect;
 import android.widget.ImageView;
 import android.widget.OverScroller;
 import android.widget.PopupWindow;
@@ -623,9 +622,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     private final ViewSwitcher mViewSwitcher;
     private final GestureDetector mGestureDetector;
     private final OverScroller mScroller;
-    private final EdgeEffect mEdgeEffectTop;
-    private final EdgeEffect mEdgeEffectBottom;
-    private boolean mCallEdgeEffectOnAbsorb;
     private final int OVERFLING_DISTANCE;
     private float mLastVelocity;
 
@@ -764,8 +760,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
         mScroller = new OverScroller(context);
         mHScrollInterpolator = new ScrollInterpolator();
-        mEdgeEffectTop = new EdgeEffect(context);
-        mEdgeEffectBottom = new EdgeEffect(context);
         ViewConfiguration vc = ViewConfiguration.get(context);
         mScaledPagingTouchSlop = vc.getScaledPagingTouchSlop();
         mOnDownDelay = ViewConfiguration.getTapTimeout();
@@ -1246,8 +1240,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
     protected void onSizeChanged(int width, int height, int oldw, int oldh) {
         mViewWidth = width;
         mViewHeight = height;
-        mEdgeEffectTop.setSize(mViewWidth, mViewHeight);
-        mEdgeEffectBottom.setSize(mViewWidth, mViewHeight);
         int gridAreaWidth = width - mHoursWidth;
         mCellWidth = (gridAreaWidth - (mNumDays * DAY_GAP)) / mNumDays;
 
@@ -1960,24 +1952,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
         }
         mComputeSelectedEvents = false;
 
-        // Draw overscroll glow
-        if (!mEdgeEffectTop.isFinished()) {
-            if (DAY_HEADER_HEIGHT != 0) {
-                canvas.translate(0, DAY_HEADER_HEIGHT);
-            }
-            if (mEdgeEffectTop.draw(canvas)) {
-                invalidate();
-            }
-            if (DAY_HEADER_HEIGHT != 0) {
-                canvas.translate(0, -DAY_HEADER_HEIGHT);
-            }
-        }
-        if (!mEdgeEffectBottom.isFinished()) {
-            canvas.rotate(180, mViewWidth/2, mViewHeight/2);
-            if (mEdgeEffectBottom.draw(canvas)) {
-                invalidate();
-            }
-        }
         canvas.restore();
     }
 
@@ -2001,9 +1975,11 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             // Draw the allDay expand/collapse icon
             if (mUseExpandIcon) {
                 mExpandAlldayDrawable.setBounds(mExpandAllDayRect);
+                mExpandAlldayDrawable.setTint(mCalendarHourLabelColor);
                 mExpandAlldayDrawable.draw(canvas);
             } else {
                 mCollapseAlldayDrawable.setBounds(mExpandAllDayRect);
+                mCollapseAlldayDrawable.setTint(mCalendarHourLabelColor);
                 mCollapseAlldayDrawable.draw(canvas);
             }
         }
@@ -3724,17 +3700,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
             // If dragging while already at the end, do a glow
             final int pulledToY = (int) (mScrollStartY + deltaY);
-            if (pulledToY < 0) {
-                mEdgeEffectTop.onPull(deltaY / mViewHeight);
-                if (!mEdgeEffectBottom.isFinished()) {
-                    mEdgeEffectBottom.onRelease();
-                }
-            } else if (pulledToY > mMaxViewStartY) {
-                mEdgeEffectBottom.onPull(deltaY / mViewHeight);
-                if (!mEdgeEffectTop.isFinished()) {
-                    mEdgeEffectTop.onRelease();
-                }
-            }
 
             if (mViewStartY < 0) {
                 mViewStartY = 0;
@@ -3819,16 +3784,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
                 (int) -velocityY, 0 /* minX */, 0 /* maxX */, 0 /* minY */,
                 mMaxViewStartY /* maxY */, OVERFLING_DISTANCE, OVERFLING_DISTANCE);
 
-        // When flinging down, show a glow when it hits the end only if it
-        // wasn't started at the top
-        if (velocityY > 0 && mViewStartY != 0) {
-            mCallEdgeEffectOnAbsorb = true;
-        }
-        // When flinging up, show a glow when it hits the end only if it wasn't
-        // started at the bottom
-        else if (velocityY < 0 && mViewStartY != mMaxViewStartY) {
-            mCallEdgeEffectOnAbsorb = true;
-        }
         mHandler.post(mContinueScroll);
     }
 
@@ -3972,8 +3927,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
 
             case MotionEvent.ACTION_UP:
                 if (DEBUG) Log.e(TAG, "ACTION_UP Cnt=" + ev.getPointerCount() + mHandleActionUp + " " + mOnFlingCalled + " " + mScrolling);
-                mEdgeEffectTop.onRelease();
-                mEdgeEffectBottom.onRelease();
                 mStartingScroll = false;
                 mScrolling = false;
                 mGestureDetector.onTouchEvent(ev);
@@ -4444,17 +4397,6 @@ public class DayView extends View implements View.OnCreateContextMenuListener,
             }
 
             mViewStartY = mScroller.getCurrY();
-
-            if (mCallEdgeEffectOnAbsorb) {
-                if (mViewStartY < 0) {
-                    mEdgeEffectTop.onAbsorb((int) mLastVelocity);
-                    mCallEdgeEffectOnAbsorb = false;
-                } else if (mViewStartY > mMaxViewStartY) {
-                    mEdgeEffectBottom.onAbsorb((int) mLastVelocity);
-                    mCallEdgeEffectOnAbsorb = false;
-                }
-                mLastVelocity = mScroller.getCurrVelocity();
-            }
 
             if (mScrollStartY == 0 || mScrollStartY == mMaxViewStartY) {
                 // Allow overscroll/springback only on a fling,
